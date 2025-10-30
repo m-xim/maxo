@@ -3,7 +3,7 @@ from typing import Any, dataclass_transform
 
 
 @dataclass_transform(
-    frozen_default=True,
+    frozen_default=False,
     kw_only_default=True,
 )
 class _MaxoTypeMetaClass(type):
@@ -19,7 +19,7 @@ class _MaxoTypeMetaClass(type):
 
         return dataclass(
             slots=True,
-            frozen=True,
+            frozen=False,
             kw_only=True,
         )(class_)
 

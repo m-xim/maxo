@@ -3,7 +3,6 @@ from typing import Any, Optional
 
 from maxo.dispatcher.event.handler import FilterObject
 from maxo.types import Message
-
 from maxo_dialog.api.protocols import (
     DialogManager,
     DialogProtocol,
@@ -14,9 +13,9 @@ from .base import BaseInput
 
 class CombinedInput(BaseInput):
     def __init__(
-            self,
-            *inputs: BaseInput,
-            filter: Optional[Callable[..., Any]] = None,
+        self,
+        *inputs: BaseInput,
+        filter: Optional[Callable[..., Any]] = None,
     ):
         super().__init__()
         self.inputs = inputs
@@ -25,14 +24,15 @@ class CombinedInput(BaseInput):
             self.filters.append(FilterObject(filter))
 
     async def process_message(
-            self,
-            message: Message,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         for handler_filter in self.filters:
             if not await handler_filter.call(
-                    manager.event, **manager.middleware_data,
+                manager.event,
+                **manager.middleware_data,
             ):
                 return False
         for input_widget in self.inputs:

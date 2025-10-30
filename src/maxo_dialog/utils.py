@@ -1,24 +1,8 @@
 from logging import getLogger
 from typing import Optional, Union
 
+from maxo.types import Callback, CallbackKeyboardButton, Chat, MessageKeyboardButton, User
 from maxo.types.api.message import Message
-
-
-ChatJoinRequest,
-    ChatMemberUpdated,
-    ErrorEvent,
-    InaccessibleMessage,
-    InlineKeyboardButton,
-    KeyboardButton,
-    Message,
-
-from maxo.types.api import (
-    Callback,
-    Chat,
-
-    User,
-)
-
 from maxo_dialog.api.entities import (
     ChatEvent,
     DialogUpdateEvent,
@@ -28,48 +12,44 @@ from maxo_dialog.api.internal import RawKeyboard
 
 logger = getLogger(__name__)
 
-CB_SEP = "\x1D"
+CB_SEP = "\x1d"
 
 REPLY_CALLBACK_SYMBOLS: str = (
-    "\u200C"
-    "\u200D"
+    "\u200c"
+    "\u200d"
     "\u2060"
     "\u2061"
     "\u2062"
     "\u2063"
     "\u2064"
-    "\u00AD"
-    "\U0001D173"
-    "\U0001D174"
-    "\U0001D175"
-    "\U0001D176"
-    "\U0001D177"
-    "\U0001D178"
-    "\U0001D179"
-    "\U0001D17A"
+    "\u00ad"
+    "\U0001d173"
+    "\U0001d174"
+    "\U0001d175"
+    "\U0001d176"
+    "\U0001d177"
+    "\U0001d178"
+    "\U0001d179"
+    "\U0001d17a"
 )
 
 
 def _encode_reply_callback_byte(byte: int):
     return (
-        REPLY_CALLBACK_SYMBOLS[byte % len(REPLY_CALLBACK_SYMBOLS)] +
-        REPLY_CALLBACK_SYMBOLS[byte // len(REPLY_CALLBACK_SYMBOLS)]
+        REPLY_CALLBACK_SYMBOLS[byte % len(REPLY_CALLBACK_SYMBOLS)]
+        + REPLY_CALLBACK_SYMBOLS[byte // len(REPLY_CALLBACK_SYMBOLS)]
     )
 
 
 def encode_reply_callback(data: str) -> str:
     bytes_data = data.encode("utf-8")
-    return "".join(
-        _encode_reply_callback_byte(byte)
-        for byte in bytes_data
-    )
+    return "".join(_encode_reply_callback_byte(byte) for byte in bytes_data)
 
 
 def _decode_reply_callback_byte(little: str, big: str) -> int:
-    return (
-        REPLY_CALLBACK_SYMBOLS.index(big) * len(REPLY_CALLBACK_SYMBOLS) +
-        REPLY_CALLBACK_SYMBOLS.index(little)
-    )
+    return REPLY_CALLBACK_SYMBOLS.index(big) * len(
+        REPLY_CALLBACK_SYMBOLS
+    ) + REPLY_CALLBACK_SYMBOLS.index(little)
 
 
 def join_reply_callback(text: str, callback_data: str) -> str:
@@ -77,53 +57,50 @@ def join_reply_callback(text: str, callback_data: str) -> str:
 
 
 def split_reply_callback(
-        data: Optional[str],
+    data: Optional[str],
 ) -> tuple[Optional[str], Optional[str]]:
     if not data:
         return None, None
     text = data.rstrip(REPLY_CALLBACK_SYMBOLS)
-    callback = data[len(text):]
+    callback = data[len(text) :]
     return text, decode_reply_callback(callback)
 
 
 def decode_reply_callback(data: str) -> str:
     bytes_data = bytes(
         _decode_reply_callback_byte(little, big)
-        for little, big in zip(data[::2], data[1::2])
+        for little, big in zip(data[::2], data[1::2], strict=False)
     )
     return bytes_data.decode("utf-8")
 
 
 def _transform_to_reply_button(
-        button: Union[InlineKeyboardButton, KeyboardButton],
-) -> KeyboardButton:
-    if isinstance(button, KeyboardButton):
+    button: Union[CallbackKeyboardButton, MessageKeyboardButton],
+) -> MessageKeyboardButton:
+    if isinstance(button, MessageKeyboardButton):
         return button
-    if button.web_app:
-        return KeyboardButton(text=button.text, web_app=button.web_app)
-    if not button.callback_data:
+    # if button.web_app:
+    #     return KeyboardButton(text=button.text, web_app=button.web_app)
+    if not button.payload:
         raise ValueError(
             "Cannot convert inline button without callback_data or web_app",
         )
-    return KeyboardButton(text=join_reply_callback(
-        text=button.text, callback_data=button.callback_data,
-    ))
+    return MessageKeyboardButton(
+        text=join_reply_callback(
+            text=button.text,
+            callback_data=button.payload,
+        )
+    )
 
 
 def transform_to_reply_keyboard(
-        keyboard: list[list[Union[InlineKeyboardButton, KeyboardButton]]],
-) -> list[list[KeyboardButton]]:
-    return [
-        [_transform_to_reply_button(button) for button in row]
-        for row in keyboard
-    ]
+    keyboard: list[list[Union[CallbackKeyboardButton, MessageKeyboardButton]]],
+) -> list[list[MessageKeyboardButton]]:
+    return [[_transform_to_reply_button(button) for button in row] for row in keyboard]
 
 
 def get_chat(event: ChatEvent) -> Chat:
-    if isinstance(
-            event,
-            (Message, DialogUpdateEvent, ChatMemberUpdated, ChatJoinRequest),
-    ):
+    if isinstance(event, (Message, DialogUpdateEvent)):
         return event.chat
     elif isinstance(event, Callback):
         if not event.message:
@@ -161,19 +138,14 @@ def is_user_loaded(user: User) -> bool:
     return not getattr(user, "fake", False)
 
 
-def get_media_id(
-    message: Union[Message, InaccessibleMessage],
-) -> Optional[MediaId]:
-    if isinstance(message, InaccessibleMessage):
-        return None
-
+def get_media_id(message: Message) -> Optional[MediaId]:
     media = (
-        message.audio or
-        message.animation or
-        message.document or
-        (message.photo[-1] if message.photo else None) or
-        message.video or
-        message.voice
+        message.audio
+        or message.animation
+        or message.document
+        or (message.photo[-1] if message.photo else None)
+        or message.video
+        or message.voice
     )
     if not media:
         return None
@@ -184,7 +156,8 @@ def get_media_id(
 
 
 def intent_callback_data(
-        intent_id: str, callback_data: Optional[str],
+    intent_id: str,
+    callback_data: Optional[str],
 ) -> Optional[str]:
     if callback_data is None:
         return None
@@ -197,9 +170,10 @@ def intent_callback_data(
 def add_intent_id(keyboard: RawKeyboard, intent_id: str):
     for row in keyboard:
         for button in row:
-            if isinstance(button, InlineKeyboardButton):
-                button.callback_data = intent_callback_data(
-                    intent_id, button.callback_data,
+            if isinstance(button, CallbackKeyboardButton):
+                button.payload = intent_callback_data(
+                    intent_id,
+                    button.payload,
                 )
 
 

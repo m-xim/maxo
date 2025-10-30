@@ -5,9 +5,9 @@ from .data_context import (
     StaticGetter,
 )
 
-__all__ = [
-    "DataGetter",
+__all__ = (
     "CompositeGetter",
-    "StaticGetter",
+    "DataGetter",
     "PreviewAwareGetter",
-]
+    "StaticGetter",
+)

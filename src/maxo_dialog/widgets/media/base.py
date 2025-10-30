@@ -3,7 +3,7 @@ from typing import Optional
 from maxo_dialog.api.entities import MediaAttachment
 from maxo_dialog.api.internal import MediaWidget
 from maxo_dialog.api.protocols import DialogManager
-from maxo_dialog.widgets.common import BaseWidget, Whenable, WhenCondition
+from maxo_dialog.widgets.common import BaseWidget, WhenCondition, Whenable
 
 
 class Media(Whenable, BaseWidget, MediaWidget):
@@ -11,14 +11,18 @@ class Media(Whenable, BaseWidget, MediaWidget):
         super().__init__(when=when)
 
     async def render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         if not self.is_(data, manager):
             return None
         return await self._render_media(data, manager)
 
     async def _render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         return None
 
@@ -39,7 +43,9 @@ class Or(Media):
         self.widgets = widgets
 
     async def _render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         for widget in self.widgets:
             res = await widget.render_media(data, manager)

@@ -12,8 +12,7 @@ from typing import (
 )
 
 from maxo.dispatcher.event.handler import FilterObject
-from maxo.types import ContentType, Message
-
+from maxo.types import AttachmentType, Message
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
 from maxo_dialog.widgets.common import ManagedWidget
 from maxo_dialog.widgets.widget_event import (
@@ -30,12 +29,12 @@ TypeFactory = Callable[[str], T]
 class OnSuccess(Protocol[T]):
     @abstractmethod
     async def __call__(
-            self,
-            message: Message,
-            widget: ManagedTextInput[T],
-            dialog_manager: DialogManager,
-            data: T,
-            /,
+        self,
+        message: Message,
+        widget: ManagedTextInput[T],
+        dialog_manager: DialogManager,
+        data: T,
+        /,
     ) -> Any:
         raise NotImplementedError
 
@@ -43,24 +42,24 @@ class OnSuccess(Protocol[T]):
 class OnError(Protocol[T]):
     @abstractmethod
     async def __call__(
-            self,
-            message: Message,
-            widget: ManagedTextInput[T],
-            dialog_manager: DialogManager,
-            error: ValueError,
-            /,
+        self,
+        message: Message,
+        widget: ManagedTextInput[T],
+        dialog_manager: DialogManager,
+        error: ValueError,
+        /,
     ) -> Any:
         raise NotImplementedError
 
 
 class TextInput(BaseInput, Generic[T]):
     def __init__(
-            self,
-            id: str,
-            type_factory: TypeFactory[T] = str,
-            on_success: Union[OnSuccess[T], WidgetEventProcessor, None] = None,
-            on_error: Union[OnError, WidgetEventProcessor, None] = None,
-            filter: Optional[Callable[..., Any]] = None,
+        self,
+        id: str,
+        type_factory: TypeFactory[T] = str,
+        on_success: Union[OnSuccess[T], WidgetEventProcessor, None] = None,
+        on_error: Union[OnError, WidgetEventProcessor, None] = None,
+        filter: Optional[Callable[..., Any]] = None,
     ):
         super().__init__(id=id)
         if filter is not None:
@@ -72,28 +71,35 @@ class TextInput(BaseInput, Generic[T]):
         self.on_error = ensure_event_processor(on_error)
 
     async def process_message(
-            self,
-            message: Message,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
-        if message.content_type != ContentType.TEXT:
+        if message.content_type != AttachmentType.TEXT:
             return False
         if self.filter and not await self.filter.call(
-                manager.event, **manager.middleware_data,
+            manager.event,
+            **manager.middleware_data,
         ):
             return False
         try:
             value = self.type_factory(message.text)
         except ValueError as err:
             await self.on_error.process_event(
-                message, self.managed(manager), manager, err,
+                message,
+                self.managed(manager),
+                manager,
+                err,
             )
         else:
             # store original text
             self.set_widget_data(manager, message.text)
             await self.on_success.process_event(
-                message, self.managed(manager), manager, value,
+                message,
+                self.managed(manager),
+                manager,
+                value,
             )
         return True
 

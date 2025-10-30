@@ -11,11 +11,11 @@ from maxo_dialog.api.protocols import DialogManager
 class Predicate(Protocol):
     @abstractmethod
     def __call__(
-            self,
-            data: dict,
-            widget: Whenable,
-            dialog_manager: DialogManager,
-            /,
+        self,
+        data: dict,
+        widget: Whenable,
+        dialog_manager: DialogManager,
+        /,
     ) -> bool:
         """
         Check if widget should be shown.
@@ -33,7 +33,9 @@ WhenCondition = Union[str, MagicFilter, Predicate, None]
 
 def new_when_field(fieldname: str) -> Predicate:
     def when_field(
-            data: dict, widget: Whenable, manager: DialogManager,
+        data: dict,
+        widget: Whenable,
+        manager: DialogManager,
     ) -> bool:
         return bool(data.get(fieldname))
 
@@ -42,7 +44,9 @@ def new_when_field(fieldname: str) -> Predicate:
 
 def new_when_magic(f: MagicFilter) -> Predicate:
     def when_magic(
-            data: dict, widget: Whenable, manager: DialogManager,
+        data: dict,
+        widget: Whenable,
+        manager: DialogManager,
     ) -> bool:
         return f.resolve(data)
 

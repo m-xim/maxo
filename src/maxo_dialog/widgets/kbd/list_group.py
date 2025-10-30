@@ -2,7 +2,6 @@ from collections.abc import Callable
 from typing import Any, Optional, Union
 
 from maxo.types import Callback
-
 from maxo_dialog.api.internal import RawKeyboard, Widget
 from maxo_dialog.api.protocols import (
     DialogManager,
@@ -22,12 +21,12 @@ ItemIdGetter = Callable[[Any], Union[str, int]]
 
 class ListGroup(Keyboard):
     def __init__(
-            self,
-            *buttons: Keyboard,
-            id: str,
-            item_id_getter: ItemIdGetter,
-            items: ItemsGetterVariant,
-            when: WhenCondition = None,
+        self,
+        *buttons: Keyboard,
+        id: str,
+        item_id_getter: ItemIdGetter,
+        items: ItemsGetterVariant,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.buttons = buttons
@@ -35,7 +34,9 @@ class ListGroup(Keyboard):
         self.items_getter = get_items_getter(items)
 
     async def _render_keyboard(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         kbd: RawKeyboard = []
         for pos, item in enumerate(self.items_getter(data)):
@@ -43,11 +44,11 @@ class ListGroup(Keyboard):
         return kbd
 
     async def _render_item(
-            self,
-            pos: int,
-            item: Any,
-            data: dict,
-            manager: DialogManager,
+        self,
+        pos: int,
+        item: Any,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         kbd: RawKeyboard = []
         data = {"data": data, "item": item, "pos": pos + 1, "pos0": pos}
@@ -79,23 +80,25 @@ class ListGroup(Keyboard):
         return None
 
     async def _process_item_callback(
-            self,
-            callback: Callback,
-            data: str,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        data: str,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         item_id, callback_data = data.split(":", maxsplit=1)
-        callback = callback.model_copy(update={
-            "data": callback_data,
-        })
+        callback = callback.model_copy(
+            update={
+                "data": callback_data,
+            }
+        )
         sub_manager = SubManager(
             widget=self,
             manager=manager,
             widget_id=self.widget_id,
             item_id=item_id,
         )
-        for b in self.buttons:  # noqa: RET503
+        for b in self.buttons:
             if await b.process_callback(callback, dialog, sub_manager):
                 return True
 

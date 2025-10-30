@@ -64,4 +64,3 @@ class Message(MaxoType):
             obj=self,
             attr="stat",
         )
-

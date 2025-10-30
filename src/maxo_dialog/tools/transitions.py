@@ -1,11 +1,11 @@
 import os.path
 from collections.abc import Iterable, Sequence
 
-from maxo import Router
-from maxo.alta.state_system import State
 from diagrams import Cluster, Diagram, Edge
 from diagrams.custom import Custom
 
+from maxo import Router
+from maxo.fsm import State
 from maxo_dialog import Dialog
 from maxo_dialog.api.internal import WindowProtocol
 from maxo_dialog.setup import collect_dialogs
@@ -36,19 +36,15 @@ def widget_edges(nodes, dialog, starts, current_state, kbd):
     elif isinstance(kbd, Cancel):
         for from_, to_ in starts:
             if to_.group == current_state.group:
-                (
-                    nodes[current_state] >>
-                    Edge(color="grey", style="dashed") >>
-                    nodes[from_]
-                )
+                (nodes[current_state] >> Edge(color="grey", style="dashed") >> nodes[from_])
 
 
 def walk_keyboard(
-        nodes,
-        dialog,
-        starts: list[tuple[State, State]],
-        current_state: State,
-        keyboards: Sequence,
+    nodes,
+    dialog,
+    starts: list[tuple[State, State]],
+    current_state: State,
+    keyboards: Sequence,
 ):
     for kbd in keyboards:
         if isinstance(kbd, Group):
@@ -58,7 +54,8 @@ def walk_keyboard(
 
 
 def find_starts(
-        current_state, keyboards: Sequence,
+    current_state,
+    keyboards: Sequence,
 ) -> Iterable[tuple[State, State]]:
     for kbd in keyboards:
         if isinstance(kbd, Group):
@@ -68,8 +65,10 @@ def find_starts(
 
 
 def render_window(
-        nodes: dict, dialog: Dialog, starts: list[tuple[State, State]],
-        window: WindowProtocol,
+    nodes: dict,
+    dialog: Dialog,
+    starts: list[tuple[State, State]],
+    window: WindowProtocol,
 ):
     walk_keyboard(
         nodes,
@@ -79,7 +78,9 @@ def render_window(
         [window.keyboard],
     )
     preview_add_transitions = getattr(
-        window, "preview_add_transitions", None,
+        window,
+        "preview_add_transitions",
+        None,
     )
     if preview_add_transitions:
         walk_keyboard(
@@ -92,10 +93,10 @@ def render_window(
 
 
 def render_transitions(
-        router: Router,
-        title: str = "Maxo Dialog",
-        filename: str = "maxo_dialog",
-        format: str = "png",
+    router: Router,
+    title: str = "Maxo Dialog",
+    filename: str = "maxo_dialog",
+    format: str = "png",
 ):
     dialogs = list(collect_dialogs(router))
     with Diagram(title, filename=filename, outformat=format, show=False):
@@ -104,7 +105,8 @@ def render_transitions(
             with Cluster(dialog.states_group_name()):
                 for window in dialog.windows.values():
                     nodes[window.get_state()] = Custom(
-                        icon_path=ICON_PATH, label=window.get_state()._state,
+                        icon_path=ICON_PATH,
+                        label=window.get_state()._state,
                     )
 
         starts = []
@@ -117,5 +119,8 @@ def render_transitions(
         for dialog in dialogs:
             for window in dialog.windows.values():
                 render_window(
-                    nodes=nodes, dialog=dialog, window=window, starts=starts,
+                    nodes=nodes,
+                    dialog=dialog,
+                    window=window,
+                    starts=starts,
                 )

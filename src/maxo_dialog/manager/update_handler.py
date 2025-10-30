@@ -13,7 +13,8 @@ logger = getLogger(__name__)
 
 
 async def handle_update(
-        event: DialogUpdateEvent, dialog_manager: DialogManager,
+    event: DialogUpdateEvent,
+    dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.show_mode = event.show_mode or ShowMode.AUTO
     if isinstance(event, DialogStartEvent):

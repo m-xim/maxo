@@ -3,7 +3,6 @@ from itertools import chain
 from typing import Optional
 
 from maxo.types import Callback, InlineKeyboardButton
-
 from maxo_dialog.api.internal import ButtonVariant, RawKeyboard
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
 from maxo_dialog.widgets.common import WhenCondition
@@ -13,11 +12,11 @@ from .base import Keyboard
 
 class Group(Keyboard):
     def __init__(
-            self,
-            *buttons: Keyboard,
-            id: Optional[str] = None,
-            width: Optional[int] = None,
-            when: WhenCondition = None,
+        self,
+        *buttons: Keyboard,
+        id: Optional[str] = None,
+        width: Optional[int] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.buttons = buttons
@@ -34,9 +33,9 @@ class Group(Keyboard):
         return None
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         kbd: RawKeyboard = []
         for b in self.buttons:
@@ -52,8 +51,8 @@ class Group(Keyboard):
         return kbd
 
     def _wrap_kbd(
-            self,
-            kbd: Iterable[InlineKeyboardButton],
+        self,
+        kbd: Iterable[InlineKeyboardButton],
     ) -> RawKeyboard:
         res: RawKeyboard = []
         row: list[ButtonVariant] = []
@@ -67,10 +66,10 @@ class Group(Keyboard):
         return res
 
     async def _process_other_callback(
-            self,
-            callback: Callback,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         for b in self.buttons:
             if await b.process_callback(callback, dialog, manager):
@@ -80,21 +79,24 @@ class Group(Keyboard):
 
 class Row(Group):
     def __init__(
-            self,
-            *buttons: Keyboard,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        *buttons: Keyboard,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            *buttons, id=id, width=9999, when=when,
+            *buttons,
+            id=id,
+            width=9999,
+            when=when,
         )  # telegram doe not allow even 100 columns
 
 
 class Column(Group):
     def __init__(
-            self,
-            *buttons: Keyboard,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        *buttons: Keyboard,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(*buttons, id=id, when=when, width=1)

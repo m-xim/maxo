@@ -2,7 +2,6 @@ from abc import abstractmethod
 from typing import Optional, Protocol, Union
 
 from maxo.types import Callback, InlineKeyboardButton
-
 from maxo_dialog.api.entities import ChatEvent
 from maxo_dialog.api.internal import RawKeyboard
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
@@ -18,10 +17,10 @@ from maxo_dialog.widgets.widget_event import (
 class OnCounterEvent(Protocol):
     @abstractmethod
     async def __call__(
-            self,
-            event: ChatEvent,
-            counter: "ManagedCounter",  # noqa: F841, RUF100
-            dialog_manager: DialogManager,
+        self,
+        event: ChatEvent,
+        counter: "ManagedCounter",  # noqa: F841, RUF100
+        dialog_manager: DialogManager,
     ):
         raise NotImplementedError
 
@@ -42,20 +41,20 @@ class Counter(Keyboard):
     """
 
     def __init__(
-            self,
-            id: str,
-            plus: Optional[Text] = PLUS_TEXT,
-            minus: Optional[Text] = MINUS_TEXT,
-            text: Optional[Text] = DEFAULT_COUNTER_TEXT,
-            min_value: float = 0,
-            max_value: float = 999999,
-            increment: float = 1,
-            default: float = 0,
-            cycle: bool = False,
-            on_click: OnCounterEventVariant = None,
-            on_text_click: OnCounterEventVariant = None,
-            on_value_changed: OnCounterEventVariant = None,
-            when: WhenCondition = None,
+        self,
+        id: str,
+        plus: Optional[Text] = PLUS_TEXT,
+        minus: Optional[Text] = MINUS_TEXT,
+        text: Optional[Text] = DEFAULT_COUNTER_TEXT,
+        min_value: float = 0,
+        max_value: float = 999999,
+        increment: float = 1,
+        default: float = 0,
+        cycle: bool = False,
+        on_click: OnCounterEventVariant = None,
+        on_text_click: OnCounterEventVariant = None,
+        on_value_changed: OnCounterEventVariant = None,
+        when: WhenCondition = None,
     ) -> None:
         """
         Init counter widget.
@@ -92,8 +91,7 @@ class Counter(Keyboard):
     def get_value(self, manager: DialogManager) -> float:
         return self.get_widget_data(manager, self.default)
 
-    async def set_value(self, manager: DialogManager,
-                        value: float) -> None:
+    async def set_value(self, manager: DialogManager, value: float) -> None:
         if self.min <= value <= self.max:
             self.set_widget_data(manager, value)
             await self.on_value_changed.process_event(
@@ -103,9 +101,9 @@ class Counter(Keyboard):
             )
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         row = []
         if self.minus:
@@ -138,14 +136,16 @@ class Counter(Keyboard):
         return [row]
 
     async def _process_item_callback(
-            self,
-            callback: Callback,
-            data: str,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        data: str,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         await self.on_click.process_event(
-            callback, self.managed(manager), manager,
+            callback,
+            self.managed(manager),
+            manager,
         )
 
         value = self.get_value(manager)
@@ -161,7 +161,9 @@ class Counter(Keyboard):
             await self.set_value(manager, value)
         elif data == "":
             await self.on_text_click.process_event(
-                callback, self.managed(manager), manager,
+                callback,
+                self.managed(manager),
+                manager,
             )
         return True
 

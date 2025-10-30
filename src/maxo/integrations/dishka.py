@@ -15,13 +15,13 @@ except ImportError as e:
     e.add_note(" * Please run `pip install maxo[dishka]`")
     raise
 
-from maxo.alta.dispatcher import Dispatcher
-from maxo.alta.state_system.manager import StateManager
-from maxo.alta.state_system.storages.base import RawState, Storage
 from maxo.bot.bot import Bot
+from maxo.fsm.manager import FSMContext
+from maxo.fsm.storages.base import BaseStorage, RawState
 from maxo.routing.ctx import Ctx
 from maxo.routing.updates.base import BaseUpdate
-from maxo.types.update_context import UpdateContext
+from maxo.tools.dispatcher import Dispatcher
+from maxo.types.api.update_context import UpdateContext
 
 _ReturnT = TypeVar("_ReturnT")
 _ParamsP = ParamSpec("_ParamsP")
@@ -35,21 +35,22 @@ _UpdateHandlerFn = Callable[Concatenate[_UpdateT, Ctx[_UpdateT], _ParamsP], _Ret
 @overload
 def inject(
     func: _SignalHandlerFn[_SignalT, _ParamsP, _ReturnT],
-) -> SignalHandlerFn[_SignalT, _ReturnT]:
-    ...
+) -> SignalHandlerFn[_SignalT, _ReturnT]: ...
+
 
 @overload
 def inject(
     func: _UpdateHandlerFn[_UpdateT, _ParamsP, _ReturnT],
-) -> UpdateHandlerFn[_UpdateT, _ReturnT]:
-    ...
+) -> UpdateHandlerFn[_UpdateT, _ReturnT]: ...
 
-def inject(func: Any) ->  Any:
+
+def inject(func: Any) -> Any:
     return wrap_injection(
         func=func,
         is_async=True,
         container_getter=lambda args, kwargs: kwargs["ctx"].data.dishka_container,
     )
+
 
 def setup_dishka(
     dispatcher: Dispatcher,
@@ -66,9 +67,7 @@ class DishkaMiddleware(Middleware[Update[Any]]):
     __slots__ = ("_container", "_extra_context")
 
     def __init__(
-        self,
-        container: AsyncContainer,
-        extra_context: dict[Any, Any] | None = None
+        self, container: AsyncContainer, extra_context: dict[Any, Any] | None = None
     ) -> None:
         self._container = container
         self._extra_context = extra_context or {}
@@ -85,7 +84,8 @@ class DishkaMiddleware(Middleware[Update[Any]]):
                 Update[type(update.update)]: update,  # type: ignore[misc]
                 Ctx[Update[Any], Any]: ctx,
                 Ctx[Update[type(update.update)], Any]: ctx,  # type: ignore[misc]
-            } | self._extra_context,
+            }
+            | self._extra_context,
         ) as container:
             ctx.dishka_container = container
             return await next(ctx)
@@ -98,8 +98,8 @@ class MaxoProvider(Provider):
         from_context(Bot)
         + from_context(Dispatcher)
         + from_context(UpdateContext)
-        + from_context(Storage)
-        + from_context(StateManager)
+        + from_context(BaseStorage)
+        + from_context(FSMContext)
         + from_context(RawState)
         + from_context(Update[Any])
         + from_context(Update[_UpdateT])

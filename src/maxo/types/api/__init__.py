@@ -40,6 +40,7 @@ from maxo.types.api.markup_elements import (
     UserMentionMarkupElement,
 )
 from maxo.types.api.media_attachment_payload import MediaAttachmentPayload
+from maxo.types.api.message import Message
 from maxo.types.api.message_body import MessageBody
 from maxo.types.api.message_keyboard_button import MessageKeyboardButton
 from maxo.types.api.message_stat import MessageStat
@@ -102,6 +103,7 @@ __all__ = (
     "LocationAttachment",
     "LocationAttachmentRequest",
     "MediaAttachmentPayload",
+    "Message",
     "MessageBody",
     "MessageKeyboardButton",
     "MessageStat",

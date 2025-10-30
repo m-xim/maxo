@@ -4,7 +4,6 @@ from typing import Any, Union
 from maxo import Router
 from maxo.dispatcher.middlewares.base import BaseMiddleware
 from maxo.types import TelegramObject, Update
-
 from maxo_dialog.api.entities import ChatEvent, DialogUpdateEvent
 from maxo_dialog.api.internal import STORAGE_KEY, DialogManagerFactory
 from maxo_dialog.api.protocols import (
@@ -19,10 +18,10 @@ BG_FACTORY_KEY = "dialog_bg_factory"
 
 class ManagerMiddleware(BaseMiddleware):
     def __init__(
-            self,
-            dialog_manager_factory: DialogManagerFactory,
-            registry: DialogRegistryProtocol,
-            router: Router,
+        self,
+        dialog_manager_factory: DialogManagerFactory,
+        registry: DialogRegistryProtocol,
+        router: Router,
     ) -> None:
         super().__init__()
         self.dialog_manager_factory = dialog_manager_factory
@@ -30,18 +29,20 @@ class ManagerMiddleware(BaseMiddleware):
         self.router = router
 
     def _is_event_supported(
-            self, event: TelegramObject, data: dict[str, Any],
+        self,
+        event: TelegramObject,
+        data: dict[str, Any],
     ) -> bool:
         return STORAGE_KEY in data
 
     async def __call__(
-            self,
-            handler: Callable[
-                [Union[Update, DialogUpdateEvent], dict[str, Any]],
-                Awaitable[Any],
-            ],
-            event: ChatEvent,
-            data: dict[str, Any],
+        self,
+        handler: Callable[
+            [Union[Update, DialogUpdateEvent], dict[str, Any]],
+            Awaitable[Any],
+        ],
+        event: ChatEvent,
+        data: dict[str, Any],
     ) -> Any:
         if self._is_event_supported(event, data):
             data[MANAGER_KEY] = self.dialog_manager_factory(
@@ -61,20 +62,20 @@ class ManagerMiddleware(BaseMiddleware):
 
 class BgFactoryMiddleware(BaseMiddleware):
     def __init__(
-            self,
-            bg_manager_factory: BgManagerFactory,
+        self,
+        bg_manager_factory: BgManagerFactory,
     ) -> None:
         super().__init__()
         self.bg_manager_factory = bg_manager_factory
 
     async def __call__(
-            self,
-            handler: Callable[
-                [Union[TelegramObject, DialogUpdateEvent], dict[str, Any]],
-                Awaitable[TelegramObject],
-            ],
-            event: TelegramObject,
-            data: dict[str, Any],
+        self,
+        handler: Callable[
+            [Union[TelegramObject, DialogUpdateEvent], dict[str, Any]],
+            Awaitable[TelegramObject],
+        ],
+        event: TelegramObject,
+        data: dict[str, Any],
     ) -> Any:
         data[BG_FACTORY_KEY] = self.bg_manager_factory
         return await handler(event, data)

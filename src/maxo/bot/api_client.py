@@ -160,30 +160,36 @@ class MaxApiClient(AiohttpClient):
         )
 
     def init_method_dumper(self) -> Retort:
-        retort = super().init_method_dumper().extend(
-            recipe=[
-                _has_tag_providers,
-                dumper(
-                    for_marker(P[None], QueryParamMarker),
-                    lambda x: "null",
-                ),
-            ]
+        retort = (
+            super()
+            .init_method_dumper()
+            .extend(
+                recipe=[
+                    _has_tag_providers,
+                    dumper(
+                        for_marker(P[None], QueryParamMarker),
+                        lambda x: "null",
+                    ),
+                ]
+            )
         )
         return warming_up_retort(
-            retort,
-            warming_up=WarmingUpType.METHOD if self._warming_up else None
+            retort, warming_up=WarmingUpType.METHOD if self._warming_up else None
         )
 
     def init_response_loader(self) -> Retort:
-        retort = super().init_response_loader().extend(
-            recipe=(
-                _has_tag_providers,
-                loader(P[datetime], lambda x: datetime.fromtimestamp(x / 1000)),
-            ),
+        retort = (
+            super()
+            .init_response_loader()
+            .extend(
+                recipe=(
+                    _has_tag_providers,
+                    loader(P[datetime], lambda x: datetime.fromtimestamp(x / 1000)),
+                ),
+            )
         )
         return warming_up_retort(
-            retort,
-            warming_up=WarmingUpType.TYPES if self._warming_up else None
+            retort, warming_up=WarmingUpType.TYPES if self._warming_up else None
         )
 
     async def retrieve_response_data(

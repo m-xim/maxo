@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Union
 
-from maxo.enums import ContentType
 from maxo.types import (
     Chat,
     ForceReply,
@@ -11,11 +10,14 @@ from maxo.types import (
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
 )
-
+from maxo.types.enums import AttachmentType
 from maxo_dialog.api.entities import MediaAttachment, ShowMode
 
 MarkupVariant = Union[
-    ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove,
+    ForceReply,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
 ]
 
 
@@ -33,7 +35,7 @@ class OldMessage:
     has_protected_content: Optional[bool] = None
     has_reply_keyboard: bool = False
     business_connection_id: Optional[str] = None
-    content_type: Optional[ContentType] = None
+    content_type: Optional[AttachmentType] = None
 
 
 @dataclass

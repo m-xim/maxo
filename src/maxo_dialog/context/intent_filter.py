@@ -1,9 +1,8 @@
 from typing import Optional
 
 from maxo.filters import BaseFilter
-from maxo.alta.state_system import StatesGroup
+from maxo.fsm import StatesGroup
 from maxo.types import TelegramObject
-
 from maxo_dialog.api.entities import Context
 from maxo_dialog.api.internal import CONTEXT_KEY
 

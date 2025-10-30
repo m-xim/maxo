@@ -13,7 +13,9 @@ Selector = Callable[[dict, "Case", DialogManager], Hashable]
 
 def new_case_field(fieldname: str) -> Selector:
     def case_field(
-            data: dict, widget: "Case", manager: DialogManager,
+        data: dict,
+        widget: "Case",
+        manager: DialogManager,
     ) -> Hashable:
         return data.get(fieldname)
 
@@ -22,7 +24,9 @@ def new_case_field(fieldname: str) -> Selector:
 
 def new_magic_selector(f: MagicFilter) -> Selector:
     def when_magic(
-            data: dict, widget: "Case", manager: DialogManager,
+        data: dict,
+        widget: "Case",
+        manager: DialogManager,
     ) -> bool:
         return f.resolve(data)
 
@@ -31,10 +35,10 @@ def new_magic_selector(f: MagicFilter) -> Selector:
 
 class Case(Text):
     def __init__(
-            self,
-            texts: dict[Any, Text],
-            selector: Union[str, Selector, MagicFilter],
-            when: WhenCondition = None,
+        self,
+        texts: dict[Any, Text],
+        selector: Union[str, Selector, MagicFilter],
+        when: WhenCondition = None,
     ):
         super().__init__(when=when)
         self.texts = texts

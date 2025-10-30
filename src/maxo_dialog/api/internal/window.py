@@ -4,9 +4,8 @@ from typing import (
     Protocol,
 )
 
-from maxo.alta.state_system import State
+from maxo.fsm import State
 from maxo.types import Callback, Message
-
 from maxo_dialog.api.entities import Data, NewMessage
 from maxo_dialog.api.protocols import DialogProtocol
 
@@ -16,36 +15,38 @@ from .manager import DialogManager
 class WindowProtocol(Protocol):
     @abstractmethod
     async def process_message(
-            self,
-            message: Message,
-            dialog: "DialogProtocol",
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: "DialogProtocol",
+        manager: DialogManager,
     ) -> bool:
         """Return True if message in handled."""
         raise NotImplementedError
 
     @abstractmethod
     async def process_callback(
-            self,
-            callback: Callback,
-            dialog: "DialogProtocol",
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: "DialogProtocol",
+        manager: DialogManager,
     ) -> bool:
         """Return True if callback in handled."""
         raise NotImplementedError
 
     @abstractmethod
     async def process_result(
-            self, start_data: Data, result: Any,
-            manager: "DialogManager",
+        self,
+        start_data: Data,
+        result: Any,
+        manager: "DialogManager",
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def render(
-            self,
-            dialog: "DialogProtocol",
-            manager: DialogManager,
+        self,
+        dialog: "DialogProtocol",
+        manager: DialogManager,
     ) -> NewMessage:
         raise NotImplementedError
 

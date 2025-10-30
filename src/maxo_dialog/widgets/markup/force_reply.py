@@ -1,7 +1,6 @@
 from typing import Optional
 
 from maxo.types import ForceReply
-
 from maxo_dialog import DialogManager
 from maxo_dialog.api.internal.widgets import (
     MarkupFactory,
@@ -13,19 +12,23 @@ from maxo_dialog.widgets.text import Text
 
 class ForceReplyFactory(MarkupFactory):
     def __init__(
-            self,
-            input_field_placeholder: Optional[Text] = None,
-            selective: Optional[bool] = None,
+        self,
+        input_field_placeholder: Optional[Text] = None,
+        selective: Optional[bool] = None,
     ):
         self.input_field_placeholder = input_field_placeholder
         self.selective = selective
 
     async def render_markup(
-            self, data: dict, manager: DialogManager, keyboard: RawKeyboard,
+        self,
+        data: dict,
+        manager: DialogManager,
+        keyboard: RawKeyboard,
     ) -> MarkupVariant:
         if self.input_field_placeholder:
             placeholder = await self.input_field_placeholder.render_text(
-                data, manager,
+                data,
+                manager,
             )
         else:
             placeholder = None

@@ -17,12 +17,12 @@ from .base import Media
 
 class MediaScroll(Media, BaseScroll):
     def __init__(
-            self,
-            media: Media,
-            items: ItemsGetterVariant,
-            id: str,
-            when: WhenCondition = None,
-            on_page_changed: OnPageChangedVariants = None,
+        self,
+        media: Media,
+        items: ItemsGetterVariant,
+        id: str,
+        when: WhenCondition = None,
+        on_page_changed: OnPageChangedVariants = None,
     ):
         Media.__init__(self, when=when)
         BaseScroll.__init__(self, id=id, on_page_changed=on_page_changed)
@@ -30,7 +30,9 @@ class MediaScroll(Media, BaseScroll):
         self.items_getter = get_items_getter(items)
 
     async def _render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         items = self.items_getter(data)
         pages = len(items)

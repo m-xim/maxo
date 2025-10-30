@@ -12,7 +12,7 @@ from maxo.types.enums.text_fromat import TextFormat
 from maxo.types.enums.update_type import UpdateType
 from maxo.types.enums.upload_type import UploadType
 
-__all__ = [
+__all__ = (
     "AttachmentRequestType",
     "AttachmentType",
     "ChatActionType",
@@ -26,4 +26,4 @@ __all__ = [
     "TextFormat",
     "UpdateType",
     "UploadType",
-]
+)

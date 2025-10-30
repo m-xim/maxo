@@ -1,7 +1,6 @@
 import importlib.metadata
 
-from maxo.alta.state_system import State, StatesGroup
-
+from maxo.fsm import State, StatesGroup
 from maxo_dialog.dialog import Dialog
 from maxo_dialog.widgets.kbd import Cancel, Keyboard, Start
 from maxo_dialog.widgets.link_preview import LinkPreview
@@ -52,7 +51,7 @@ DEFAULT_ABOUT_BTN_TEXT = Const("🗨️ About maxo-dialog")
 
 
 def about_maxo_dialog_button(
-        text: Text = DEFAULT_ABOUT_BTN_TEXT,
+    text: Text = DEFAULT_ABOUT_BTN_TEXT,
 ) -> Keyboard:
     return Start(
         text=text,

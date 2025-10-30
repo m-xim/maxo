@@ -6,7 +6,8 @@ from maxo.types import InlineKeyboardButton, Message
 
 class InlineButtonLocator(Protocol):
     def find_button(
-            self, message: Message,
+        self,
+        message: Message,
     ) -> Optional[InlineKeyboardButton]:
         raise NotImplementedError
 
@@ -16,7 +17,8 @@ class InlineButtonTextLocator:
         self.regex = re.compile(regex)
 
     def find_button(
-            self, message: Message,
+        self,
+        message: Message,
     ) -> Optional[InlineKeyboardButton]:
         if not message.reply_markup:
             return None
@@ -36,7 +38,8 @@ class InlineButtonPositionLocator:
         self.column = column
 
     def find_button(
-            self, message: Message,
+        self,
+        message: Message,
     ) -> Optional[InlineKeyboardButton]:
         if not message.reply_markup:
             return None
@@ -46,8 +49,7 @@ class InlineButtonPositionLocator:
             return None
 
     def __repr__(self):
-        return f"InlineButtonPositionLocator" \
-               f"(row={self.row}, column={self.column})"
+        return f"InlineButtonPositionLocator" f"(row={self.row}, column={self.column})"
 
 
 class InlineButtonDataLocator:
@@ -55,7 +57,8 @@ class InlineButtonDataLocator:
         self.regex = re.compile(regex)
 
     def find_button(
-            self, message: Message,
+        self,
+        message: Message,
     ) -> Optional[InlineKeyboardButton]:
         if not message.reply_markup:
             return None

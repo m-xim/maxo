@@ -6,12 +6,12 @@ from .base import Text
 
 class Progress(Text):
     def __init__(
-            self,
-            field: str,
-            width: int = 10,
-            filled="🟥",
-            empty="⬜",
-            when: WhenCondition = None,
+        self,
+        field: str,
+        width: int = 10,
+        filled="🟥",
+        empty="⬜",
+        when: WhenCondition = None,
     ):
         super().__init__(when)
         self.field = field
@@ -20,7 +20,9 @@ class Progress(Text):
         self.empty = empty
 
     async def _render_text(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> str:
         if manager.is_preview():
             percent = 15

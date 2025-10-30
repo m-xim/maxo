@@ -14,7 +14,7 @@ from maxo_dialog.tools.transitions import render_transitions
 
 def removesuffix(s, suffix):
     if s.endswith(suffix):
-        return s[:-len(suffix)]
+        return s[: -len(suffix)]
     return s
 
 
@@ -58,7 +58,8 @@ class Controller:
         loop = asyncio.get_event_loop()
         with ProcessPoolExecutor(max_workers=1) as executor:
             text = await loop.run_in_executor(
-                executor, self.renderer.load_preview,
+                executor,
+                self.renderer.load_preview,
             )
         return web.Response(
             text=text,
@@ -70,7 +71,9 @@ class Controller:
         with NamedTemporaryFile(suffix=".png") as f:
             with ProcessPoolExecutor(max_workers=1) as executor:
                 await loop.run_in_executor(
-                    executor, self.renderer.load_transitions, f.name,
+                    executor,
+                    self.renderer.load_transitions,
+                    f.name,
                 )
             return web.Response(
                 body=f.read(),

@@ -3,12 +3,12 @@ import os
 from typing import Any
 
 from maxo import Bot, Ctx, Dispatcher
-from maxo.alta.facades import MessageCreatedFacade
-from maxo.alta.long_polling.long_polling import LongPolling
 from maxo.routing.filters.base import BaseFilter
 from maxo.routing.interfaces.middleware import Middleware, NextMiddleware
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.routing.utils.inline_ctx import inline_ctx
+from maxo.tools.facades import MessageCreatedFacade
+from maxo.tools.long_polling.long_polling import LongPolling
 
 
 class OuterMiddleware(Middleware[MessageCreated]):

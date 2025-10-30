@@ -2,7 +2,6 @@ from collections.abc import Callable
 from typing import Optional, Union
 
 from maxo.types import KeyboardButton, KeyboardButtonPollType
-
 from maxo_dialog.api.internal import RawKeyboard
 from maxo_dialog.api.protocols import DialogManager
 from maxo_dialog.widgets.text import Text
@@ -12,17 +11,17 @@ from .base import Keyboard
 
 class RequestContact(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            when: Union[str, Callable, None] = None,
+        self,
+        text: Text,
+        when: Union[str, Callable, None] = None,
     ):
         super().__init__(when=when)
         self.text = text
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         return [
             [
@@ -36,17 +35,17 @@ class RequestContact(Keyboard):
 
 class RequestLocation(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            when: Union[str, Callable, None] = None,
+        self,
+        text: Text,
+        when: Union[str, Callable, None] = None,
     ):
         super().__init__(when=when)
         self.text = text
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         return [
             [
@@ -60,19 +59,19 @@ class RequestLocation(Keyboard):
 
 class RequestPoll(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            poll_type: Optional[str] = None,
-            when: Union[str, Callable, None] = None,
+        self,
+        text: Text,
+        poll_type: Optional[str] = None,
+        when: Union[str, Callable, None] = None,
     ):
         super().__init__(when=when)
         self.text = text
         self.poll_type = poll_type
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         text = await self.text.render_text(data, manager)
         request_poll = KeyboardButtonPollType(type=self.poll_type)

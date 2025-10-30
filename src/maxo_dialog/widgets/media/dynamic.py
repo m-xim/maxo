@@ -19,9 +19,9 @@ MediaSelector = Callable[[dict], MediaAttachment]
 
 class DynamicMedia(Media):
     def __init__(
-            self,
-            selector: Union[str, MediaSelector],
-            when: WhenCondition = None,
+        self,
+        selector: Union[str, MediaSelector],
+        when: WhenCondition = None,
     ):
         super().__init__(when=when)
         if isinstance(selector, str):
@@ -30,7 +30,9 @@ class DynamicMedia(Media):
             self.selector = selector
 
     async def _render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         media: Optional[MediaAttachment] = self.selector(data)
         return media

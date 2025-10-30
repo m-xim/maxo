@@ -9,17 +9,17 @@ except ImportError as e:
     e.add_note("* Please run `pip install maxo[redis]`")
     raise
 
-from maxo.alta.state_system.key_builder import (
+from maxo.fsm.key_builder import (
     DefaultKeyBuilder,
     KeyBuilder,
     StorageKey,
     StorageKeyType,
 )
-from maxo.alta.state_system.state import State
-from maxo.alta.state_system.storages.base import Storage
+from maxo.fsm.state import State
+from maxo.fsm.storages.base import BaseStorage
 
 
-class RedisStorage(Storage):
+class RedisStorage(BaseStorage):
     def __init__(
         self,
         redis: Redis,

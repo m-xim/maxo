@@ -4,19 +4,18 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Optional, Union
 
-from maxo.routing.interfaces import Router
+from jinja2 import Environment, PackageLoader, select_autoescape
 
-from maxo.alta.state_system import State, StatesGroup
-from maxo.types.api import Callback, Chat, User
-from maxo.types.api.message import Message
 from maxo import (
-    ContentType,
+    AttachmentType,
     InlineKeyboardMarkup,
     Message,
     ReplyKeyboardMarkup,
 )
-from jinja2 import Environment, PackageLoader, select_autoescape
-
+from maxo.fsm import State, StatesGroup
+from maxo.routing.interfaces import Router
+from maxo.types.api import Callback, Chat, User
+from maxo.types.api.message import Message
 from maxo_dialog import (
     BaseDialogManager,
     Dialog,
@@ -73,7 +72,9 @@ class FakeManager(DialogManager):
     def __init__(self):
         self._event = DialogUpdateEvent(
             from_user=User(
-                id=1, is_bot=False, first_name="Fake",
+                id=1,
+                is_bot=False,
+                first_name="Fake",
                 language_code="en",
             ),
             chat=Chat(id=1, type="private"),
@@ -125,7 +126,6 @@ class FakeManager(DialogManager):
         new_state = states[current_index - 1]
         await self.switch_to(new_state, show_mode)
 
-
     @property
     def middleware_data(self) -> dict:
         return self._data
@@ -168,26 +168,26 @@ class FakeManager(DialogManager):
         )
 
     async def switch_to(
-            self,
-            state: State,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        state: State,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         self.set_state(state)
 
     async def start(
-            self,
-            state: State,
-            data: Data = None,
-            mode: StartMode = StartMode.NORMAL,
-            show_mode: ShowMode = ShowMode.AUTO,
-            access_settings: Optional[AccessSettings] = None,
+        self,
+        state: State,
+        data: Data = None,
+        mode: StartMode = StartMode.NORMAL,
+        show_mode: ShowMode = ShowMode.AUTO,
+        access_settings: Optional[AccessSettings] = None,
     ) -> None:
         self.set_state(state)
 
     async def done(
-            self,
-            result: Any = None,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        result: Any = None,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         self.set_state(State("-"))
 
@@ -230,20 +230,20 @@ class FakeManager(DialogManager):
         return widget.managed(self)
 
     async def update(
-            self,
-            data: dict,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        data: dict,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         pass
 
     def bg(
-            self,
-            user_id: Optional[int] = None,
-            chat_id: Optional[int] = None,
-            stack_id: Optional[str] = None,
-            thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
-            business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
-            load: bool = False,
+        self,
+        user_id: Optional[int] = None,
+        chat_id: Optional[int] = None,
+        stack_id: Optional[str] = None,
+        thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
+        business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
+        load: bool = False,
     ) -> BaseDialogManager:
         return self
 
@@ -254,7 +254,7 @@ class FakeManager(DialogManager):
 def create_photo(media: Optional[MediaAttachment]) -> Optional[str]:
     if not media:
         return None
-    if media.type != ContentType.PHOTO:
+    if media.type != AttachmentType.IMAGE:
         return None
     if media.url:
         return media.url
@@ -266,12 +266,12 @@ def create_photo(media: Optional[MediaAttachment]) -> Optional[str]:
 
 
 async def create_button(
-        title: str,
-        callback: str,
-        manager: FakeManager,
-        state: State,
-        dialog: Dialog,
-        simulate_events: bool,
+    title: str,
+    callback: str,
+    manager: FakeManager,
+    state: State,
+    dialog: Dialog,
+    simulate_events: bool,
 ) -> RenderButton:
     if not simulate_events:
         return RenderButton(title=title, state=state.state)
@@ -291,15 +291,15 @@ async def create_button(
 
 
 async def render_input(
-        manager: FakeManager,
-        state: State,
-        dialog: Dialog,
-        content_type: str,
-        simulate_events: bool,
+    manager: FakeManager,
+    state: State,
+    dialog: Dialog,
+    content_type: str,
+    simulate_events: bool,
 ) -> Optional[RenderButton]:
     if not simulate_events:
         return None
-    if content_type == ContentType.PHOTO:
+    if content_type == AttachmentType.IMAGE:
         data = {content_type: []}
     else:
         data = {content_type: "<stub>"}
@@ -319,7 +319,9 @@ async def render_input(
         logging.debug("State not changed")
         return None
     logging.debug(
-        "State changed %s >> %s", state, manager.current_context().state,
+        "State changed %s >> %s",
+        state,
+        manager.current_context().state,
     )
     return RenderButton(
         title=content_type,
@@ -328,11 +330,11 @@ async def render_input(
 
 
 async def render_inline_keyboard(
-        state: State,
-        reply_markup: InlineKeyboardMarkup,
-        manager: FakeManager,
-        dialog: Dialog,
-        simulate_events: bool,
+    state: State,
+    reply_markup: InlineKeyboardMarkup,
+    manager: FakeManager,
+    dialog: Dialog,
+    simulate_events: bool,
 ):
     return [
         [
@@ -351,11 +353,11 @@ async def render_inline_keyboard(
 
 
 async def render_reply_keyboard(
-        state: State,
-        reply_markup: ReplyKeyboardMarkup,
-        manager: FakeManager,
-        dialog: Dialog,
-        simulate_events: bool,
+    state: State,
+    reply_markup: ReplyKeyboardMarkup,
+    manager: FakeManager,
+    dialog: Dialog,
+    simulate_events: bool,
 ):
     # TODO simulate events using keyboard
     keyboard = []
@@ -378,11 +380,11 @@ async def render_reply_keyboard(
 
 
 async def create_window(
-        state: State,
-        message: NewMessage,
-        manager: FakeManager,
-        dialog: Dialog,
-        simulate_events: bool,
+    state: State,
+    message: NewMessage,
+    manager: FakeManager,
+    dialog: Dialog,
+    simulate_events: bool,
 ) -> RenderWindow:
     if message.parse_mode is None or message.parse_mode == "None":
         text = html.escape(message.text)
@@ -391,13 +393,21 @@ async def create_window(
 
     if isinstance(message.reply_markup, InlineKeyboardMarkup):
         keyboard = await render_inline_keyboard(
-            state, message.reply_markup, manager, dialog, simulate_events,
+            state,
+            message.reply_markup,
+            manager,
+            dialog,
+            simulate_events,
         )
         reply_keyboard = []
     elif isinstance(message.reply_markup, ReplyKeyboardMarkup):
         keyboard = []
         reply_keyboard = await render_reply_keyboard(
-            state, message.reply_markup, manager, dialog, simulate_events,
+            state,
+            message.reply_markup,
+            manager,
+            dialog,
+            simulate_events,
         )
     else:
         keyboard = []
@@ -414,24 +424,24 @@ async def create_window(
             manager=manager,
             state=state,
             dialog=dialog,
-            content_type=ContentType.TEXT,
+            content_type=AttachmentType.TEXT,
             simulate_events=simulate_events,
         ),
         attachment_input=await render_input(
             manager=manager,
             state=state,
             dialog=dialog,
-            content_type=ContentType.PHOTO,
+            content_type=AttachmentType.IMAGE,
             simulate_events=simulate_events,
         ),
     )
 
 
 async def render_dialog(
-        manager: FakeManager,
-        group: type[StatesGroup],
-        dialog: Dialog,
-        simulate_events: bool,
+    manager: FakeManager,
+    group: type[StatesGroup],
+    dialog: Dialog,
+    simulate_events: bool,
 ) -> RenderDialog:
     manager.set_dialog(dialog)
     windows = []
@@ -452,8 +462,8 @@ async def render_dialog(
 
 
 async def render_preview_content(
-        router: Router,
-        simulate_events: bool = False,
+    router: Router,
+    simulate_events: bool = False,
 ) -> str:
     fake_manager = FakeManager()
     dialogs = [
@@ -474,9 +484,9 @@ async def render_preview_content(
 
 
 async def render_preview(
-        router: Router,
-        file: str,
-        simulate_events: bool = False,
+    router: Router,
+    file: str,
+    simulate_events: bool = False,
 ):
     res = await render_preview_content(router, simulate_events)
     with open(file, "w", encoding="utf-8") as f:

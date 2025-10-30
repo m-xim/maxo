@@ -8,11 +8,7 @@ from maxo.types.enums.update_type import UpdateType
 def _collect_used_updates_type(router: Router) -> set[UpdateType]:
     used_updates = set()
     for update_tp, observer in router.observers.items():
-        if (
-            issubclass(update_tp, MaxUpdate)
-            and observer.handlers
-            and update_tp.type is not None
-        ):
+        if issubclass(update_tp, MaxUpdate) and observer.handlers and update_tp.type is not None:
             used_updates.add(update_tp.type)
 
     return used_updates

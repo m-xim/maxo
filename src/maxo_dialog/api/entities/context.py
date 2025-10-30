@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional, Union
 
-from maxo.alta.state_system import State
+from maxo.fsm import State
 
 from .access import AccessSettings
 
@@ -18,7 +18,8 @@ class Context:
     dialog_data: DataDict = field(compare=False, default_factory=dict)
     widget_data: DataDict = field(compare=False, default_factory=dict)
     access_settings: Optional[AccessSettings] = field(
-        compare=False, default=None,
+        compare=False,
+        default=None,
     )
 
     @property

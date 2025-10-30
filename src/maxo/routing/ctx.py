@@ -16,6 +16,7 @@ _CtxDataT = TypeVarExtensions("_CtxDataT", default=Any)
 
 _sentinel = Omitted()
 
+
 class CtxState:
     __slots__ = ("_data",)
 
@@ -98,12 +99,12 @@ class Ctx(GenericExtensions[_UpdateT, _CtxDataT]):
         setattr(self._state, name, value)
 
     if TYPE_CHECKING:
-        from maxo.alta.dispatcher import Dispatcher
-        from maxo.alta.facades.updates.base import BaseUpdateFacade
-        from maxo.alta.state_system.manager import StateManager
-        from maxo.alta.state_system.storages.base import Storage
         from maxo.bot.bot import Bot
-        from maxo.types.update_context import UpdateContext
+        from maxo.fsm.manager import FSMContext
+        from maxo.fsm.storages.base import BaseStorage
+        from maxo.tools.dispatcher import Dispatcher
+        from maxo.tools.facades.updates.base import BaseUpdateFacade
+        from maxo.types.api.update_context import UpdateContext
 
         update: _UpdateT
         update_tp: type[_UpdateT]
@@ -114,6 +115,6 @@ class Ctx(GenericExtensions[_UpdateT, _CtxDataT]):
 
         facade: BaseUpdateFacade[Any]
 
-        storage: Maybe[Storage]
-        state_manager: Maybe[StateManager]
+        storage: Maybe[BaseStorage]
+        state: Maybe[FSMContext]
         raw_state: Maybe[str | None]

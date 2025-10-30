@@ -4,8 +4,7 @@ from typing import Any, Optional, Union
 
 from maxo import F
 from maxo.dispatcher.event.handler import FilterObject
-from maxo.types import ContentType, Message
-
+from maxo.types import AttachmentType, Message
 from maxo_dialog.api.internal import InputWidget
 from maxo_dialog.api.protocols import (
     DialogManager,
@@ -26,42 +25,45 @@ MessageHandlerFunc = Callable[
 class BaseInput(Actionable, InputWidget):
     @abstractmethod
     async def process_message(
-            self, message: Message, dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         raise NotImplementedError
 
 
 class MessageInput(BaseInput):
     def __init__(
-            self,
-            func: Union[MessageHandlerFunc, WidgetEventProcessor, None],
-            content_types: Union[Sequence[str], str] = ContentType.ANY,
-            filter: Optional[Callable[..., Any]] = None,
-            id: Optional[str] = None,
+        self,
+        func: Union[MessageHandlerFunc, WidgetEventProcessor, None],
+        content_types: Union[Sequence[str], str] = AttachmentType.ANY,
+        filter: Optional[Callable[..., Any]] = None,
+        id: Optional[str] = None,
     ):
         super().__init__(id=id)
         self.func = ensure_event_processor(func)
 
         filters = []
         if isinstance(content_types, str):
-            if content_types != ContentType.ANY:
+            if content_types != AttachmentType.ANY:
                 filters.append(FilterObject(F.content_type == content_types))
-        elif ContentType.ANY not in content_types:
+        elif AttachmentType.ANY not in content_types:
             filters.append(FilterObject(F.content_type.in_(content_types)))
         if filter is not None:
             filters.append(FilterObject(filter))
         self.filters = filters
 
     async def process_message(
-            self,
-            message: Message,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         for handler_filter in self.filters:
             if not await handler_filter.call(
-                    manager.event, **manager.middleware_data,
+                manager.event,
+                **manager.middleware_data,
             ):
                 return False
         await self.func.process_event(message, self, manager)

@@ -7,7 +7,7 @@ from maxo.bot.methods.base import MaxoMethod
 from maxo.omit import Omittable, Omitted
 from maxo.types.api.new_message_link import NewMessageLink
 from maxo.types.api.request_attachments import AttachmentsRequests
-from maxo.types.enums.text_fromat import TextFormat
+from maxo.types.enums import TextFormat
 
 
 class EditMessage(MaxoMethod[EditMessageResult]):

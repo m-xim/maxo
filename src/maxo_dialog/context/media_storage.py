@@ -1,9 +1,9 @@
 import os
 from typing import NamedTuple, Optional, cast
 
-from maxo.types import ContentType
 from cachetools import LRUCache
 
+from maxo.types import AttachmentType
 from maxo_dialog.api.entities import MediaId
 from maxo_dialog.api.protocols import MediaIdStorageProtocol
 
@@ -18,15 +18,15 @@ class MediaIdStorage(MediaIdStorageProtocol):
         self.cache = LRUCache(maxsize=maxsize)
 
     async def get_media_id(
-            self,
-            path: Optional[str],
-            url: Optional[str],
-            type: ContentType,
+        self,
+        path: Optional[str],
+        url: Optional[str],
+        type: AttachmentType,
     ) -> Optional[MediaId]:
         if not path and not url:
             return None
         cached = cast(
-            Optional[CachedMediaId],
+            "Optional[CachedMediaId]",
             self.cache.get((path, url, type)),
         )
         if cached is None:
@@ -46,11 +46,11 @@ class MediaIdStorage(MediaIdStorageProtocol):
         return os.path.getmtime(path)  # noqa: PTH204
 
     async def save_media_id(
-            self,
-            path: Optional[str],
-            url: Optional[str],
-            type: ContentType,
-            media_id: MediaId,
+        self,
+        path: Optional[str],
+        url: Optional[str],
+        type: AttachmentType,
+        media_id: MediaId,
     ) -> None:
         if not path and not url:
             return

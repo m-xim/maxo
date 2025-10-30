@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol, Union
 
-from maxo.alta.state_system import State, StatesGroup
+from maxo.fsm import State, StatesGroup
 
 from .dialog import DialogProtocol
 

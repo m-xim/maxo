@@ -33,8 +33,9 @@ class FakeBot(Bot):
         return 1
 
     async def __call__(
-            self, method: TelegramMethod[Any],
-            request_timeout: Optional[int] = None,
+        self,
+        method: TelegramMethod[Any],
+        request_timeout: Optional[int] = None,
     ) -> Any:
         del request_timeout  # unused
         if isinstance(method, AnswerCallback):
@@ -60,16 +61,17 @@ ChatMember = Union[
 
 class BotClient:
     def __init__(
-            self,
-            dp: Dispatcher,
-            user_id: int = 1,
-            chat_id: int = 1,
-            chat_type: str = "private",
-            bot: Optional[Bot] = None,
+        self,
+        dp: Dispatcher,
+        user_id: int = 1,
+        chat_id: int = 1,
+        chat_type: str = "private",
+        bot: Optional[Bot] = None,
     ):
         self.chat = Chat(id=chat_id, type=chat_type)
         self.user = User(
-            id=user_id, is_bot=False,
+            id=user_id,
+            is_bot=False,
             first_name=f"User_{user_id}",
         )
         self.dp = dp
@@ -86,7 +88,9 @@ class BotClient:
         return self.last_message_id
 
     def _new_message(
-            self, text: str, reply_to: Optional[Message],
+        self,
+        text: str,
+        reply_to: Optional[Message],
     ):
         return Message(
             message_id=self._new_message_id(),
@@ -98,13 +102,18 @@ class BotClient:
         )
 
     async def send(self, text: str, reply_to: Optional[Message] = None):
-        return await self.dp.feed_update(self.bot, Update(
-            update_id=self._new_update_id(),
-            message=self._new_message(text, reply_to),
-        ))
+        return await self.dp.feed_update(
+            self.bot,
+            Update(
+                update_id=self._new_update_id(),
+                message=self._new_message(text, reply_to),
+            ),
+        )
 
     def _new_callback(
-            self, message: Message, button: InlineKeyboardButton,
+        self,
+        message: Message,
+        button: InlineKeyboardButton,
     ) -> Callback:
         if not button.callback_data:
             raise ValueError("Button has no callback data")
@@ -117,8 +126,9 @@ class BotClient:
         )
 
     async def click(
-            self, message: Message,
-            locator: InlineButtonLocator,
+        self,
+        message: Message,
+        locator: InlineButtonLocator,
     ) -> str:
         button = locator.find_button(message)
         if not button:
@@ -127,33 +137,44 @@ class BotClient:
             )
 
         callback = self._new_callback(message, button)
-        await self.dp.feed_update(self.bot, Update(
-            update_id=self._new_update_id(),
-            callback_query=callback,
-        ))
+        await self.dp.feed_update(
+            self.bot,
+            Update(
+                update_id=self._new_update_id(),
+                callback_query=callback,
+            ),
+        )
         return callback.id
 
     async def request_chat_join(self):
-        return await self.dp.feed_update(self.bot, Update(
-            update_id=self._new_update_id(),
-            chat_join_request=ChatJoinRequest(
-                chat=self.chat,
-                from_user=self.user,
-                date=datetime.fromtimestamp(1234567890),
-                user_chat_id=self.user.id,
+        return await self.dp.feed_update(
+            self.bot,
+            Update(
+                update_id=self._new_update_id(),
+                chat_join_request=ChatJoinRequest(
+                    chat=self.chat,
+                    from_user=self.user,
+                    date=datetime.fromtimestamp(1234567890),
+                    user_chat_id=self.user.id,
+                ),
             ),
-        ))
+        )
 
     async def my_chat_member_update(
-            self, old_chat_member: ChatMember, new_chat_member: ChatMember,
+        self,
+        old_chat_member: ChatMember,
+        new_chat_member: ChatMember,
     ):
-        return await self.dp.feed_update(self.bot, Update(
-            update_id=self._new_update_id(),
-            my_chat_member=ChatMemberUpdated(
-                chat=self.chat,
-                from_user=self.user,
-                date=datetime.fromtimestamp(1234567890),
-                old_chat_member=old_chat_member,
-                new_chat_member=new_chat_member,
+        return await self.dp.feed_update(
+            self.bot,
+            Update(
+                update_id=self._new_update_id(),
+                my_chat_member=ChatMemberUpdated(
+                    chat=self.chat,
+                    from_user=self.user,
+                    date=datetime.fromtimestamp(1234567890),
+                    old_chat_member=old_chat_member,
+                    new_chat_member=new_chat_member,
+                ),
             ),
-        ))
+        )

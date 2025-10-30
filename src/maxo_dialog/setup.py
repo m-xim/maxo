@@ -1,12 +1,11 @@
 from collections.abc import Callable, Iterable
 from typing import Optional, Union
 
-from maxo import Router
 from maxo.dispatcher.event.telegram import TelegramEventObserver
-from maxo.alta.state_system import State, StatesGroup, any_state
-from maxo.fsm.storage.base import BaseEventIsolation
-from maxo.fsm.storage.memory import SimpleEventIsolation
-
+from maxo.fsm import State, StatesGroup
+from maxo.fsm.event_isolations import BaseEventIsolation, SimpleEventIsolation
+from maxo.fsm.state import any_state
+from maxo.routing.interfaces import Router
 from maxo_dialog.api.entities import DIALOG_EVENT_NAME
 from maxo_dialog.api.exceptions import UnregisteredDialogError
 from maxo_dialog.api.internal import DialogManagerFactory
@@ -40,7 +39,8 @@ from .context.access_validator import DefaultAccessValidator
 
 def _setup_event_observer(router: Router) -> None:
     router.observers[DIALOG_EVENT_NAME] = TelegramEventObserver(
-        router=router, event_name=DIALOG_EVENT_NAME,
+        router=router,
+        event_name=DIALOG_EVENT_NAME,
     )
 
 
@@ -66,8 +66,7 @@ class DialogRegistry(DialogRegistryProtocol):
             return self._dialogs[state.group]
         except KeyError as e:
             raise UnregisteredDialogError(
-                f"No dialog found for `{state.group}`"
-                f" (looking by state `{state}`)",
+                f"No dialog found for `{state.group}`" f" (looking by state `{state}`)",
             ) from e
 
     def states_groups(self) -> dict[str, type[StatesGroup]]:
@@ -87,14 +86,13 @@ class DialogRegistry(DialogRegistryProtocol):
             self._dialogs[states_group] = dialog
 
         self._states_groups = {
-            d.states_group_name(): d.states_group()
-            for d in self._dialogs.values()
+            d.states_group_name(): d.states_group() for d in self._dialogs.values()
         }
         self._loaded = True
 
 
 def _startup_callback(
-        registry: DialogRegistry,
+    registry: DialogRegistry,
 ) -> Callable:
     async def _setup_dialogs(router):
         registry.refresh()
@@ -103,11 +101,11 @@ def _startup_callback(
 
 
 def _register_middleware(
-        router: Router,
-        dialog_manager_factory: DialogManagerFactory,
-        bg_manager_factory: BgManagerFactory,
-        stack_access_validator: StackAccessValidator,
-        events_isolation: BaseEventIsolation,
+    router: Router,
+    dialog_manager_factory: DialogManagerFactory,
+    bg_manager_factory: BgManagerFactory,
+    stack_access_validator: StackAccessValidator,
+    events_isolation: BaseEventIsolation,
 ):
     registry = DialogRegistry(router)
     manager_middleware = ManagerMiddleware(
@@ -124,11 +122,13 @@ def _register_middleware(
     router.startup.register(_startup_callback(registry))
     update_handler = router.observers[DIALOG_EVENT_NAME]
 
-    router.errors.middleware(IntentErrorMiddleware(
-        registry=registry,
-        events_isolation=events_isolation,
-        access_validator=stack_access_validator,
-    ))
+    router.errors.middleware(
+        IntentErrorMiddleware(
+            registry=registry,
+            events_isolation=events_isolation,
+            access_validator=stack_access_validator,
+        )
+    )
 
     router.message.middleware(manager_middleware)
     router.business_message.middleware(manager_middleware)
@@ -145,12 +145,6 @@ def _register_middleware(
     )
     update_handler.outer_middleware(
         intent_middleware.process_aiogd_update,
-    )
-    router.my_chat_member.outer_middleware(
-        intent_middleware.process_my_chat_member,
-    )
-    router.chat_join_request.outer_middleware(
-        intent_middleware.process_chat_join_request,
     )
 
     router.message.outer_middleware(context_unlocker_middleware)
@@ -173,9 +167,9 @@ def _register_middleware(
 
 
 def _prepare_dialog_manager_factory(
-        dialog_manager_factory: Optional[DialogManagerFactory],
-        message_manager: Optional[MessageManagerProtocol],
-        media_id_storage: Optional[MediaIdStorageProtocol],
+    dialog_manager_factory: Optional[DialogManagerFactory],
+    message_manager: Optional[MessageManagerProtocol],
+    media_id_storage: Optional[MediaIdStorageProtocol],
 ) -> DialogManagerFactory:
     if dialog_manager_factory is not None:
         return dialog_manager_factory
@@ -190,7 +184,7 @@ def _prepare_dialog_manager_factory(
 
 
 def _prepare_stack_access_validator(
-        stack_access_validator: Optional[StackAccessValidator],
+    stack_access_validator: Optional[StackAccessValidator],
 ) -> StackAccessValidator:
     if stack_access_validator:
         return stack_access_validator
@@ -199,7 +193,7 @@ def _prepare_stack_access_validator(
 
 
 def _prepare_events_isolation(
-        events_isolation: Optional[BaseEventIsolation],
+    events_isolation: Optional[BaseEventIsolation],
 ) -> BaseEventIsolation:
     if events_isolation:
         return events_isolation
@@ -219,13 +213,13 @@ def _include_default_dialogs(router: Router):
 
 
 def setup_dialogs(
-        router: Router,
-        *,
-        dialog_manager_factory: Optional[DialogManagerFactory] = None,
-        message_manager: Optional[MessageManagerProtocol] = None,
-        media_id_storage: Optional[MediaIdStorageProtocol] = None,
-        stack_access_validator: Optional[StackAccessValidator] = None,
-        events_isolation: Optional[BaseEventIsolation] = None,
+    router: Router,
+    *,
+    dialog_manager_factory: Optional[DialogManagerFactory] = None,
+    message_manager: Optional[MessageManagerProtocol] = None,
+    media_id_storage: Optional[MediaIdStorageProtocol] = None,
+    stack_access_validator: Optional[StackAccessValidator] = None,
+    events_isolation: Optional[BaseEventIsolation] = None,
 ) -> BgManagerFactory:
     _setup_event_observer(router)
     _register_event_handler(router, handle_update)

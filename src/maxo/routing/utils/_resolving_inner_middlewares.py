@@ -11,9 +11,7 @@ def resolve_middlewares(
     middlewares_map: MutableMapping[type[BaseUpdate], MutableSequence[Middleware[Any]]],
 ) -> None:
     for update_tp, observer in router.observers.items():
-        middlewares = (
-            *middlewares_map[update_tp],
-        )
+        middlewares = (*middlewares_map[update_tp],)
 
         observer.middleware.inner._middlewares.extend(middlewares)
         middlewares_map[update_tp].extend(middlewares)
@@ -34,7 +32,9 @@ def resolving_inner_middlewares(
 
 def resolving_inner_middlewares(
     router: Router,
-    middlewares_map: MutableMapping[type[BaseUpdate], MutableSequence[Middleware[Any]]] | None = None,
+    middlewares_map: (
+        MutableMapping[type[BaseUpdate], MutableSequence[Middleware[Any]]] | None
+    ) = None,
 ) -> None:
     if middlewares_map is None:
         middlewares_map = defaultdict(list)

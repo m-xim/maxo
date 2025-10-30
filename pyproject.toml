@@ -6,20 +6,20 @@ build-backend = "uv_build"
 name = "maxo"
 description = "Modern framework for max bots"
 version = "0.0.1"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "anyio~=4.9.0",
-    "typing-extensions>=4.11.0",
+    "typing-extensions>=4.11.0,<5.0.0",
     "retejo[aiohttp] @ git+https://github.com/IvanKirpichnikov/retejo.git@develop",
+    "magic_filter>=1.0.0,<2.0.0",
+    "cachetools>=4.0.0,<7.0.0",
 ]
 
 [project.optional-dependencies]
 redis = ["redis~=6.0.0"]
 magic_filter = ["magic_filter~=1.0.0"]
-diska = ["dishka~=1.0.0"]
+dishka = ["dishka~=1.0.0"]
 all = ["maxo[redis, magic_filter, dishka]"]
-
-[dependency-groups]
 optionals = ["maxo[all]"]
 lint = [
     "mypy~=1.16.0",
@@ -27,10 +27,9 @@ lint = [
     "codespell~=2.4.1",
     "bandit~=1.8.5",
     "slotscheck~=0.19.1",
-]
-dev = [
-    { include-group = "optionals"},
-    { include-group = "lint" },
+    "black~=25.9.0",
+    "jinja2",
+    "cachetools>=4.0.0,<6.0.0"
 ]
 
 [tool.mypy]
@@ -42,12 +41,13 @@ local_partial_types = true
 [tool.ruff]
 include = [
     "src/maxo/**/*.py",
+    "src/maxo_dialog/**/*.py",
     "examples/**.py",
     "pyproject.toml",
 ]
 fix = true
 line-length = 100
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
@@ -102,7 +102,9 @@ ignore = [
 
     "TC001",
     "RUF001",
-    "UP"
+    "UP",
+
+    "TC006",     # Add quotes to type expression in typing.cast()
 ]
 
 [tool.ruff.lint.isort]
@@ -114,3 +116,8 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "lf"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+include = 'src/maxo/.*\.py$|src/maxo_dialog/.*\.py$'

@@ -21,14 +21,14 @@ _UpdateHandlerFn = Callable[Concatenate[_UpdateT, Ctx[_UpdateT], _ParamsT], _Ret
 @overload
 def inline_ctx(
     func: _SignalHandlerFn[_SignalT, _ParamsT, _ReturnT],
-) -> SignalHandlerFn[_SignalT, _ReturnT]:
-    ...
+) -> SignalHandlerFn[_SignalT, _ReturnT]: ...
+
 
 @overload
 def inline_ctx(
     func: _UpdateHandlerFn[_UpdateT, _ParamsT, _ReturnT],
-) -> UpdateHandlerFn[_UpdateT, _ReturnT]:
-    ...
+) -> UpdateHandlerFn[_UpdateT, _ReturnT]: ...
+
 
 # TODO: maybe make code generetor?
 # TODO: add support custom handlers
@@ -52,4 +52,5 @@ def inline_ctx(func: Any) -> Any:
             for inline_paramater in inline_paramaters
         }
         return await func(*args, **kwargs, **inline_kwargs)
+
     return handler

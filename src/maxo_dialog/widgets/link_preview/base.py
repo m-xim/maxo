@@ -1,10 +1,9 @@
 from typing import Optional
 
 from maxo.types import LinkPreviewOptions
-
 from maxo_dialog import DialogManager
 from maxo_dialog.api.internal import LinkPreviewWidget, TextWidget
-from maxo_dialog.widgets.common import BaseWidget, Whenable, WhenCondition
+from maxo_dialog.widgets.common import BaseWidget, WhenCondition, Whenable
 
 
 class LinkPreviewBase(Whenable, BaseWidget, LinkPreviewWidget):
@@ -12,27 +11,31 @@ class LinkPreviewBase(Whenable, BaseWidget, LinkPreviewWidget):
         super().__init__(when=when)
 
     async def render_link_preview(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[LinkPreviewOptions]:
         if not self.is_(data, manager):
             return None
         return await self._render_link_preview(data, manager)
 
     async def _render_link_preview(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[LinkPreviewOptions]:
         return None
 
 
 class LinkPreview(LinkPreviewBase):
     def __init__(
-            self,
-            url: Optional[TextWidget] = None,
-            is_disabled: bool = False,
-            prefer_small_media: bool = False,
-            prefer_large_media: bool = False,
-            show_above_text: bool = False,
-            when: WhenCondition = None,
+        self,
+        url: Optional[TextWidget] = None,
+        is_disabled: bool = False,
+        prefer_small_media: bool = False,
+        prefer_large_media: bool = False,
+        show_above_text: bool = False,
+        when: WhenCondition = None,
     ):
         super().__init__(when=when)
         self.url = url
@@ -42,21 +45,21 @@ class LinkPreview(LinkPreviewBase):
         self.show_above_text = show_above_text
 
     async def render_link_preview(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[LinkPreviewOptions]:
         if not self.is_(data, manager):
             return None
         return await self._render_link_preview(data, manager)
 
     async def _render_link_preview(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[LinkPreviewOptions]:
         return LinkPreviewOptions(
-            url=(
-                await self.url.render_text(data, manager)
-                if self.url
-                else None
-            ),
+            url=(await self.url.render_text(data, manager) if self.url else None),
             is_disabled=self.is_disabled,
             prefer_small_media=self.prefer_small_media,
             prefer_large_media=self.prefer_large_media,

@@ -1,9 +1,8 @@
 import dataclasses
 from typing import Any, Optional, Union
 
-from maxo.alta.state_system import State
+from maxo.fsm import State
 from maxo.types import Message
-
 from maxo_dialog.api.entities import (
     AccessSettings,
     ChatEvent,
@@ -23,11 +22,11 @@ from maxo_dialog.api.protocols import (
 
 class SubManager(DialogManager):
     def __init__(
-            self,
-            widget: Widget,
-            manager: DialogManager,
-            widget_id: str,
-            item_id: str,
+        self,
+        widget: Widget,
+        manager: DialogManager,
+        widget_id: str,
+        item_id: str,
     ):
         self.widget = widget
         self.manager = manager
@@ -107,9 +106,9 @@ class SubManager(DialogManager):
         await self.manager.back(show_mode)
 
     async def done(
-            self,
-            result: Any = None,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        result: Any = None,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         await self.manager.done(result, show_mode)
 
@@ -117,42 +116,44 @@ class SubManager(DialogManager):
         await self.manager.mark_closed()
 
     async def start(
-            self,
-            state: State,
-            data: Data = None,
-            mode: StartMode = StartMode.NORMAL,
-            show_mode: Optional[ShowMode] = None,
-            access_settings: Optional[AccessSettings] = None,
+        self,
+        state: State,
+        data: Data = None,
+        mode: StartMode = StartMode.NORMAL,
+        show_mode: Optional[ShowMode] = None,
+        access_settings: Optional[AccessSettings] = None,
     ) -> None:
         await self.manager.start(
-            state=state, data=data,
-            mode=mode, show_mode=show_mode,
+            state=state,
+            data=data,
+            mode=mode,
+            show_mode=show_mode,
             access_settings=access_settings,
         )
 
     async def switch_to(
-            self,
-            state: State,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        state: State,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         await self.manager.switch_to(state, show_mode)
 
     async def update(
-            self,
-            data: dict,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        data: dict,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         self.current_context().dialog_data.update(data)
         await self.show(show_mode)
 
     def bg(
-            self,
-            user_id: Optional[int] = None,
-            chat_id: Optional[int] = None,
-            stack_id: Optional[str] = None,
-            thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
-            business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
-            load: bool = False,
+        self,
+        user_id: Optional[int] = None,
+        chat_id: Optional[int] = None,
+        stack_id: Optional[str] = None,
+        thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
+        business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
+        load: bool = False,
     ) -> BaseDialogManager:
         return self.manager.bg(
             user_id=user_id,

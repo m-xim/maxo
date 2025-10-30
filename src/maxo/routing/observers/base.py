@@ -83,4 +83,4 @@ class BaseObserver(Observer[_UpdateT, _HandlerT, _HandlerFnT]):
         handler: _HandlerT,
     ) -> _ReturnT_co:
         chain_middlewares = self.middleware.inner._make_chain(handler.execute)
-        return cast("_ReturnT_co", await chain_middlewares(ctx))
+        return cast(_ReturnT_co, await chain_middlewares(ctx))

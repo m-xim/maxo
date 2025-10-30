@@ -1,7 +1,6 @@
 from typing import Any
 
 from maxo.types import CopyTextButton, InlineKeyboardButton
-
 from maxo_dialog import DialogManager
 from maxo_dialog.api.internal import RawKeyboard
 from maxo_dialog.widgets.common import WhenCondition

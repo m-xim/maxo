@@ -2,7 +2,6 @@ import asyncio
 from contextvars import copy_context
 
 from maxo import Bot, Dispatcher, Router
-
 from maxo_dialog.api.entities import DialogUpdate
 
 

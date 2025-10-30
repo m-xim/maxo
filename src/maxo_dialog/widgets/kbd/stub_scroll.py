@@ -17,7 +17,9 @@ PagesGetter = Callable[[dict, "StubScroll", DialogManager], int]
 
 def new_pages_field(fieldname: str) -> PagesGetter:
     def pages_field(
-            data: dict, widget: "StubScroll", manager: DialogManager,
+        data: dict,
+        widget: "StubScroll",
+        manager: DialogManager,
     ) -> int:
         return data.get(fieldname)
 
@@ -26,7 +28,9 @@ def new_pages_field(fieldname: str) -> PagesGetter:
 
 def new_pages_magic(f: MagicFilter) -> PagesGetter:
     def pages_magic(
-            data: dict, widget: "StubScroll", manager: DialogManager,
+        data: dict,
+        widget: "StubScroll",
+        manager: DialogManager,
     ) -> int:
         return f.resolve(data)
 
@@ -35,7 +39,9 @@ def new_pages_magic(f: MagicFilter) -> PagesGetter:
 
 def new_pages_fixed(pages: int) -> PagesGetter:
     def pages_fixed(
-            data: dict, widget: "StubScroll", manager: DialogManager,
+        data: dict,
+        widget: "StubScroll",
+        manager: DialogManager,
     ) -> int:
         return pages
 
@@ -44,10 +50,10 @@ def new_pages_fixed(pages: int) -> PagesGetter:
 
 class StubScroll(Keyboard, BaseScroll):
     def __init__(
-            self,
-            id: str,
-            pages: Union[str, int, PagesGetter, MagicFilter],
-            on_page_changed: OnPageChangedVariants = None,
+        self,
+        id: str,
+        pages: Union[str, int, PagesGetter, MagicFilter],
+        on_page_changed: OnPageChangedVariants = None,
     ):
         Keyboard.__init__(self, id=id, when=None)
         BaseScroll.__init__(self, id=id, on_page_changed=on_page_changed)
@@ -59,9 +65,9 @@ class StubScroll(Keyboard, BaseScroll):
             self._pages = new_pages_fixed(pages)
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         return [[]]
 

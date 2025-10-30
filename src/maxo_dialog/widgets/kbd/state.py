@@ -1,8 +1,7 @@
 from typing import Any, Optional
 
-from maxo.alta.state_system import State
+from maxo.fsm import State
 from maxo.types import Callback
-
 from maxo_dialog.api.entities import ChatEvent, Data, ShowMode, StartMode
 from maxo_dialog.api.protocols import DialogManager
 from maxo_dialog.widgets.common import WhenCondition
@@ -17,35 +16,39 @@ CANCEL_TEXT = Const("Cancel")
 
 class EventProcessorButton(Button, WidgetEventProcessor):
     async def process_event(
-            self,
-            event: ChatEvent,
-            source: Any,
-            manager: DialogManager,
-            *args,
-            **kwargs,
+        self,
+        event: ChatEvent,
+        source: Any,
+        manager: DialogManager,
+        *args,
+        **kwargs,
     ):
         await self._on_click(event, self, manager)
 
     async def _on_click(
-            self, callback: Callback, button: Button,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        button: Button,
+        manager: DialogManager,
     ):
         raise NotImplementedError
 
 
 class SwitchTo(EventProcessorButton):
     def __init__(
-            self,
-            text: Text,
-            id: str,
-            state: State,
-            on_click: Optional[OnClick] = None,
-            when: WhenCondition = None,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        text: Text,
+        id: str,
+        state: State,
+        on_click: Optional[OnClick] = None,
+        when: WhenCondition = None,
+        show_mode: Optional[ShowMode] = None,
     ):
         super().__init__(
-            text=text, on_click=self._on_click,
-            id=id, when=when,
+            text=text,
+            on_click=self._on_click,
+            id=id,
+            when=when,
         )
         self.text = text
         self.user_on_click = on_click
@@ -53,8 +56,10 @@ class SwitchTo(EventProcessorButton):
         self.show_mode = show_mode
 
     async def _on_click(
-            self, callback: Callback, button: Button,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        button: Button,
+        manager: DialogManager,
     ):
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
@@ -63,25 +68,28 @@ class SwitchTo(EventProcessorButton):
 
 class Next(EventProcessorButton):
     def __init__(
-            self,
-            text: Text = NEXT_TEXT,
-            id: str = "__next__",
-            on_click: Optional[OnClick] = None,
-            show_mode: Optional[ShowMode] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text = NEXT_TEXT,
+        id: str = "__next__",
+        on_click: Optional[OnClick] = None,
+        show_mode: Optional[ShowMode] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(
             text=text,
             on_click=self._on_click,
-            id=id, when=when,
+            id=id,
+            when=when,
         )
         self.text = text
         self.show_mode = show_mode
         self.user_on_click = on_click
 
     async def _on_click(
-            self, callback: Callback, button: Button,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        button: Button,
+        manager: DialogManager,
     ):
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
@@ -90,16 +98,18 @@ class Next(EventProcessorButton):
 
 class Back(EventProcessorButton):
     def __init__(
-            self,
-            text: Text = BACK_TEXT,
-            id: str = "__back__",
-            on_click: Optional[OnClick] = None,
-            show_mode: Optional[ShowMode] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text = BACK_TEXT,
+        id: str = "__back__",
+        on_click: Optional[OnClick] = None,
+        show_mode: Optional[ShowMode] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            text=text, on_click=self._on_click,
-            id=id, when=when,
+            text=text,
+            on_click=self._on_click,
+            id=id,
+            when=when,
         )
         self.text = text
         self.callback_data = id
@@ -107,8 +117,10 @@ class Back(EventProcessorButton):
         self.user_on_click = on_click
 
     async def _on_click(
-            self, callback: Callback, button: Button,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        button: Button,
+        manager: DialogManager,
     ):
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
@@ -117,17 +129,19 @@ class Back(EventProcessorButton):
 
 class Cancel(EventProcessorButton):
     def __init__(
-            self,
-            text: Text = CANCEL_TEXT,
-            id: str = "__cancel__",
-            result: Any = None,
-            on_click: Optional[OnClick] = None,
-            when: WhenCondition = None,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        text: Text = CANCEL_TEXT,
+        id: str = "__cancel__",
+        result: Any = None,
+        on_click: Optional[OnClick] = None,
+        when: WhenCondition = None,
+        show_mode: Optional[ShowMode] = None,
     ):
         super().__init__(
-            text=text, on_click=self._on_click,
-            id=id, when=when,
+            text=text,
+            on_click=self._on_click,
+            id=id,
+            when=when,
         )
         self.text = text
         self.result = result
@@ -135,8 +149,10 @@ class Cancel(EventProcessorButton):
         self.show_mode = show_mode
 
     async def _on_click(
-            self, callback: Callback, button: Button,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        button: Button,
+        manager: DialogManager,
     ):
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
@@ -145,19 +161,21 @@ class Cancel(EventProcessorButton):
 
 class Start(EventProcessorButton):
     def __init__(
-            self,
-            text: Text,
-            id: str,
-            state: State,
-            data: Data = None,
-            on_click: Optional[OnClick] = None,
-            show_mode: Optional[ShowMode] = None,
-            mode: StartMode = StartMode.NORMAL,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        id: str,
+        state: State,
+        data: Data = None,
+        on_click: Optional[OnClick] = None,
+        show_mode: Optional[ShowMode] = None,
+        mode: StartMode = StartMode.NORMAL,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            text=text, on_click=self._on_click,
-            id=id, when=when,
+            text=text,
+            on_click=self._on_click,
+            id=id,
+            when=when,
         )
         self.text = text
         self.start_data = data
@@ -167,8 +185,10 @@ class Start(EventProcessorButton):
         self.mode = mode
 
     async def _on_click(
-            self, callback: Callback, button: Button,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        button: Button,
+        manager: DialogManager,
     ):
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)

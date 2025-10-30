@@ -3,7 +3,7 @@ from typing import cast
 from maxo.routing.ctx import Ctx
 from maxo.routing.filters.base import BaseFilter
 from maxo.routing.updates.message_created import MessageCreated
-from maxo.types.command_object import CommandObject
+from maxo.types.api.command_object import CommandObject
 
 
 class CommandParseError(Exception):

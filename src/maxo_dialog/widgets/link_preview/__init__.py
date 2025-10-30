@@ -1,3 +1,6 @@
-__all__ = ["LinkPreviewBase", "LinkPreview"]
-
 from .base import LinkPreview, LinkPreviewBase
+
+__all__ = (
+    "LinkPreview",
+    "LinkPreviewBase",
+)

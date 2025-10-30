@@ -13,7 +13,13 @@ from .text import Format, Multi, Text
 from .widget_event import WidgetEventProcessor
 
 WidgetSrc = Union[
-    str, Text, Keyboard, MessageHandlerFunc, Media, BaseInput, LinkPreviewBase,
+    str,
+    Text,
+    Keyboard,
+    MessageHandlerFunc,
+    Media,
+    BaseInput,
+    LinkPreviewBase,
 ]
 
 SingleGetterBase = Union[DataGetter, dict]
@@ -44,12 +50,12 @@ def ensure_keyboard(widget: Union[Keyboard, Sequence[Keyboard]]) -> Keyboard:
 
 
 def ensure_input(
-        widget: Union[
-            MessageHandlerFunc,
-            WidgetEventProcessor,
-            BaseInput,
-            Sequence[BaseInput],
-        ],
+    widget: Union[
+        MessageHandlerFunc,
+        WidgetEventProcessor,
+        BaseInput,
+        Sequence[BaseInput],
+    ],
 ) -> Union[BaseInput, None]:
     if isinstance(widget, BaseInput):
         return widget
@@ -75,7 +81,7 @@ def ensure_media(widget: Union[Media, Sequence[Media]]) -> Media:
 
 
 def ensure_link_preview(
-        widget: Union[LinkPreviewWidget, Sequence[LinkPreviewWidget]],
+    widget: Union[LinkPreviewWidget, Sequence[LinkPreviewWidget]],
 ) -> Optional[LinkPreviewWidget]:
     if isinstance(widget, LinkPreviewWidget):
         return widget
@@ -87,7 +93,7 @@ def ensure_link_preview(
 
 
 def ensure_widgets(
-        widgets: Sequence[WidgetSrc],
+    widgets: Sequence[WidgetSrc],
 ) -> tuple[
     Text,
     Keyboard,

@@ -22,9 +22,9 @@ class Actionable(BaseWidget):
         return None
 
     def get_widget_data(
-            self,
-            manager: DialogManager,
-            default: Any,
+        self,
+        manager: DialogManager,
+        default: Any,
     ) -> Any:
         """Get data for current widget id, setting default if needed."""
         return manager.current_context().widget_data.setdefault(
@@ -33,9 +33,9 @@ class Actionable(BaseWidget):
         )
 
     def set_widget_data(
-            self,
-            manager: DialogManager,
-            value: Any,
+        self,
+        manager: DialogManager,
+        value: Any,
     ) -> Any:
         """Set data for current widget id."""
         manager.current_context().widget_data[self.widget_id] = value

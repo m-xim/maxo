@@ -4,9 +4,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional
 
-from maxo.enums import ContentType
-from maxo.alta.state_system import State
-
+from maxo.fsm import State
+from maxo.types.enums import AttachmentType
 from maxo_dialog.api.exceptions import DialogStackOverflow
 
 from .access import AccessSettings
@@ -46,9 +45,10 @@ class Stack:
     last_media_id: Optional[str] = field(compare=False, default=None)
     last_media_unique_id: Optional[str] = field(compare=False, default=None)
     last_income_media_group_id: Optional[str] = field(
-        compare=False, default=None,
+        compare=False,
+        default=None,
     )
-    content_type: Optional[ContentType] = field(compare=False, default=None)
+    content_type: Optional[AttachmentType] = field(compare=False, default=None)
     access_settings: Optional[AccessSettings] = None
     has_protected_content: Optional[bool] = field(compare=False, default=None)
 
@@ -59,8 +59,7 @@ class Stack:
     def push(self, state: State, data: Data) -> Context:
         if len(self.intents) >= _STACK_LIMIT:
             raise DialogStackOverflow(
-                f"Cannot open more dialogs in current stack. "
-                f"Max count is {_STACK_LIMIT}",
+                f"Cannot open more dialogs in current stack. " f"Max count is {_STACK_LIMIT}",
             )
         context = Context(
             _intent_id=new_id(),

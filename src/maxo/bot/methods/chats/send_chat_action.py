@@ -2,7 +2,7 @@ from retejo.http.markers import Body, UrlVar
 
 from maxo.bot.method_results.chats.send_chat_action import SendChatActionResult
 from maxo.bot.methods.base import MaxoMethod
-from maxo.types.enums.chat_action_type import ChatActionType
+from maxo.types.enums import ChatActionType
 
 
 class SendChatAction(MaxoMethod[SendChatActionResult]):

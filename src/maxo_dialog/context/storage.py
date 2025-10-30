@@ -3,13 +3,12 @@ from copy import copy
 from typing import Optional
 
 from maxo import Bot
-from maxo.alta.state_system import State, StatesGroup
+from maxo.fsm import State, StatesGroup
 from maxo.fsm.storage.base import (
     BaseEventIsolation,
     BaseStorage,
     StorageKey,
 )
-
 from maxo_dialog.api.entities import (
     DEFAULT_STACK_ID,
     AccessSettings,
@@ -21,15 +20,15 @@ from maxo_dialog.api.exceptions import UnknownIntent, UnknownState
 
 class StorageProxy:
     def __init__(
-            self,
-            storage: BaseStorage,
-            events_isolation: BaseEventIsolation,
-            user_id: Optional[int],
-            chat_id: int,
-            thread_id: Optional[int],
-            business_connection_id: Optional[str],
-            bot: Bot,
-            state_groups: dict[str, type[StatesGroup]],
+        self,
+        storage: BaseStorage,
+        events_isolation: BaseEventIsolation,
+        user_id: Optional[int],
+        chat_id: int,
+        thread_id: Optional[int],
+        business_connection_id: Optional[str],
+        bot: Bot,
+        state_groups: dict[str, type[StatesGroup]],
     ):
         self.storage = storage
         self.events_isolation = events_isolation
@@ -142,10 +141,7 @@ class StorageProxy:
         if stack_id != DEFAULT_STACK_ID:
             return stack_id
         # private chat has chat_id=user_id and no business connection
-        if (
-                self.user_id in (None, self.chat_id) and
-                self.business_connection_id is None
-        ):
+        if self.user_id in (None, self.chat_id) and self.business_connection_id is None:
             return stack_id
         return f"<{self.user_id}>"
 
@@ -171,7 +167,8 @@ class StorageProxy:
         raise UnknownState(f"Unknown state {state}")
 
     def _parse_access_settings(
-            self, raw: Optional[dict],
+        self,
+        raw: Optional[dict],
     ) -> Optional[AccessSettings]:
         if not raw:
             return None
@@ -181,7 +178,8 @@ class StorageProxy:
         )
 
     def _dump_access_settings(
-            self, access_settings: Optional[AccessSettings],
+        self,
+        access_settings: Optional[AccessSettings],
     ) -> Optional[dict]:
         if not access_settings:
             return None

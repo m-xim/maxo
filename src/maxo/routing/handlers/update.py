@@ -9,6 +9,7 @@ from maxo.routing.updates.base import BaseUpdate
 _UpdateT = TypeVar("_UpdateT", bound=BaseUpdate)
 _ReturnT_co = TypeVar("_ReturnT_co", covariant=True)
 
+
 @runtime_checkable
 class UpdateHandlerFn(Protocol[_UpdateT, _ReturnT_co]):
     async def __call__(self, update: _UpdateT, ctx: Ctx[_UpdateT]) -> _ReturnT_co: ...

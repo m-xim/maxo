@@ -3,8 +3,7 @@ from enum import Enum
 from typing import Any, Optional, Protocol, Union
 
 from maxo import Bot
-from maxo.alta.state_system import State
-
+from maxo.fsm import State
 from maxo_dialog.api.entities import (
     AccessSettings,
     ChatEvent,
@@ -23,48 +22,48 @@ class UnsetId(Enum):
 class BaseDialogManager(Protocol):
     @abstractmethod
     async def done(
-            self,
-            result: Any = None,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        result: Any = None,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def start(
-            self,
-            state: State,
-            data: Data = None,
-            mode: StartMode = StartMode.NORMAL,
-            show_mode: Optional[ShowMode] = None,
-            access_settings: Optional[AccessSettings] = None,
+        self,
+        state: State,
+        data: Data = None,
+        mode: StartMode = StartMode.NORMAL,
+        show_mode: Optional[ShowMode] = None,
+        access_settings: Optional[AccessSettings] = None,
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def switch_to(
-            self,
-            state: State,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        state: State,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def update(
-            self,
-            data: dict,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        data: dict,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def bg(
-            self,
-            user_id: Optional[int] = None,
-            chat_id: Optional[int] = None,
-            stack_id: Optional[str] = None,
-            thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
-            business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
-            load: bool = False,  # load chat and user
+        self,
+        user_id: Optional[int] = None,
+        chat_id: Optional[int] = None,
+        stack_id: Optional[str] = None,
+        thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
+        business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
+        load: bool = False,  # load chat and user
     ) -> "BaseDialogManager":
         raise NotImplementedError
 
@@ -72,14 +71,14 @@ class BaseDialogManager(Protocol):
 class BgManagerFactory(Protocol):
     @abstractmethod
     def bg(
-            self,
-            bot: Bot,
-            user_id: int,
-            chat_id: int,
-            stack_id: Optional[str] = None,
-            thread_id: Optional[int] = None,
-            business_connection_id: Optional[str] = None,
-            load: bool = False,  # load chat and user
+        self,
+        bot: Bot,
+        user_id: int,
+        chat_id: int,
+        stack_id: Optional[str] = None,
+        thread_id: Optional[int] = None,
+        business_connection_id: Optional[str] = None,
+        load: bool = False,  # load chat and user
     ) -> "BaseDialogManager":
         raise NotImplementedError
 

@@ -8,7 +8,6 @@ from maxo.types import (
     SwitchInlineQueryChosenChat,
     WebAppInfo,
 )
-
 from maxo_dialog.api.internal import RawKeyboard
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
 from maxo_dialog.widgets.common import WhenCondition
@@ -25,29 +24,29 @@ OnClick = Callable[[Callback, "Button", DialogManager], Awaitable]
 
 class Button(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            id: str,
-            on_click: Union[OnClick, WidgetEventProcessor, None] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        id: str,
+        on_click: Union[OnClick, WidgetEventProcessor, None] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.text = text
         self.on_click = ensure_event_processor(on_click)
 
     async def _process_own_callback(
-            self,
-            callback: Callback,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         await self.on_click.process_event(callback, self, manager)
         return True
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         return [
             [
@@ -61,20 +60,20 @@ class Button(Keyboard):
 
 class Url(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            url: Text,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        url: Text,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.text = text
         self.url = url
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         return [
             [
@@ -88,7 +87,9 @@ class Url(Keyboard):
 
 class WebApp(Url):
     async def _render_keyboard(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> list[list[InlineKeyboardButton]]:
         text = await self.text.render_text(data, manager)
 
@@ -100,27 +101,28 @@ class WebApp(Url):
 
 class SwitchInlineQuery(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            switch_inline_query: Text,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        switch_inline_query: Text,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.text = text
         self.switch_inline = switch_inline_query
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> list[list[InlineKeyboardButton]]:
         return [
             [
                 InlineKeyboardButton(
                     text=await self.text.render_text(data, manager),
                     switch_inline_query=await self.switch_inline.render_text(
-                        data, manager,
+                        data,
+                        manager,
                     ),
                 ),
             ],
@@ -129,14 +131,14 @@ class SwitchInlineQuery(Keyboard):
 
 class LoginURLButton(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            url: Text,
-            forward_text: Optional[Text] = None,
-            bot_username: Optional[Text] = None,
-            request_write_access: Optional[bool] = None,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        url: Text,
+        forward_text: Optional[Text] = None,
+        bot_username: Optional[Text] = None,
+        request_write_access: Optional[bool] = None,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.text = text
@@ -146,9 +148,9 @@ class LoginURLButton(Keyboard):
         self.request_write_access = request_write_access
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         text = await self.text.render_text(data, manager)
         url = await self.url.render_text(data, manager)
@@ -180,26 +182,25 @@ class LoginURLButton(Keyboard):
 
 class SwitchInlineQueryCurrentChat(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            switch_inline_query_current_chat: Text,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        switch_inline_query_current_chat: Text,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.text = text
-        self.switch_inline_query_current_chat = (
-            switch_inline_query_current_chat
-        )
+        self.switch_inline_query_current_chat = switch_inline_query_current_chat
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         text = await self.text.render_text(data, manager)
         query = await self.switch_inline_query_current_chat.render_text(
-            data, manager,
+            data,
+            manager,
         )
 
         return [
@@ -214,15 +215,15 @@ class SwitchInlineQueryCurrentChat(Keyboard):
 
 class SwitchInlineQueryChosenChatButton(Keyboard):
     def __init__(
-            self,
-            text: Text,
-            query: Text,
-            allow_user_chats: Optional[bool] = None,
-            allow_bot_chats: Optional[bool] = None,
-            allow_group_chats: Optional[bool] = None,
-            allow_channel_chats: Optional[bool] = None,
-            id: Optional[str] = None,
-            when: WhenCondition = None,
+        self,
+        text: Text,
+        query: Text,
+        allow_user_chats: Optional[bool] = None,
+        allow_bot_chats: Optional[bool] = None,
+        allow_group_chats: Optional[bool] = None,
+        allow_channel_chats: Optional[bool] = None,
+        id: Optional[str] = None,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         self.text = text

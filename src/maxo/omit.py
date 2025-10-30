@@ -21,7 +21,7 @@ is_not_omitted = origin_is_not_omitted
 is_omittable_tp = origin_is_omittable_tp
 is_omitted = origin_is_omitted
 
-__all__ = [
+__all__ = (
     "Omittable",
     "Omitted",
     "is_defined",
@@ -30,4 +30,4 @@ __all__ = [
     "is_not_omitted",
     "is_omittable_tp",
     "is_omitted",
-]
+)

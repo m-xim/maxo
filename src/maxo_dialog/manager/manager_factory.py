@@ -1,5 +1,4 @@
 from maxo import Router
-
 from maxo_dialog.api.entities import ChatEvent
 from maxo_dialog.api.internal import DialogManagerFactory
 from maxo_dialog.api.protocols import (
@@ -14,17 +13,19 @@ from .manager import ManagerImpl
 
 class DefaultManagerFactory(DialogManagerFactory):
     def __init__(
-            self,
-            message_manager: MessageManagerProtocol,
-            media_id_storage: MediaIdStorageProtocol,
+        self,
+        message_manager: MessageManagerProtocol,
+        media_id_storage: MediaIdStorageProtocol,
     ) -> None:
         self.message_manager = message_manager
         self.media_id_storage = media_id_storage
 
     def __call__(
-            self, event: ChatEvent, data: dict,
-            registry: DialogRegistryProtocol,
-            router: Router,
+        self,
+        event: ChatEvent,
+        data: dict,
+        registry: DialogRegistryProtocol,
+        router: Router,
     ) -> DialogManager:
         return ManagerImpl(
             event=event,

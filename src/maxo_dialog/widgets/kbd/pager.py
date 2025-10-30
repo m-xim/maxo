@@ -3,7 +3,6 @@ from enum import Enum
 from typing import Optional, TypedDict, Union
 
 from maxo.types import Callback, InlineKeyboardButton
-
 from maxo_dialog.api.internal import RawKeyboard
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
 from maxo_dialog.widgets.common import ManagedScroll, Scroll, WhenCondition
@@ -45,10 +44,10 @@ DEFAULT_CURRENT_PAGE_TEXT = Format("[ {current_page1} ]")
 
 class BasePager(Keyboard, ABC):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str,
-            when: WhenCondition = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str,
+        when: WhenCondition = None,
     ):
         super().__init__(id=id, when=when)
         if isinstance(scroll, str):
@@ -65,11 +64,11 @@ class BasePager(Keyboard, ABC):
             return manager.find(self._scroll_id)
 
     async def _process_item_callback(
-            self,
-            callback: Callback,
-            data: str,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        data: str,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         scroll = self._find_scroll(manager)
         await scroll.set_page(int(data))
@@ -78,11 +77,12 @@ class BasePager(Keyboard, ABC):
 
 class SwitchPage(BasePager):
     def __init__(
-            self, page: Union[int, PageDirection],
-            scroll: Union[str, Scroll, None],
-            id: str,
-            text: Text,
-            when: WhenCondition = None,
+        self,
+        page: Union[int, PageDirection],
+        scroll: Union[str, Scroll, None],
+        id: str,
+        text: Text,
+        when: WhenCondition = None,
     ):
 
         super().__init__(id=id, scroll=scroll, when=when)
@@ -90,7 +90,9 @@ class SwitchPage(BasePager):
         self.text = text
 
     async def _get_target_page(
-            self, current_page: int, pages: int,
+        self,
+        current_page: int,
+        pages: int,
     ) -> int:
         if isinstance(self.page, int):
             return self.page
@@ -108,9 +110,11 @@ class SwitchPage(BasePager):
             return min(last_page, current_page)
 
     async def _prepare_data(
-            self, data: dict,
-            target_page: int,
-            current_page: int, pages: int,
+        self,
+        data: dict,
+        target_page: int,
+        current_page: int,
+        pages: int,
     ) -> PagerPageData:
 
         return {
@@ -123,108 +127,131 @@ class SwitchPage(BasePager):
         }
 
     async def render_keyboard(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         scroll = self._find_scroll(manager)
         pages = await scroll.get_page_count(data)
         current_page = await scroll.get_page()
         target_page = await self._get_target_page(current_page, pages)
         button_data = await self._prepare_data(
-            data=data, target_page=target_page, current_page=current_page,
+            data=data,
+            target_page=target_page,
+            current_page=current_page,
             pages=pages,
         )
         return await super().render_keyboard(button_data, manager)
 
     async def _render_keyboard(
-            self, data: PagerPageData, manager: DialogManager,
+        self,
+        data: PagerPageData,
+        manager: DialogManager,
     ) -> RawKeyboard:
-        return [[
-            InlineKeyboardButton(
-                text=await self.text.render_text(data, manager),
-                callback_data=self._item_callback_data(data["target_page"]),
-            ),
-        ]]
+        return [
+            [
+                InlineKeyboardButton(
+                    text=await self.text.render_text(data, manager),
+                    callback_data=self._item_callback_data(data["target_page"]),
+                ),
+            ]
+        ]
 
 
 class LastPage(SwitchPage):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str = DEFAULT_PAGER_ID,
-            text: Text = DEFAULT_LAST_BUTTON_TEXT,
-            when: WhenCondition = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str = DEFAULT_PAGER_ID,
+        text: Text = DEFAULT_LAST_BUTTON_TEXT,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            id=id, text=text,
-            page=PageDirection.LAST, scroll=scroll, when=when,
+            id=id,
+            text=text,
+            page=PageDirection.LAST,
+            scroll=scroll,
+            when=when,
         )
 
 
 class NextPage(SwitchPage):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str = DEFAULT_PAGER_ID,
-            text: Text = DEFAULT_NEXT_BUTTON_TEXT,
-            when: WhenCondition = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str = DEFAULT_PAGER_ID,
+        text: Text = DEFAULT_NEXT_BUTTON_TEXT,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            id=id, text=text,
-            page=PageDirection.NEXT, scroll=scroll, when=when,
+            id=id,
+            text=text,
+            page=PageDirection.NEXT,
+            scroll=scroll,
+            when=when,
         )
 
 
 class PrevPage(SwitchPage):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str = DEFAULT_PAGER_ID,
-            text: Text = DEFAULT_PREV_BUTTON_TEXT,
-            when: WhenCondition = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str = DEFAULT_PAGER_ID,
+        text: Text = DEFAULT_PREV_BUTTON_TEXT,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            id=id, text=text,
-            page=PageDirection.PREV, scroll=scroll, when=when,
+            id=id,
+            text=text,
+            page=PageDirection.PREV,
+            scroll=scroll,
+            when=when,
         )
 
 
 class FirstPage(SwitchPage):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str = DEFAULT_PAGER_ID,
-            text: Text = DEFAULT_FIRST_BUTTON_TEXT,
-            when: WhenCondition = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str = DEFAULT_PAGER_ID,
+        text: Text = DEFAULT_FIRST_BUTTON_TEXT,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            id=id, text=text,
-            page=PageDirection.FIRST, scroll=scroll, when=when,
+            id=id,
+            text=text,
+            page=PageDirection.FIRST,
+            scroll=scroll,
+            when=when,
         )
 
 
 class CurrentPage(SwitchPage):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str = DEFAULT_PAGER_ID,
-            text: Text = DEFAULT_CURRENT_BUTTON_TEXT,
-            when: WhenCondition = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str = DEFAULT_PAGER_ID,
+        text: Text = DEFAULT_CURRENT_BUTTON_TEXT,
+        when: WhenCondition = None,
     ):
         super().__init__(
-            id=id, text=text,
-            page=PageDirection.IGNORE, scroll=scroll, when=when,
+            id=id,
+            text=text,
+            page=PageDirection.IGNORE,
+            scroll=scroll,
+            when=when,
         )
 
 
 class NumberedPager(BasePager):
     def __init__(
-            self,
-            scroll: Union[str, Scroll, None],
-            id: str = DEFAULT_PAGER_ID,
-            page_text: Text = DEFAULT_PAGE_TEXT,
-            current_page_text: Text = DEFAULT_CURRENT_PAGE_TEXT,
-            when: WhenCondition = None,
-            length: Optional[int] = None,
+        self,
+        scroll: Union[str, Scroll, None],
+        id: str = DEFAULT_PAGER_ID,
+        page_text: Text = DEFAULT_PAGE_TEXT,
+        current_page_text: Text = DEFAULT_CURRENT_PAGE_TEXT,
+        when: WhenCondition = None,
+        length: Optional[int] = None,
     ):
         super().__init__(id=id, scroll=scroll, when=when)
         self.page_text = page_text
@@ -232,8 +259,10 @@ class NumberedPager(BasePager):
         self.length = length
 
     async def _prepare_data(
-            self, data: dict,
-            current_page: int, pages: int,
+        self,
+        data: dict,
+        current_page: int,
+        pages: int,
     ) -> PagerData:
         return {
             "data": data,
@@ -243,7 +272,9 @@ class NumberedPager(BasePager):
         }
 
     async def _prepare_page_data(
-            self, data: dict, target_page: int,
+        self,
+        data: dict,
+        target_page: int,
     ) -> PagerData:
         data = data.copy()
         data["target_page"] = target_page
@@ -251,7 +282,9 @@ class NumberedPager(BasePager):
         return data
 
     async def render_keyboard(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         scroll = self._find_scroll(manager)
         pages = await scroll.get_page_count(data)
@@ -264,7 +297,9 @@ class NumberedPager(BasePager):
         return await super().render_keyboard(pager_data, manager)
 
     async def _render_keyboard(
-            self, data: PagerData, manager: DialogManager,
+        self,
+        data: PagerData,
+        manager: DialogManager,
     ) -> RawKeyboard:
         buttons = []
         pages = data["pages"]
@@ -275,17 +310,20 @@ class NumberedPager(BasePager):
                 final_buttons.append(buttons)
                 buttons = []
             button_data = await self._prepare_page_data(
-                data=data, target_page=target_page,
+                data=data,
+                target_page=target_page,
             )
             if target_page == current_page:
                 text_widget = self.current_page_text
             else:
                 text_widget = self.page_text
             text = await text_widget.render_text(button_data, manager)
-            buttons.append(InlineKeyboardButton(
-                text=text,
-                callback_data=self._item_callback_data(target_page),
-            ))
+            buttons.append(
+                InlineKeyboardButton(
+                    text=text,
+                    callback_data=self._item_callback_data(target_page),
+                )
+            )
         if buttons:
             final_buttons.append(buttons)
         return final_buttons

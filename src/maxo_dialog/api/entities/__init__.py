@@ -1,15 +1,3 @@
-__all__ = [
-    "Context", "Data",
-    "ChatEvent", "EVENT_CONTEXT_KEY", "EventContext",
-    "LaunchMode",
-    "MediaAttachment", "MediaId",
-    "ShowMode", "StartMode",
-    "MarkupVariant", "NewMessage", "OldMessage", "UnknownText",
-    "AccessSettings", "DEFAULT_STACK_ID", "GROUP_STACK_ID", "Stack",
-    "DIALOG_EVENT_NAME", "DialogAction", "DialogUpdateEvent",
-    "DialogStartEvent", "DialogSwitchEvent", "DialogUpdate",
-]
-
 from .access import AccessSettings
 from .context import Context, Data
 from .events import EVENT_CONTEXT_KEY, ChatEvent, EventContext
@@ -26,3 +14,31 @@ from .update_event import (
     DialogUpdate,
     DialogUpdateEvent,
 )
+
+__all__ = (
+    "DEFAULT_STACK_ID",
+    "DIALOG_EVENT_NAME",
+    "EVENT_CONTEXT_KEY",
+    "GROUP_STACK_ID",
+    "AccessSettings",
+    "ChatEvent",
+    "Context",
+    "Data",
+    "DialogAction",
+    "DialogStartEvent",
+    "DialogSwitchEvent",
+    "DialogUpdate",
+    "DialogUpdateEvent",
+    "EventContext",
+    "LaunchMode",
+    "MarkupVariant",
+    "MediaAttachment",
+    "MediaId",
+    "NewMessage",
+    "OldMessage",
+    "ShowMode",
+    "Stack",
+    "StartMode",
+    "UnknownText",
+)
+

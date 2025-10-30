@@ -1,24 +1,3 @@
-__all__ = [
-    "AccessSettings",
-    "DEFAULT_STACK_ID",
-    "Dialog",
-    "Data",
-    "GROUP_STACK_ID",
-    "ChatEvent",
-    "LaunchMode",
-    "StartMode",
-    "BaseDialogManager",
-    "BgManagerFactory",
-    "CancelEventProcessing",
-    "DialogManager",
-    "DialogProtocol",
-    "UnsetId",
-    "setup_dialogs",
-    "ShowMode",
-    "SubManager",
-    "Window",
-]
-
 import importlib.metadata as _metadata
 
 from .api.entities import (
@@ -45,3 +24,25 @@ from .setup import setup_dialogs
 from .window import Window
 
 __version__ = _metadata.version("maxo-dialog")
+
+
+__all__ = (
+    "DEFAULT_STACK_ID",
+    "GROUP_STACK_ID",
+    "AccessSettings",
+    "BaseDialogManager",
+    "BgManagerFactory",
+    "CancelEventProcessing",
+    "ChatEvent",
+    "Data",
+    "Dialog",
+    "DialogManager",
+    "DialogProtocol",
+    "LaunchMode",
+    "ShowMode",
+    "StartMode",
+    "SubManager",
+    "UnsetId",
+    "Window",
+    "setup_dialogs",
+)

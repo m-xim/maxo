@@ -25,7 +25,10 @@ class Scroll(Widget, Protocol):
 
     @abstractmethod
     async def set_page(
-            self, event: ChatEvent, page: int, manager: DialogManager,
+        self,
+        event: ChatEvent,
+        page: int,
+        manager: DialogManager,
     ) -> None:
         raise NotImplementedError
 
@@ -43,7 +46,9 @@ class ManagedScroll(ManagedWidget[Scroll]):
 
     async def set_page(self, page: int) -> None:
         return await self.widget.set_page(
-            self.manager.event, page, self.manager,
+            self.manager.event,
+            page,
+            self.manager,
         )
 
 
@@ -56,9 +61,9 @@ OnPageChangedVariants = Union[OnPageChanged, WidgetEventProcessor, None]
 
 class BaseScroll(Actionable, Scroll, ABC):
     def __init__(
-            self,
-            id: str,
-            on_page_changed: OnPageChangedVariants = None,
+        self,
+        id: str,
+        on_page_changed: OnPageChangedVariants = None,
     ):
         super().__init__(id=id)
         self.on_page_changed = ensure_event_processor(on_page_changed)
@@ -67,7 +72,10 @@ class BaseScroll(Actionable, Scroll, ABC):
         return self.get_widget_data(manager, 0)
 
     async def set_page(
-            self, event: ChatEvent, page: int, manager: DialogManager,
+        self,
+        event: ChatEvent,
+        page: int,
+        manager: DialogManager,
     ) -> None:
         self.set_widget_data(manager, page)
         await self.on_page_changed.process_event(
@@ -94,8 +102,9 @@ def sync_scroll(
         page = await widget.get_page()
         scroll_ids = scroll_id
         if isinstance(scroll_id, str):
-            scroll_ids = (scroll_id, )
+            scroll_ids = (scroll_id,)
         for id_ in scroll_ids:
             other_scroll: ManagedScroll = dialog_manager.find(id_)
             await other_scroll.set_page(page=page)
+
     return sync_scroll_on_page_changed

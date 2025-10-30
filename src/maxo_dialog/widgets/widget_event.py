@@ -9,12 +9,12 @@ from maxo_dialog.api.protocols import DialogManager
 class WidgetEventProcessor:
     @abstractmethod
     async def process_event(
-            self,
-            event: ChatEvent,
-            source: Any,
-            manager: DialogManager,
-            *args,
-            **kwargs,
+        self,
+        event: ChatEvent,
+        source: Any,
+        manager: DialogManager,
+        *args,
+        **kwargs,
     ):
         raise NotImplementedError
 
@@ -24,19 +24,19 @@ class SimpleEventProcessor(WidgetEventProcessor):
         self.callback = callback
 
     async def process_event(
-            self,
-            event: ChatEvent,
-            source: Any,
-            manager: DialogManager,
-            *args,
-            **kwargs,
+        self,
+        event: ChatEvent,
+        source: Any,
+        manager: DialogManager,
+        *args,
+        **kwargs,
     ):
         if self.callback:
             await self.callback(event, source, manager, *args, **kwargs)
 
 
 def ensure_event_processor(
-        processor: Union[Callable, WidgetEventProcessor, None],
+    processor: Union[Callable, WidgetEventProcessor, None],
 ) -> WidgetEventProcessor:
     if isinstance(processor, WidgetEventProcessor):
         return processor

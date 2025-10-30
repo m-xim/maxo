@@ -11,3 +11,5 @@ class AttachmentType(StrEnum):
     INLINE_KEYBOARD = "inline_keyboard"
     SHARE = "share"
     LOCATION = "location"
+
+    VOICE = AUDIO

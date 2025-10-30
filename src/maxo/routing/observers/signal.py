@@ -30,7 +30,6 @@ class SignalObserver(
 
         return handler_fn
 
-
     async def handler_lookup(self, ctx: Ctx[_SignalT]) -> Any:
         result = UNHANDLED
 

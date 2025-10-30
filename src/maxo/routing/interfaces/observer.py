@@ -14,6 +14,7 @@ _ReturnT_co = TypeVar("_ReturnT_co", covariant=True)
 _HandlerT = TypeVar("_HandlerT", bound=Handler[Any, Any])
 _HandlerFnT = TypeVar("_HandlerFnT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
+
 class ObserverState(Protocol):
     @abstractmethod
     def ensure_add_handler(self) -> None:

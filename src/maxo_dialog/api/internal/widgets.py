@@ -10,12 +10,11 @@ from typing import (
 
 from maxo.types import (
     Callback,
-    InlineKeyboardButton,
-    KeyboardButton,
+    CallbackKeyboardButton,
     LinkPreviewOptions,
     Message,
+    MessageKeyboardButton,
 )
-
 from maxo_dialog import DialogManager
 from maxo_dialog.api.entities import MarkupVariant, MediaAttachment
 from maxo_dialog.api.protocols import DialogProtocol
@@ -36,7 +35,9 @@ class Widget(Protocol):
 class TextWidget(Widget, Protocol):
     @abstractmethod
     async def render_text(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> str:
         """Create text."""
         raise NotImplementedError
@@ -46,13 +47,15 @@ class TextWidget(Widget, Protocol):
 class LinkPreviewWidget(Widget, Protocol):
     @abstractmethod
     async def render_link_preview(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[LinkPreviewOptions]:
         """Create link preview."""
         raise NotImplementedError
 
 
-ButtonVariant = Union[InlineKeyboardButton, KeyboardButton]
+ButtonVariant = Union[CallbackKeyboardButton, MessageKeyboardButton]
 RawKeyboard = list[list[ButtonVariant]]
 
 
@@ -60,15 +63,19 @@ RawKeyboard = list[list[ButtonVariant]]
 class KeyboardWidget(Widget, Protocol):
     @abstractmethod
     async def render_keyboard(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         """Create Inline keyboard contents."""
         raise NotImplementedError
 
     @abstractmethod
     async def process_callback(
-            self, callback: Callback, dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         """
         Handle user click on some inline button.
@@ -84,7 +91,9 @@ class KeyboardWidget(Widget, Protocol):
 class MediaWidget(Widget, Protocol):
     @abstractmethod
     async def render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         """Create media attachment."""
         raise NotImplementedError
@@ -94,8 +103,10 @@ class MediaWidget(Widget, Protocol):
 class InputWidget(Widget, Protocol):
     @abstractmethod
     async def process_message(
-            self, message: Message, dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         """
         Handle incoming message from user.
@@ -114,7 +125,10 @@ DataGetter = Callable[..., Awaitable[dict]]
 class MarkupFactory(Protocol):
     @abstractmethod
     async def render_markup(
-            self, data: dict, manager: DialogManager, keyboard: RawKeyboard,
+        self,
+        data: dict,
+        manager: DialogManager,
+        keyboard: RawKeyboard,
     ) -> MarkupVariant:
         """Render reply_markup using prepared keyboard."""
         raise NotImplementedError

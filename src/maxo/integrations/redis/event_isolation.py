@@ -9,8 +9,8 @@ except ImportError as e:
     e.add_note("* Please run `pip install maxo[redis]`")
     raise
 
-from maxo.alta.state_system.event_isolations.base import EventIsolation
-from maxo.alta.state_system.key_builder import (
+from maxo.fsm.event_isolations.base import BaseEventIsolation
+from maxo.fsm.key_builder import (
     DefaultKeyBuilder,
     KeyBuilder,
     StorageKey,
@@ -20,7 +20,7 @@ from maxo.alta.state_system.key_builder import (
 DEFAULT_REDIS_LOCK_KWARGS = {"timeout": 60}
 
 
-class RedisEventIsolation(EventIsolation):
+class RedisEventIsolation(BaseEventIsolation):
     __slots__ = (
         "key_builder",
         "lock_kwargs",
@@ -53,4 +53,3 @@ class RedisEventIsolation(EventIsolation):
 
     async def close(self) -> None:
         await self.redis.aclose()
-

@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any, Optional, Union
 
-from maxo.alta.state_system import State
+from maxo.fsm import State
 from maxo.fsm.storage.base import BaseStorage, StorageKey
 
 StateType = Optional[Union[str, State]]
@@ -25,7 +25,9 @@ class JsonMemoryStorage(BaseStorage):
         pass
 
     async def set_state(
-            self, key: StorageKey, state: StateType = None,
+        self,
+        key: StorageKey,
+        state: StateType = None,
     ) -> None:
         if isinstance(state, State):
             state_value = state.state

@@ -1,7 +1,6 @@
 from typing import Optional
 
 from maxo.types import Callback, InlineKeyboardButton
-
 from maxo_dialog.api.internal import RawKeyboard
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
 from maxo_dialog.widgets.common import (
@@ -16,15 +15,15 @@ from .group import Group
 
 class ScrollingGroup(Group, BaseScroll):
     def __init__(
-            self,
-            *buttons: Keyboard,
-            id: str,
-            width: Optional[int] = None,
-            height: int = 0,
-            when: WhenCondition = None,
-            on_page_changed: OnPageChangedVariants = None,
-            hide_on_single_page: bool = False,
-            hide_pager: bool = False,
+        self,
+        *buttons: Keyboard,
+        id: str,
+        width: Optional[int] = None,
+        height: int = 0,
+        when: WhenCondition = None,
+        on_page_changed: OnPageChangedVariants = None,
+        hide_on_single_page: bool = False,
+        hide_pager: bool = False,
     ):
         Group.__init__(self, *buttons, id=id, width=width, when=when)
         BaseScroll.__init__(self, id=id, on_page_changed=on_page_changed)
@@ -33,22 +32,22 @@ class ScrollingGroup(Group, BaseScroll):
         self.hide_pager = hide_pager
 
     def _get_page_count(
-            self,
-            keyboard: RawKeyboard,
+        self,
+        keyboard: RawKeyboard,
     ) -> int:
         return len(keyboard) // self.height + bool(len(keyboard) % self.height)
 
     async def _render_contents(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         return await super()._render_keyboard(data, manager)
 
     async def _render_pager(
-            self,
-            pages: int,
-            manager: DialogManager,
+        self,
+        pages: int,
+        manager: DialogManager,
     ) -> RawKeyboard:
         if self.hide_pager:
             return []
@@ -63,7 +62,8 @@ class ScrollingGroup(Group, BaseScroll):
         return [
             [
                 InlineKeyboardButton(
-                    text="1", callback_data=self._item_callback_data("0"),
+                    text="1",
+                    callback_data=self._item_callback_data("0"),
                 ),
                 InlineKeyboardButton(
                     text="<",
@@ -85,21 +85,21 @@ class ScrollingGroup(Group, BaseScroll):
         ]
 
     async def _render_page(
-            self,
-            page: int,
-            keyboard: list[list[InlineKeyboardButton]],
+        self,
+        page: int,
+        keyboard: list[list[InlineKeyboardButton]],
     ) -> list[list[InlineKeyboardButton]]:
         pages = self._get_page_count(keyboard)
         last_page = pages - 1
         current_page = min(last_page, page)
         page_offset = current_page * self.height
 
-        return keyboard[page_offset: page_offset + self.height]
+        return keyboard[page_offset : page_offset + self.height]
 
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         keyboard = await self._render_contents(data, manager)
         pages = self._get_page_count(keyboard)
@@ -113,11 +113,11 @@ class ScrollingGroup(Group, BaseScroll):
         return page_keyboard + pager
 
     async def _process_item_callback(
-            self,
-            callback: Callback,
-            data: str,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        data: str,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         await self.set_page(callback, int(data), manager)
         return True

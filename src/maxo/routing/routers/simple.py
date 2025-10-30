@@ -56,7 +56,6 @@ class SimpleRouter(Router):
 
     __state: RouterState
 
-
     def __init__(self, name: str | None = None) -> None:
         self.bot_added = UpdateObserver()
         self.bot_removed = UpdateObserver()

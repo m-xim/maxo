@@ -7,11 +7,11 @@ from typing import (
     Union,
 )
 
+from maxo.fsm import State, StatesGroup
 from maxo.routing.interfaces import Router
+from maxo.types.api import Callback, Chat
 from maxo.types.api.message import Message
 from maxo.types.enums import ChatType
-from maxo.alta.state_system import State, StatesGroup
-from maxo.types.api import Callback, Chat
 from maxo_dialog.api.entities import Context, Data, LaunchMode, NewMessage
 from maxo_dialog.api.exceptions import (
     UnregisteredWindowError,
@@ -38,15 +38,15 @@ W = TypeVar("W", bound=Widget)
 
 class Dialog(Router, DialogProtocol):
     def __init__(
-            self,
-            *windows: WindowProtocol,
-            on_start: Optional[OnDialogEvent] = None,
-            on_close: Optional[OnDialogEvent] = None,
-            on_process_result: Optional[OnResultEvent] = None,
-            launch_mode: LaunchMode = LaunchMode.STANDARD,
-            getter: GetterVariant = None,
-            preview_data: GetterVariant = None,
-            name: Optional[str] = None,
+        self,
+        *windows: WindowProtocol,
+        on_start: Optional[OnDialogEvent] = None,
+        on_close: Optional[OnDialogEvent] = None,
+        on_process_result: Optional[OnResultEvent] = None,
+        launch_mode: LaunchMode = LaunchMode.STANDARD,
+        getter: GetterVariant = None,
+        preview_data: GetterVariant = None,
+        name: Optional[str] = None,
     ):
         if not windows:
             raise ValueError(
@@ -66,7 +66,7 @@ class Dialog(Router, DialogProtocol):
                 raise ValueError(f"Multiple windows with state {state}")
             self._states.append(state)
         self.windows: dict[State, WindowProtocol] = dict(
-            zip(self._states, windows),
+            zip(self._states, windows, strict=False),
         )
         self.on_start = on_start
         self.on_close = on_close
@@ -87,10 +87,10 @@ class Dialog(Router, DialogProtocol):
         return self._states
 
     async def process_start(
-            self,
-            manager: DialogManager,
-            start_data: Data,
-            state: Optional[State] = None,
+        self,
+        manager: DialogManager,
+        start_data: Data,
+        state: Optional[State] = None,
     ) -> None:
         if state is None:
             state = self._states[0]
@@ -99,13 +99,17 @@ class Dialog(Router, DialogProtocol):
         await self._process_callback(self.on_start, start_data, manager)
 
     async def _process_callback(
-            self, callback: Optional[OnDialogEvent], *args, **kwargs,
+        self,
+        callback: Optional[OnDialogEvent],
+        *args,
+        **kwargs,
     ):
         if callback:
             await callback(*args, **kwargs)
 
     async def _current_window(
-            self, manager: DialogManager,
+        self,
+        manager: DialogManager,
     ) -> WindowProtocol:
         try:
             return self.windows[manager.current_context().state]
@@ -116,7 +120,8 @@ class Dialog(Router, DialogProtocol):
             ) from e
 
     async def load_data(
-            self, manager: DialogManager,
+        self,
+        manager: DialogManager,
     ) -> dict:
         data = await manager.load_data()
         data.update(await self.getter(**manager.middleware_data))
@@ -128,13 +133,17 @@ class Dialog(Router, DialogProtocol):
         return await window.render(self, manager)
 
     async def _message_handler(
-            self, message: Message, dialog_manager: DialogManager,
+        self,
+        message: Message,
+        dialog_manager: DialogManager,
     ):
         old_context = dialog_manager.current_context()
         window = await self._current_window(dialog_manager)
         try:
             processed = await window.process_message(
-                message, self, dialog_manager,
+                message,
+                self,
+                dialog_manager,
             )
         except CancelEventProcessing:
             processed = False
@@ -142,9 +151,9 @@ class Dialog(Router, DialogProtocol):
             await dialog_manager.show()
 
     async def _callback_handler(
-            self,
-            callback: Callback,
-            dialog_manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog_manager: DialogManager,
     ):
         old_context = dialog_manager.current_context()
         intent_id, callback_data = remove_intent_id(callback.payload)
@@ -152,7 +161,9 @@ class Dialog(Router, DialogProtocol):
         window = await self._current_window(dialog_manager)
         try:
             processed = await window.process_callback(
-                cleaned_callback, self, dialog_manager,
+                cleaned_callback,
+                self,
+                dialog_manager,
             )
         except CancelEventProcessing:
             processed = False
@@ -161,9 +172,10 @@ class Dialog(Router, DialogProtocol):
         await dialog_manager.answer_callback()
 
     def _need_refresh(
-            self, processed: bool,
-            old_context: Context,
-            dialog_manager: DialogManager,
+        self,
+        processed: bool,
+        old_context: Context,
+        dialog_manager: DialogManager,
     ):
         if not dialog_manager.has_context():
             # nothing to show
@@ -199,25 +211,32 @@ class Dialog(Router, DialogProtocol):
         return self._states_group.__full_group_name__
 
     async def process_result(
-            self,
-            start_data: Data,
-            result: Any,
-            manager: DialogManager,
+        self,
+        start_data: Data,
+        result: Any,
+        manager: DialogManager,
     ) -> None:
         context = manager.current_context()
         await self._process_callback(
-            self.on_process_result, start_data, result, manager,
+            self.on_process_result,
+            start_data,
+            result,
+            manager,
         )
         if context.id == manager.current_context().id:
             await self.windows[context.state].process_result(
-                start_data, result, manager,
+                start_data,
+                result,
+                manager,
             )
 
     def include_router(self, router: Router) -> Router:
         raise TypeError("Dialog cannot include routers")
 
     async def process_close(
-            self, result: Any, manager: DialogManager,
+        self,
+        result: Any,
+        manager: DialogManager,
     ) -> None:
         await self._process_callback(self.on_close, result, manager)
 

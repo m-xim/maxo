@@ -4,14 +4,14 @@ import os
 from magic_filter import F
 
 from maxo import Bot, Dispatcher, SimpleRouter
-from maxo.alta.facades import MessageCreatedFacade
-from maxo.alta.long_polling.long_polling import LongPolling
-from maxo.alta.state_system import State, StateFilter, StateManager, StatesGroup
+from maxo.fsm import FSMContext, State, StateFilter, StatesGroup
 from maxo.integrations.magic_filter import MagicFilter
 from maxo.routing.ctx import Ctx
 from maxo.routing.filters import CommandStart
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.routing.utils import inline_ctx
+from maxo.tools.facades import MessageCreatedFacade
+from maxo.tools.long_polling.long_polling import LongPolling
 from maxo.types.enums import TextFormat
 
 router = SimpleRouter(__name__)
@@ -28,11 +28,11 @@ async def start_handler(
     update: MessageCreated,
     ctx: Ctx[MessageCreated],
     facade: MessageCreatedFacade,
-    state_manager: StateManager,
+    state: FSMContext,
 ) -> None:
     await facade.reply_text("Привет. Заполни анкету.")
     await facade.answer_text("Введи имя.")
-    await state_manager.set_state(UserRegistatorStatesGroup.INPUT_NAME)
+    await state.set_state(UserRegistatorStatesGroup.INPUT_NAME)
 
 
 @router.message_created(MagicFilter(F.message.body.text) & StateFilter(UserRegistatorStatesGroup.INPUT_NAME))
@@ -41,7 +41,7 @@ async def input_name_handler(
     update: MessageCreated,
     ctx: Ctx[MessageCreated],
     facade: MessageCreatedFacade,
-    state_manager: StateManager,
+    state: FSMContext,
 ) -> None:
     await facade.delete_message()
 
@@ -56,8 +56,8 @@ async def input_name_handler(
         format=TextFormat.HTML,
     )
 
-    await state_manager.update_data(name=text)
-    await state_manager.set_state(UserRegistatorStatesGroup.INPUT_AGE)
+    await state.update_data(name=text)
+    await state.set_state(UserRegistatorStatesGroup.INPUT_AGE)
 
 
 @router.message_created(MagicFilter(F.message.body.text) & StateFilter(UserRegistatorStatesGroup.INPUT_AGE))
@@ -66,7 +66,7 @@ async def input_age_handler(
     update: MessageCreated,
     ctx: Ctx[MessageCreated],
     facade: MessageCreatedFacade,
-    state_manager: StateManager,
+    state: FSMContext,
 ) -> None:
     await facade.delete_message()
 
@@ -81,7 +81,7 @@ async def input_age_handler(
         await facade.answer_text("Ты отправил не возраст. Попробуй еще раз")
         return None
 
-    name = await state_manager.get_value("name")
+    name = await state.get_value("name")
 
     await facade.answer_text("Ты успешно заполнил анкету")
     await facade.answer_text(
@@ -89,7 +89,7 @@ async def input_age_handler(
         format=TextFormat.HTML,
     )
 
-    await state_manager.clear()
+    await state.clear()
 
 
 def main() -> None:

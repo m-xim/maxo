@@ -1,14 +1,15 @@
 from enum import Enum
 from typing import Any, Optional
 
-from maxo.alta.state_system import State
+from pydantic import ConfigDict
+
+from maxo.fsm import State
 from maxo.types import (
     Chat,
     TelegramObject,
     Update,
     User,
 )
-from pydantic import ConfigDict
 
 from .modes import (
     ShowMode,

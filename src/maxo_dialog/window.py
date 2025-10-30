@@ -2,14 +2,8 @@ import warnings
 from logging import getLogger
 from typing import Any, Optional, cast
 
-from maxo.alta.state_system import State
-from maxo.types import (
-    UNSET_PARSE_MODE,
-    Callback,
-    LinkPreviewOptions,
-    Message,
-)
-
+from maxo.fsm import State
+from maxo.types import Callback, Message
 from maxo_dialog.api.entities import (
     EVENT_CONTEXT_KEY,
     EventContext,
@@ -41,17 +35,17 @@ _DEFAULT_MARKUP_FACTORY = InlineKeyboardFactory()
 
 class Window(WindowProtocol):
     def __init__(
-            self,
-            *widgets: WidgetSrc,
-            state: State,
-            getter: GetterVariant = None,
-            on_process_result: Optional[OnResultEvent] = None,
-            markup_factory: MarkupFactory = _DEFAULT_MARKUP_FACTORY,
-            parse_mode: Optional[str] = UNSET_PARSE_MODE,
-            disable_web_page_preview: Optional[bool] = None,
-            protect_content: Optional[bool] = None,
-            preview_add_transitions: Optional[list[Keyboard]] = None,
-            preview_data: GetterVariant = None,
+        self,
+        *widgets: WidgetSrc,
+        state: State,
+        getter: GetterVariant = None,
+        on_process_result: Optional[OnResultEvent] = None,
+        markup_factory: MarkupFactory = _DEFAULT_MARKUP_FACTORY,
+        parse_mode: Optional[str] = None,
+        disable_web_page_preview: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
+        preview_add_transitions: Optional[list[Keyboard]] = None,
+        preview_data: GetterVariant = None,
     ):
         (
             self.text,
@@ -73,81 +67,100 @@ class Window(WindowProtocol):
         if disable_web_page_preview is not None:
             if self.link_preview:
                 raise ValueError(
-                    "Cannot use LinkPreview widget "
-                    "together with disable_web_page_preview",
+                    "Cannot use LinkPreview widget " "together with disable_web_page_preview",
                 )
             warnings.warn(
-                "disable_web_page_preview is deprecated, "
-                "use `LinkPreview` widget instead",
+                "disable_web_page_preview is deprecated, " "use `LinkPreview` widget instead",
                 category=DeprecationWarning,
                 stacklevel=2,
             )
             self.link_preview = LinkPreview(is_disabled=True)
 
     async def render_text(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> str:
         return await self.text.render_text(data, manager)
 
     async def render_media(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> Optional[MediaAttachment]:
         if self.media:
             return await self.media.render_media(data, manager)
         return None
 
     async def render_kbd(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> MarkupVariant:
         keyboard = await self.keyboard.render_keyboard(data, manager)
         return await self.markup_factory.render_markup(
-            data, manager, keyboard,
+            data,
+            manager,
+            keyboard,
         )
 
     async def render_link_preview(
-            self, data: dict, manager: DialogManager,
-    ) -> Optional[LinkPreviewOptions]:
-        if self.link_preview:
-            return await self.link_preview.render_link_preview(data, manager)
+        self,
+        data: dict,
+        manager: DialogManager,
+    ) -> None:
         return None
 
     async def load_data(
-            self, dialog: "DialogProtocol",
-            manager: DialogManager,
+        self,
+        dialog: "DialogProtocol",
+        manager: DialogManager,
     ) -> dict:
         data = await dialog.load_data(manager)
         data.update(await self.getter(**manager.middleware_data))
         return data
 
     async def process_message(
-            self, message: Message, dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        message: Message,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         if self.on_message:
             return await self.on_message.process_message(
-                message, dialog, manager,
+                message,
+                dialog,
+                manager,
             )
         return False
 
     async def process_callback(
-            self, callback: Callback, dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         if self.keyboard:
             return await self.keyboard.process_callback(
-                callback, dialog, manager,
+                callback,
+                dialog,
+                manager,
             )
         return False
 
     async def process_result(
-            self, start_data: Data, result: Any, manager: DialogManager,
+        self,
+        start_data: Data,
+        result: Any,
+        manager: DialogManager,
     ) -> None:
         if self.on_process_result:
             await self.on_process_result(start_data, result, manager)
 
     async def render(
-            self, dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> NewMessage:
         logger.debug("Show window: %s", self)
         chat = manager.middleware_data["event_chat"]
@@ -158,7 +171,8 @@ class Window(WindowProtocol):
             raise
         try:
             event_context = cast(
-                EventContext, manager.middleware_data.get(EVENT_CONTEXT_KEY),
+                EventContext,
+                manager.middleware_data.get(EVENT_CONTEXT_KEY),
             )
             return NewMessage(
                 chat=chat,
@@ -170,7 +184,8 @@ class Window(WindowProtocol):
                 protect_content=self.protect_content,
                 media=await self.render_media(current_data, manager),
                 link_preview_options=await self.render_link_preview(
-                    current_data, manager,
+                    current_data,
+                    manager,
                 ),
             )
         except Exception:

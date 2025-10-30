@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Optional, Protocol, runtime_checkable
 
-from maxo.alta.state_system import State, StatesGroup
-
+from maxo.fsm import State, StatesGroup
 from maxo_dialog.api.entities import (
     Data,
     LaunchMode,
@@ -36,23 +35,27 @@ class DialogProtocol(Protocol):
 
     @abstractmethod
     async def process_close(
-            self, result: Any, manager: DialogManager,
+        self,
+        result: Any,
+        manager: DialogManager,
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def process_start(
-            self,
-            manager: "DialogManager",
-            start_data: Data,
-            state: Optional[State] = None,
+        self,
+        manager: "DialogManager",
+        start_data: Data,
+        state: Optional[State] = None,
     ) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def process_result(
-            self, start_data: Data, result: Any,
-            manager: "DialogManager",
+        self,
+        start_data: Data,
+        result: Any,
+        manager: "DialogManager",
     ) -> None:
         raise NotImplementedError
 
@@ -62,7 +65,8 @@ class DialogProtocol(Protocol):
 
     @abstractmethod
     async def load_data(
-            self, manager: DialogManager,
+        self,
+        manager: DialogManager,
     ) -> dict:
         raise NotImplementedError
 

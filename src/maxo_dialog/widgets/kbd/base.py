@@ -2,13 +2,12 @@ from abc import abstractmethod
 from typing import Optional, Union
 
 from maxo.types.api import Callback
-
 from maxo_dialog.api.internal import KeyboardWidget, RawKeyboard
 from maxo_dialog.api.protocols import DialogManager, DialogProtocol
 from maxo_dialog.widgets.common import (
     Actionable,
-    Whenable,
     WhenCondition,
+    Whenable,
 )
 
 
@@ -18,9 +17,9 @@ class Keyboard(Actionable, Whenable, KeyboardWidget):
         Whenable.__init__(self, when=when)
 
     async def render_keyboard(
-            self,
-            data,
-            manager: DialogManager,
+        self,
+        data,
+        manager: DialogManager,
     ) -> RawKeyboard:
         """
         Create inline keyboard contents.
@@ -34,9 +33,9 @@ class Keyboard(Actionable, Whenable, KeyboardWidget):
 
     @abstractmethod
     async def _render_keyboard(
-            self,
-            data: dict,
-            manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         """
         Create inline keyboard contents.
@@ -59,10 +58,10 @@ class Keyboard(Actionable, Whenable, KeyboardWidget):
         return f"{self.callback_prefix()}{data}"
 
     async def process_callback(
-            self,
-            callback: Callback,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         if callback.payload == self.widget_id:
             return await self._process_own_callback(
@@ -74,36 +73,36 @@ class Keyboard(Actionable, Whenable, KeyboardWidget):
         if prefix and callback.payload.startswith(prefix):
             return await self._process_item_callback(
                 callback,
-                callback.payload[len(prefix):],
+                callback.payload[len(prefix) :],
                 dialog,
                 manager,
             )
         return await self._process_other_callback(callback, dialog, manager)
 
     async def _process_own_callback(
-            self,
-            callback: Callback,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         """Process callback related to _own_callback_data."""
         return False
 
     async def _process_item_callback(
-            self,
-            callback: Callback,
-            data: str,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        data: str,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         """Process callback related to _item_callback_data."""
         return False
 
     async def _process_other_callback(
-            self,
-            callback: Callback,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         """
         Process callback for unknown callback data.
@@ -129,7 +128,9 @@ class Or(Keyboard):
         self.widgets = widgets
 
     async def _render_keyboard(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> RawKeyboard:
         for widget in self.widgets:
             res = await widget.render_keyboard(data, manager)
@@ -138,10 +139,10 @@ class Or(Keyboard):
         return []
 
     async def _process_other_callback(
-            self,
-            callback: Callback,
-            dialog: DialogProtocol,
-            manager: DialogManager,
+        self,
+        callback: Callback,
+        dialog: DialogProtocol,
+        manager: DialogManager,
     ) -> bool:
         for b in self.widgets:
             if await b.process_callback(callback, dialog, manager):

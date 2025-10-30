@@ -2,9 +2,8 @@ from logging import getLogger
 from typing import Any, Optional, Union
 
 from maxo import Bot, Router
-from maxo.alta.state_system import State
+from maxo.fsm import State
 from maxo.types import Chat, User
-
 from maxo_dialog.api.entities import (
     DEFAULT_STACK_ID,
     AccessSettings,
@@ -34,11 +33,11 @@ logger = getLogger(__name__)
 
 
 def coalesce_business_connection_id(
-        *,
-        user: User,
-        chat: Chat,
-        business_connection_id: Union[str, None, UnsetId],
-        event_context: EventContext,
+    *,
+    user: User,
+    chat: Chat,
+    business_connection_id: Union[str, None, UnsetId],
+    event_context: EventContext,
 ) -> Optional[str]:
     if business_connection_id is not UnsetId.UNSET:
         return business_connection_id
@@ -50,11 +49,11 @@ def coalesce_business_connection_id(
 
 
 def coalesce_thread_id(
-        *,
-        user: User,
-        chat: Chat,
-        thread_id: Union[str, None, UnsetId],
-        event_context: EventContext,
+    *,
+    user: User,
+    chat: Chat,
+    thread_id: Union[str, None, UnsetId],
+    event_context: EventContext,
 ) -> Optional[str]:
     if thread_id is not UnsetId.UNSET:
         return thread_id
@@ -67,16 +66,16 @@ def coalesce_thread_id(
 
 class BgManager(BaseDialogManager):
     def __init__(
-            self,
-            user: User,
-            chat: Chat,
-            bot: Bot,
-            router: Router,
-            intent_id: Optional[str],
-            stack_id: Optional[str],
-            thread_id: Optional[int] = None,
-            business_connection_id: Optional[str] = None,
-            load: bool = False,
+        self,
+        user: User,
+        chat: Chat,
+        bot: Bot,
+        router: Router,
+        intent_id: Optional[str],
+        stack_id: Optional[str],
+        thread_id: Optional[int] = None,
+        business_connection_id: Optional[str] = None,
+        load: bool = False,
     ):
         self._event_context = EventContext(
             chat=chat,
@@ -104,13 +103,13 @@ class BgManager(BaseDialogManager):
         return FakeChat(id=chat_id, type="")
 
     def bg(
-            self,
-            user_id: Optional[int] = None,
-            chat_id: Optional[int] = None,
-            stack_id: Optional[str] = None,
-            thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
-            business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
-            load: bool = False,
+        self,
+        user_id: Optional[int] = None,
+        chat_id: Optional[int] = None,
+        stack_id: Optional[str] = None,
+        thread_id: Union[int, None, UnsetId] = UnsetId.UNSET,
+        business_connection_id: Union[str, None, UnsetId] = UnsetId.UNSET,
+        load: bool = False,
     ) -> "BaseDialogManager":
         chat = self._get_fake_chat(chat_id)
         user = self._get_fake_user(user_id)
@@ -161,8 +160,7 @@ class BgManager(BaseDialogManager):
             "intent_id": self.intent_id,
             "stack_id": self.stack_id,
             "thread_id": self._event_context.thread_id,
-            "business_connection_id":
-                self._event_context.business_connection_id,
+            "business_connection_id": self._event_context.business_connection_id,
         }
 
     async def _notify(self, event: DialogUpdateEvent):
@@ -175,7 +173,8 @@ class BgManager(BaseDialogManager):
             bot = self._event_context.bot
             if not is_chat_loaded(self._event_context.chat):
                 logger.debug(
-                    "load chat: %s", self._event_context.chat.id,
+                    "load chat: %s",
+                    self._event_context.chat.id,
                 )
                 self._event_context.chat = await bot.get_chat(
                     self._event_context.chat.id,
@@ -183,17 +182,19 @@ class BgManager(BaseDialogManager):
             if not is_user_loaded(self._event_context.user):
                 logger.debug(
                     "load user %s from chat %s",
-                    self._event_context.chat.id, self._event_context.user.id,
+                    self._event_context.chat.id,
+                    self._event_context.user.id,
                 )
                 chat_member = await bot.get_chat_member(
-                    self._event_context.chat.id, self._event_context.user.id,
+                    self._event_context.chat.id,
+                    self._event_context.user.id,
                 )
                 self._event_context.user = chat_member.user
 
     async def done(
-            self,
-            result: Any = None,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        result: Any = None,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         await self._load()
         await self._notify(
@@ -206,12 +207,12 @@ class BgManager(BaseDialogManager):
         )
 
     async def start(
-            self,
-            state: State,
-            data: Data = None,
-            mode: StartMode = StartMode.NORMAL,
-            show_mode: Optional[ShowMode] = None,
-            access_settings: Optional[AccessSettings] = None,
+        self,
+        state: State,
+        data: Data = None,
+        mode: StartMode = StartMode.NORMAL,
+        show_mode: Optional[ShowMode] = None,
+        access_settings: Optional[AccessSettings] = None,
     ) -> None:
         await self._load()
         await self._notify(
@@ -227,9 +228,9 @@ class BgManager(BaseDialogManager):
         )
 
     async def switch_to(
-            self,
-            state: State,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        state: State,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         await self._load()
         await self._notify(
@@ -243,14 +244,16 @@ class BgManager(BaseDialogManager):
         )
 
     async def update(
-            self,
-            data: dict,
-            show_mode: Optional[ShowMode] = None,
+        self,
+        data: dict,
+        show_mode: Optional[ShowMode] = None,
     ) -> None:
         await self._load()
         await self._notify(
             DialogUpdateEvent(
-                action=DialogAction.UPDATE, data=data, show_mode=show_mode,
+                action=DialogAction.UPDATE,
+                data=data,
+                show_mode=show_mode,
                 **self._base_event_params(),
             ),
         )
@@ -261,14 +264,14 @@ class BgManagerFactoryImpl(BgManagerFactory):
         self._router = router
 
     def bg(
-            self,
-            bot: Bot,
-            user_id: int,
-            chat_id: int,
-            stack_id: Optional[str] = None,
-            thread_id: Optional[int] = None,
-            business_connection_id: Optional[str] = None,
-            load: bool = False,
+        self,
+        bot: Bot,
+        user_id: int,
+        chat_id: int,
+        stack_id: Optional[str] = None,
+        thread_id: Optional[int] = None,
+        business_connection_id: Optional[str] = None,
+        load: bool = False,
     ) -> "BaseDialogManager":
         chat = FakeChat(id=chat_id, type="")
         user = FakeUser(id=user_id, is_bot=False, first_name="")

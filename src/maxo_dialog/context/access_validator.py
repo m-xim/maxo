@@ -1,8 +1,7 @@
 from logging import getLogger
 from typing import Optional
 
-from maxo.enums import ChatType
-
+from maxo.types.enums import ChatType
 from maxo_dialog import ChatEvent
 from maxo_dialog.api.entities import (
     Context,
@@ -15,11 +14,11 @@ logger = getLogger(__name__)
 
 class DefaultAccessValidator(StackAccessValidator):
     async def is_allowed(
-            self,
-            stack: Stack,
-            context: Optional[Context],
-            event: ChatEvent,
-            data: dict,
+        self,
+        stack: Stack,
+        context: Optional[Context],
+        event: ChatEvent,
+        data: dict,
     ) -> bool:
         if context:
             access_settings = context.access_settings

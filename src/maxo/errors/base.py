@@ -5,11 +5,11 @@ T = TypeVar("T")
 
 
 @dataclass_transform(
-    frozen_default=True,
+    frozen_default=False,
 )
 def maxo_error(cls: type[T]) -> type[T]:
     return dataclass(
-        frozen=True,
+        frozen=False,
     )(cls)
 
 

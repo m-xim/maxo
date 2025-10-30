@@ -14,7 +14,7 @@ from maxo.routing.updates.message_created import MessageCreated
 from maxo.routing.updates.message_edited import MessageEdited
 from maxo.routing.updates.user_added import UserAdded
 from maxo.routing.updates.user_removed import UserRemoved
-from maxo.types.update_context import UpdateContext
+from maxo.types.api.update_context import UpdateContext
 
 UPDATE_CONTEXT_ATTR: Final = "update_context"
 

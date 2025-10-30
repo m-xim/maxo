@@ -3,7 +3,6 @@ from typing import Optional, Protocol
 
 from maxo import Bot
 from maxo.types import Callback, Message
-
 from maxo_dialog import ShowMode
 from maxo_dialog.api.entities import NewMessage, OldMessage
 from maxo_dialog.api.exceptions import DialogsError
@@ -16,22 +15,26 @@ class MessageNotModified(DialogsError):
 class MessageManagerProtocol(Protocol):
     @abstractmethod
     async def remove_kbd(
-            self,
-            bot: Bot,
-            show_mode: ShowMode,
-            old_message: Optional[OldMessage],
+        self,
+        bot: Bot,
+        show_mode: ShowMode,
+        old_message: Optional[OldMessage],
     ) -> Optional[Message]:
         raise NotImplementedError
 
     @abstractmethod
     async def show_message(
-            self, bot: Bot, new_message: NewMessage,
-            old_message: Optional[OldMessage],
+        self,
+        bot: Bot,
+        new_message: NewMessage,
+        old_message: Optional[OldMessage],
     ) -> OldMessage:
         raise NotImplementedError
 
     @abstractmethod
     async def answer_callback(
-            self, bot: Bot, callback_query: Callback,
+        self,
+        bot: Bot,
+        callback_query: Callback,
     ) -> None:
         raise NotImplementedError

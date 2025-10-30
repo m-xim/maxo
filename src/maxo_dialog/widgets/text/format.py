@@ -33,7 +33,9 @@ class Format(Text):
         self.text = text
 
     async def _render_text(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> str:
         if manager.is_preview():
             return self.text.format_map(_FormatDataStub(data=data))

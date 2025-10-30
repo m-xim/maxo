@@ -6,9 +6,9 @@ from typing import (
     Union,
 )
 
-from maxo import Bot, Dispatcher
 from jinja2 import BaseLoader, Environment
 
+from maxo import Bot, Dispatcher
 from maxo_dialog.api.protocols import DialogManager
 from maxo_dialog.widgets.common import WhenCondition
 
@@ -26,7 +26,9 @@ class Jinja(Text):
         self.template_text = text
 
     async def _render_text(
-            self, data: dict, manager: DialogManager,
+        self,
+        data: dict,
+        manager: DialogManager,
     ) -> str:
         if JINJA_ENV_FIELD in manager.middleware_data:
             env = manager.middleware_data[JINJA_ENV_FIELD]
@@ -48,24 +50,26 @@ class StubLoader(BaseLoader):
 
 
 def _create_env(
-        *args: Any, filters: Optional[Filters] = None, **kwargs: Any,
+    *args: Any,
+    filters: Optional[Filters] = None,
+    **kwargs: Any,
 ) -> Environment:
     kwargs.setdefault("autoescape", True)
     kwargs.setdefault("lstrip_blocks", True)
     kwargs.setdefault("trim_blocks", True)
     if "loader" not in kwargs:
         kwargs["loader"] = StubLoader()
-    env = Environment(*args, **kwargs)  # noqa: S701
+    env = Environment(*args, **kwargs)
     if filters is not None:
         env.filters.update(filters)
     return env
 
 
 def setup_jinja(
-        dp: Union[Bot, Dispatcher],
-        *args: Any,
-        filters: Optional[Filters] = None,
-        **kwargs: Any,
+    dp: Union[Bot, Dispatcher],
+    *args: Any,
+    filters: Optional[Filters] = None,
+    **kwargs: Any,
 ) -> Environment:
     env = _create_env(*args, filters=filters, **kwargs)
     if isinstance(dp, Bot):
