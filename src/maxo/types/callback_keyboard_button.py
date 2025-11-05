@@ -17,3 +17,7 @@ class CallbackKeyboardButton(MaxoType):
     text: str
     payload: str
     intent: Omittable[IntentType] = IntentType.DEFAULT
+
+    @property
+    def callback_data(self) -> str:
+        return self.payload

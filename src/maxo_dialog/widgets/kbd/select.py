@@ -541,7 +541,11 @@ class Toggle(Radio[T], Generic[T]):
             item = first_item
         else:
             pos, item = next(
-                ((n, i) for n, i in enumerate(items_it, 1) if self.item_id_getter(i) == selected),
+                (
+                    (n, i)
+                    for n, i in enumerate(items_it, 1)
+                    if self.item_id_getter(i) == selected
+                ),
                 (0, first_item),
             )
         # click leads to the next item

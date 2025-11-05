@@ -1,11 +1,12 @@
 from collections.abc import Callable, Iterable
 from typing import Optional, Union
 
-from maxo.dispatcher.event.telegram import TelegramEventObserver
+from maxo import SimpleRouter
 from maxo.fsm import State, StatesGroup
 from maxo.fsm.event_isolations import BaseEventIsolation, SimpleEventIsolation
 from maxo.fsm.state import any_state
 from maxo.routing.interfaces import Router
+from maxo.routing.observers import UpdateObserver
 from maxo_dialog.api.entities import DIALOG_EVENT_NAME
 from maxo_dialog.api.exceptions import UnregisteredDialogError
 from maxo_dialog.api.internal import DialogManagerFactory
@@ -37,26 +38,23 @@ from .about import about_dialog
 from .context.access_validator import DefaultAccessValidator
 
 
-def _setup_event_observer(router: Router) -> None:
-    router.observers[DIALOG_EVENT_NAME] = TelegramEventObserver(
-        router=router,
-        event_name=DIALOG_EVENT_NAME,
-    )
+def _setup_event_observer(router: SimpleRouter) -> None:
+    router.observers[DIALOG_EVENT_NAME] = UpdateObserver()
 
 
-def _register_event_handler(router: Router, callback: Callable) -> None:
+def _register_event_handler(router: SimpleRouter, callback: Callable) -> None:
     handler = router.observers[DIALOG_EVENT_NAME]
-    handler.register(callback, any_state)
+    handler.handler(callback, any_state)
 
 
 class DialogRegistry(DialogRegistryProtocol):
-    def __init__(self, router: Router):
+    def __init__(self, router: SimpleRouter):
         self.router = router
         self._loaded = False
         self._dialogs = {}
         self._states_groups = {}
 
-    def _ensure_loaded(self):
+    def _ensure_loaded(self) -> None:
         if not self._loaded:
             self.refresh()
 
@@ -73,7 +71,7 @@ class DialogRegistry(DialogRegistryProtocol):
         self._ensure_loaded()
         return self._states_groups
 
-    def refresh(self):
+    def refresh(self) -> None:
         for dialog in collect_dialogs(self.router):
             states_group = dialog.states_group()
             if states_group in self._dialogs:
@@ -101,7 +99,7 @@ def _startup_callback(
 
 
 def _register_middleware(
-    router: Router,
+    router: SimpleRouter,
     dialog_manager_factory: DialogManagerFactory,
     bg_manager_factory: BgManagerFactory,
     stack_access_validator: StackAccessValidator,
@@ -204,16 +202,16 @@ def _prepare_events_isolation(
 def collect_dialogs(router: Router) -> Iterable[DialogProtocol]:
     if isinstance(router, DialogProtocol):
         yield router
-    for sub_router in router.sub_routers:
+    for sub_router in router.children_routers:
         yield from collect_dialogs(sub_router)
 
 
-def _include_default_dialogs(router: Router):
-    router.include_router(about_dialog())
+def _include_default_dialogs(router: SimpleRouter) -> None:
+    router.include(about_dialog())
 
 
 def setup_dialogs(
-    router: Router,
+    router: SimpleRouter,
     *,
     dialog_manager_factory: Optional[DialogManagerFactory] = None,
     message_manager: Optional[MessageManagerProtocol] = None,

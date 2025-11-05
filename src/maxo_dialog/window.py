@@ -1,12 +1,10 @@
 import warnings
 from logging import getLogger
-from typing import Any, Optional, cast
+from typing import Any, Optional
 
 from maxo.fsm import State
 from maxo.types import Callback, Message
 from maxo_dialog.api.entities import (
-    EVENT_CONTEXT_KEY,
-    EventContext,
     MarkupVariant,
     MediaAttachment,
     NewMessage,
@@ -67,10 +65,12 @@ class Window(WindowProtocol):
         if disable_web_page_preview is not None:
             if self.link_preview:
                 raise ValueError(
-                    "Cannot use LinkPreview widget " "together with disable_web_page_preview",
+                    "Cannot use LinkPreview widget "
+                    "together with disable_web_page_preview",
                 )
             warnings.warn(
-                "disable_web_page_preview is deprecated, " "use `LinkPreview` widget instead",
+                "disable_web_page_preview is deprecated, "
+                "use `LinkPreview` widget instead",
                 category=DeprecationWarning,
                 stacklevel=2,
             )
@@ -170,14 +170,8 @@ class Window(WindowProtocol):
             logger.error("Cannot get window data for state %s", self.state)
             raise
         try:
-            event_context = cast(
-                EventContext,
-                manager.middleware_data.get(EVENT_CONTEXT_KEY),
-            )
             return NewMessage(
                 chat=chat,
-                thread_id=event_context.thread_id,
-                business_connection_id=event_context.business_connection_id,
                 text=await self.render_text(current_data, manager),
                 reply_markup=await self.render_kbd(current_data, manager),
                 parse_mode=self.parse_mode,

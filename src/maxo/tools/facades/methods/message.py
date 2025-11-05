@@ -9,7 +9,9 @@ from maxo.tools.facades.methods.base import BaseMethodsFacade
 from maxo.tools.facades.methods.upload_media import UploadMediaFacade
 from maxo.tools.helpers.calculating import calculate_chat_id_and_user_id
 from maxo.tools.upload_media import UploadMedia
-from maxo.types.inline_keyboard_attachment_request import InlineKeyboardAttachmentRequest
+from maxo.types.inline_keyboard_attachment_request import (
+    InlineKeyboardAttachmentRequest,
+)
 from maxo.types.inline_keyboard_attachment_request_payload import (
     InlineKeyboardAttachmentRequestPayload,
 )
@@ -152,7 +154,10 @@ class MessageMethodsFacade(BaseMethodsFacade, ABC):
         attachments: list[MediaAttachmentsRequests] = []
 
         await asyncio.gather(
-            *[asyncio.create_task(self._upload_media(upload_media)) for upload_media in media]
+            *[
+                asyncio.create_task(self._upload_media(upload_media))
+                for upload_media in media
+            ]
         )
 
         # for type, token in result:

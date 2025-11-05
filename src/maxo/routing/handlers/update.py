@@ -39,8 +39,8 @@ class UpdateHandler(
         return f"{self.__class__.__name__}(handler_fn={self._handler_fn}, filter={self._filter})"
 
     async def execute_filter(self, ctx: Ctx[_UpdateT]) -> bool:
-        return await self._filter.execute(ctx.update, ctx)
+        return await self._filter(ctx.update, ctx)
 
-    async def execute(self, ctx: Ctx[_UpdateT, Any]) -> _ReturnT_co:
+    async def __call__(self, ctx: Ctx[_UpdateT, Any]) -> _ReturnT_co:
         handler_fn_result = await self._handler_fn(update=ctx.update, ctx=ctx)
         return handler_fn_result

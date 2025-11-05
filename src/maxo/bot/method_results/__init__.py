@@ -1,10 +1,14 @@
-from maxo.bot.method_results.chats.add_chat_administrators import AddChatAdministratorsResult
+from maxo.bot.method_results.chats.add_chat_administrators import (
+    AddChatAdministratorsResult,
+)
 from maxo.bot.method_results.chats.add_chat_members import AddChatMembersResult
 from maxo.bot.method_results.chats.delete_chat import DeleteChatResult
 from maxo.bot.method_results.chats.delete_chat_member import DeleteChatMemberResult
 from maxo.bot.method_results.chats.delete_me_from_chat import DeleteMeFromChatResult
 from maxo.bot.method_results.chats.delete_pin_message import DeletePinMessageResult
-from maxo.bot.method_results.chats.get_chat_administrators import GetChatAdministratorsResult
+from maxo.bot.method_results.chats.get_chat_administrators import (
+    GetChatAdministratorsResult,
+)
 from maxo.bot.method_results.chats.get_chat_members import GetChatMembersResult
 from maxo.bot.method_results.chats.get_chats import GetChatsResult
 from maxo.bot.method_results.chats.pin_message import PinMessageResult

@@ -19,7 +19,7 @@ _FACEDS_MAP: Mapping[type[Any], type[BaseUpdateFacade[Any]]] = {
 
 class FacadeMiddleware(BaseMiddleware[Update[Any]]):
     @final
-    async def execute(
+    async def __call__(
         self,
         update: Update[Any],
         ctx: Ctx[Update[Any]],

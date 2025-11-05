@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import Any, Optional, Union
 
 from maxo.fsm import State
-from maxo.fsm.storage.base import BaseStorage, StorageKey
+from maxo.fsm.key_builder import StorageKey
+from maxo.fsm.storages.base import BaseStorage
 
 StateType = Optional[Union[str, State]]
 

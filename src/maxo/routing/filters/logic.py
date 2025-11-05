@@ -17,7 +17,7 @@ class BaseLogicFilter(BaseFilter[_UpdateT], Generic[_UpdateT]):
         self._inlining()
 
     @final
-    async def execute(self, update: _UpdateT, ctx: Ctx[_UpdateT]) -> bool:
+    async def __call__(self, update: _UpdateT, ctx: Ctx[_UpdateT]) -> bool:
         copied_ctx = ctx.copy()
 
         reduce_result = await self._reduce(update, ctx)
@@ -50,7 +50,7 @@ class AndFilter(BaseLogicFilter[_UpdateT], Generic[_UpdateT]):
         for filter_ in self._filters:
             loop_copied_ctx = ctx.copy()
 
-            filter_result = await filter_.execute(update, loop_copied_ctx)
+            filter_result = await filter_(update, loop_copied_ctx)
             if not filter_result:
                 return False
 
@@ -85,7 +85,7 @@ class OrFilter(BaseLogicFilter[_UpdateT], Generic[_UpdateT]):
         for filter_ in self._filters:
             loop_copied_ctx = ctx.copy()
 
-            filter_result = await filter_.execute(update, loop_copied_ctx)
+            filter_result = await filter_(update, loop_copied_ctx)
             if filter_result:
                 ctx.merge(loop_copied_ctx)
                 return True
@@ -116,7 +116,7 @@ class InvertFilter(BaseLogicFilter[_UpdateT], Generic[_UpdateT]):
         super().__init__()
 
     async def _reduce(self, update: _UpdateT, ctx: Ctx[_UpdateT]) -> bool:
-        filter_result = await self._filter.execute(update, ctx)
+        filter_result = await self._filter(update, ctx)
         if self._inlined:
             return filter_result
         else:

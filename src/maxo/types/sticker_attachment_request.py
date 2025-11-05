@@ -1,7 +1,9 @@
 from typing import Self
 
 from maxo.types.base import MaxoType
-from maxo.types.sticker_attachment_request_payload import StickerAttachmentRequestPayload
+from maxo.types.sticker_attachment_request_payload import (
+    StickerAttachmentRequestPayload,
+)
 
 
 class StickerAttachmentRequest(MaxoType):

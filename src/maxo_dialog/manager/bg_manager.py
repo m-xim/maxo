@@ -128,7 +128,8 @@ class BgManager(BaseDialogManager):
 
     async def _notify(self, event: DialogUpdateEvent) -> None:
         bot = self._event_context.bot
-        update = DialogUpdate(aiogd_update=event.as_(bot)).as_(bot)  # TODO: ???
+        event.bot = bot  # TODO: ???
+        update = DialogUpdate(aiogd_update=event)
         await self._updater.notify(bot=bot, update=update)
 
     async def _load(self) -> None:
@@ -140,7 +141,7 @@ class BgManager(BaseDialogManager):
                     self._event_context.chat.id,
                 )
                 self._event_context.chat = await bot.get_chat(
-                    self._event_context.chat.id,
+                    chat_id=self._event_context.chat.id,
                 )
             if not is_user_loaded(self._event_context.user):
                 logger.debug(

@@ -1,14 +1,14 @@
 import re
 from typing import Optional, Protocol
 
-from maxo.types import InlineKeyboardButton, Message
+from maxo.types import CallbackKeyboardButton, Message
 
 
 class InlineButtonLocator(Protocol):
     def find_button(
         self,
         message: Message,
-    ) -> Optional[InlineKeyboardButton]:
+    ) -> Optional[CallbackKeyboardButton]:
         raise NotImplementedError
 
 
@@ -19,16 +19,16 @@ class InlineButtonTextLocator:
     def find_button(
         self,
         message: Message,
-    ) -> Optional[InlineKeyboardButton]:
-        if not message.reply_markup:
+    ) -> Optional[CallbackKeyboardButton]:
+        if not message.unsafe_body.keyboard:
             return None
-        for row in message.reply_markup.inline_keyboard:
+        for row in message.unsafe_body.keyboard.buttons:
             for button in row:
                 if self.regex.fullmatch(button.text):
                     return button
         return None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"InlineButtonTextLocator({self.regex.pattern!r})"
 
 
@@ -40,15 +40,15 @@ class InlineButtonPositionLocator:
     def find_button(
         self,
         message: Message,
-    ) -> Optional[InlineKeyboardButton]:
-        if not message.reply_markup:
+    ) -> Optional[CallbackKeyboardButton]:
+        if not message.unsafe_body.keyboard:
             return None
         try:
-            return message.reply_markup.inline_keyboard[self.row][self.column]
+            return message.unsafe_body.keyboard.buttons[self.row][self.column]
         except IndexError:
             return None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"InlineButtonPositionLocator" f"(row={self.row}, column={self.column})"
 
 
@@ -59,16 +59,16 @@ class InlineButtonDataLocator:
     def find_button(
         self,
         message: Message,
-    ) -> Optional[InlineKeyboardButton]:
-        if not message.reply_markup:
+    ) -> Optional[CallbackKeyboardButton]:
+        if not message.unsafe_body.keyboard:
             return None
-        for row in message.reply_markup.inline_keyboard:
+        for row in message.unsafe_body.keyboard.buttons:
             for button in row:
-                if not button.callback_data:
+                if not hasattr(button, "payload"):
                     continue
-                if self.regex.fullmatch(button.callback_data):
+                if self.regex.fullmatch(button.payload):
                     return button
         return None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"InlineButtonDataLocator({self.regex.pattern!r})"

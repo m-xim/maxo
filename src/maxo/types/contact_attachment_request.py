@@ -2,7 +2,9 @@ from typing import Self
 
 from maxo.omit import Omittable, Omitted
 from maxo.types.base import MaxoType
-from maxo.types.contact_attachment_request_payload import ContactAttachmentRequestPayload
+from maxo.types.contact_attachment_request_payload import (
+    ContactAttachmentRequestPayload,
+)
 
 
 class ContactAttachmentRequest(MaxoType):

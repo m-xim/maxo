@@ -1,6 +1,8 @@
 from retejo.http.markers import QueryParam, UrlVar
 
-from maxo.bot.method_results.chats.get_chat_administrators import GetChatAdministratorsResult
+from maxo.bot.method_results.chats.get_chat_administrators import (
+    GetChatAdministratorsResult,
+)
 from maxo.bot.methods.base import MaxoMethod
 from maxo.omit import Omittable, Omitted
 

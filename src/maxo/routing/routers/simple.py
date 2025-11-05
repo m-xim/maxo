@@ -148,7 +148,9 @@ class SimpleRouter(Router):
         if not observer_filter_result:
             return await self.trigger_child(ctx)
 
-        chain_middlewares = observer.middleware.outer._make_chain(observer.handler_lookup)
+        chain_middlewares = observer.middleware.outer._make_chain(
+            observer.handler_lookup
+        )
         result = await chain_middlewares(ctx)
         if result is UNHANDLED:
             return await self.trigger_child(ctx)

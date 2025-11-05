@@ -13,7 +13,7 @@ class ErrorMiddleware(BaseMiddleware[Any]):
     def __init__(self, router: Router) -> None:
         self._router = router
 
-    async def execute(
+    async def __call__(
         self,
         update: Any,
         ctx: Ctx[Any],

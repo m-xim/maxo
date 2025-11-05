@@ -21,7 +21,7 @@ async def metadata_getter(**_kwargs) -> dict:
     }
 
 
-def about_dialog():
+def about_dialog() -> Dialog:
     return Dialog(
         Window(
             Jinja(

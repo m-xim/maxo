@@ -72,7 +72,7 @@ class DishkaMiddleware(BaseMiddleware[Update[Any]]):
         self._container = container
         self._extra_context = extra_context or {}
 
-    async def execute(
+    async def __call__(
         self,
         update: Update[Any],
         ctx: Ctx[Update[Any]],

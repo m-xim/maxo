@@ -19,5 +19,5 @@ class Handler(Protocol[_UpdateT, _ReturnT_co]):
         raise NotImplementedError
 
     @abstractmethod
-    async def execute(self, ctx: Ctx[_UpdateT]) -> _ReturnT_co:
+    async def __call__(self, ctx: Ctx[_UpdateT]) -> _ReturnT_co:
         raise NotImplementedError

@@ -26,7 +26,9 @@ class FSMContext:
         return await self.storage.get_data(key=self.key)
 
     async def get_value(self, key: str, default: Any | None = None) -> Any | None:
-        return await self.storage.get_value(storage_key=self.key, value_key=key, default=default)
+        return await self.storage.get_value(
+            storage_key=self.key, value_key=key, default=default
+        )
 
     async def update_data(
         self, data: MutableMapping[str, Any] | None = None, **kwargs: Any

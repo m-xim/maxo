@@ -16,7 +16,7 @@ MANAGER_KEY = "dialog_manager"
 BG_FACTORY_KEY = "dialog_bg_factory"
 
 
-class ManagerMiddleware(BaseMiddleware[MaxUpdate]):
+class ManagerMiddleware(BaseMiddleware):
     def __init__(
         self,
         dialog_manager_factory: DialogManagerFactory,
@@ -55,7 +55,7 @@ class ManagerMiddleware(BaseMiddleware[MaxUpdate]):
         try:
             return await handler(event, data)
         finally:
-            manager: DialogManager = data.pop(MANAGER_KEY, None)
+            manager: DialogManager | None = data.pop(MANAGER_KEY, None)
             if manager:
                 await manager.close_manager()
 

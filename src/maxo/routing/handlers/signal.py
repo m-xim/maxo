@@ -38,7 +38,7 @@ class SignalHandler(
         return f"{self.__class__.__name__}(handler_fn={self._handler_fn}, filter={self._filter})"
 
     async def execute_filter(self, ctx: Ctx[_SignalT]) -> bool:
-        return await self._filter.execute(ctx.update, ctx)
+        return await self._filter(ctx.update, ctx)
 
-    async def execute(self, ctx: Ctx[_SignalT]) -> _ReturnT_co:
+    async def __call__(self, ctx: Ctx[_SignalT]) -> _ReturnT_co:
         return await self._handler_fn(ctx=ctx)

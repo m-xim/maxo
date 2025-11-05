@@ -18,3 +18,7 @@ class BaseUpdateFacade(Generic[U]):
     @property
     def bot(self) -> Bot:
         return self._bot
+
+    @property
+    def update(self) -> U:
+        return self._update

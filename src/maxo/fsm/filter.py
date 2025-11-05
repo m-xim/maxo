@@ -15,15 +15,21 @@ class StateFilter(BaseFilter[Any]):
     ) -> None:
         self._states = states
 
-    async def execute(self, update: Any, ctx: Ctx[Any]) -> bool:
+    async def __call__(self, update: Any, ctx: Ctx[Any]) -> bool:
         raw_state = ctx.raw_state
 
         for state in self._states:
-            if (isinstance(state, str) or state is None) and (state in (any_state, raw_state)):
+            if (isinstance(state, str) or state is None) and (
+                state in (any_state, raw_state)
+            ):
                 return True
             if isinstance(state, State) and raw_state == state:
                 return True
-            if isclass(state) and issubclass(state, StatesGroup) and raw_state in StatesGroup:
+            if (
+                isclass(state)
+                and issubclass(state, StatesGroup)
+                and raw_state in StatesGroup
+            ):
                 return True
 
         return False

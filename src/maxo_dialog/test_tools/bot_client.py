@@ -3,7 +3,8 @@ from datetime import datetime
 from typing import Any, Optional, Union
 
 from maxo import Bot, Dispatcher
-from maxo.methods import AnswerCallback, TelegramMethod
+from maxo.bot.methods import CallbackAnswer
+from maxo.bot.methods.base import MaxoMethod
 from maxo.types import (
     Callback,
     Chat,
@@ -34,18 +35,18 @@ class FakeBot(Bot):
 
     async def __call__(
         self,
-        method: TelegramMethod[Any],
+        method: MaxoMethod[Any],
         request_timeout: Optional[int] = None,
     ) -> Any:
         del request_timeout  # unused
-        if isinstance(method, AnswerCallback):
+        if isinstance(method, CallbackAnswer):
             return True
         raise RuntimeError("Fake bot should not be used to call telegram")
 
     def __hash__(self) -> int:
         return 1
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         return self is other
 
 

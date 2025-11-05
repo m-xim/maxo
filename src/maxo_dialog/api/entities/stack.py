@@ -59,7 +59,8 @@ class Stack:
     def push(self, state: State, data: Data) -> Context:
         if len(self.intents) >= _STACK_LIMIT:
             raise DialogStackOverflow(
-                f"Cannot open more dialogs in current stack. " f"Max count is {_STACK_LIMIT}",
+                f"Cannot open more dialogs in current stack. "
+                f"Max count is {_STACK_LIMIT}",
             )
         context = Context(
             _intent_id=new_id(),

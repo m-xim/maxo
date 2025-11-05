@@ -12,7 +12,7 @@ from maxo.tools.long_polling.long_polling import LongPolling
 
 
 class OuterMiddleware(BaseMiddleware[MessageCreated]):
-    async def execute(
+    async def __call__(
         self,
         update: MessageCreated,
         ctx: Ctx[MessageCreated],
@@ -25,7 +25,7 @@ class OuterMiddleware(BaseMiddleware[MessageCreated]):
 
 
 class InnerMiddleware(BaseMiddleware[MessageCreated]):
-    async def execute(
+    async def __call__(
         self,
         update: MessageCreated,
         ctx: Ctx[MessageCreated],
@@ -41,7 +41,7 @@ class ContainsTextFilter(BaseFilter[MessageCreated]):
     def __init__(self, text: str) -> None:
         self._text = text
 
-    async def execute(
+    async def __call__(
         self,
         update: MessageCreated,
         ctx: Ctx[MessageCreated],

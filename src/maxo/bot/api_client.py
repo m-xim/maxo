@@ -11,7 +11,12 @@ from retejo.marker_tools import for_marker
 from maxo._internal._adaptix.concat_provider import concat_provider
 from maxo._internal._adaptix.has_tag_provider import has_tag_provider
 from maxo.bot.warming_up import WarmingUpType, warming_up_retort
-from maxo.enums import AttachmentRequestType, AttachmentType, KeyboardButtonType, MarkupElementType
+from maxo.enums import (
+    AttachmentRequestType,
+    AttachmentType,
+    KeyboardButtonType,
+    MarkupElementType,
+)
 from maxo.errors.api import (
     MaxBotBadRequestError,
     MaxBotMethodNotAllowedError,
@@ -43,7 +48,9 @@ from maxo.types.file_attachment import FileAttachment
 from maxo.types.file_attachment_request import FileAttachmentRequest
 from maxo.types.image_attachment import ImageAttachment
 from maxo.types.image_attachment_request import ImageAttachmentRequest
-from maxo.types.inline_keyboard_attachment_request import InlineKeyboardAttachmentRequest
+from maxo.types.inline_keyboard_attachment_request import (
+    InlineKeyboardAttachmentRequest,
+)
 from maxo.types.keyboard import Keyboard
 from maxo.types.link_keyboard_button import LinkKeyboardButton
 from maxo.types.location_attachment import LocationAttachment
@@ -99,7 +106,9 @@ _has_tag_providers = concat_provider(
     has_tag_provider(HighlightedMarkupElement, "type", MarkupElementType.HIGHLIGHTED),
     has_tag_provider(LinkMarkupElement, "type", MarkupElementType.LINK),
     has_tag_provider(MonospacedMarkupElements, "type", MarkupElementType.MONOSPACED),
-    has_tag_provider(StrikethroughMarkupElement, "type", MarkupElementType.STRIKETHROUGH),
+    has_tag_provider(
+        StrikethroughMarkupElement, "type", MarkupElementType.STRIKETHROUGH
+    ),
     has_tag_provider(StrongMarkupElement, "type", MarkupElementType.STRONG),
     has_tag_provider(UnderlineMarkupElement, "type", MarkupElementType.UNDERLINE),
     has_tag_provider(UserMentionMarkupElement, "type", MarkupElementType.USER_MENTION),

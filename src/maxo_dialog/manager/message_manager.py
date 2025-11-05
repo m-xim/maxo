@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from maxo import Bot
 from maxo.enums import AttachmentType
-from maxo.exceptions import TelegramAPIError, TelegramBadRequest
+from maxo.errors import MaxBotApiError, MaxBotBadRequestError
 from maxo.types import (
     Callback,
     FSInputFile,
@@ -53,7 +53,9 @@ INPUT_MEDIA_TYPES = {
     AttachmentType.VIDEO: InputMediaVideo,
 }
 
-_INVALID_QUERY_ID_MSG = "query is too old and response timeout expired or query id is invalid"
+_INVALID_QUERY_ID_MSG = (
+    "query is too old and response timeout expired or query id is invalid"
+)
 
 
 def _combine(sent_message: NewMessage, message_result: Message) -> OldMessage:
@@ -81,10 +83,10 @@ class MessageManager(MessageManagerProtocol):
         callback_query: Callback,
     ) -> None:
         try:
-            await bot.answer_callback_query(
-                callback_query_id=callback_query.id,
+            await bot.callback_answer(
+                callback_id=callback_query.callback_id,
             )
-        except TelegramAPIError as e:
+        except MaxBotApiError as e:
             if _INVALID_QUERY_ID_MSG in e.message.lower():
                 logger.warning("Cannot answer callback: %s", e)
             else:
@@ -124,7 +126,10 @@ class MessageManager(MessageManagerProtocol):
         return old_message.content_type == AttachmentType.VOICE
 
     def need_voice(self, new_message: NewMessage) -> bool:
-        return new_message.media is not None and new_message.media.type == AttachmentType.VOICE
+        return (
+            new_message.media is not None
+            and new_message.media.type == AttachmentType.VOICE
+        )
 
     def _message_changed(
         self,
@@ -139,7 +144,10 @@ class MessageManager(MessageManagerProtocol):
             or
             # we do not know if link preview changed
             new_message.link_preview_options
-            or (bool(new_message.protect_content) != bool(old_message.has_protected_content))
+            or (
+                bool(new_message.protect_content)
+                != bool(old_message.has_protected_content)
+            )
         ):
             return True
 
@@ -160,7 +168,10 @@ class MessageManager(MessageManagerProtocol):
         # we cannot edit a message if there was voice
         if self.had_voice(old_message) or self.need_voice(new_message):
             return False
-        return not (self.had_reply_keyboard(old_message) or self.need_reply_keyboard(new_message))
+        return not (
+            self.had_reply_keyboard(old_message)
+            or self.need_reply_keyboard(new_message)
+        )
 
     async def show_message(
         self,
@@ -252,7 +263,7 @@ class MessageManager(MessageManagerProtocol):
                 chat_id=old_message.chat.id,
                 business_connection_id=old_message.business_connection_id,
             )
-        except TelegramBadRequest as err:
+        except MaxBotBadRequestError as err:
             if "message is not modified" in err.message:
                 pass  # nothing to remove
             elif (
@@ -296,7 +307,7 @@ class MessageManager(MessageManagerProtocol):
                 chat_id=old_message.chat.id,
                 message_id=old_message.message_id,
             )
-        except TelegramBadRequest as err:
+        except MaxBotBadRequestError as err:
             if "message to delete not found" in err.message:
                 pass
             elif "message can't be deleted" in err.message:
@@ -313,7 +324,7 @@ class MessageManager(MessageManagerProtocol):
     ) -> Message:
         try:
             return await self.edit_message(bot, new_message, old_message)
-        except TelegramBadRequest as err:
+        except MaxBotBadRequestError as err:
             if "message is not modified" in err.message:
                 raise MessageNotModified from err
             if (

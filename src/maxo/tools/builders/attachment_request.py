@@ -8,7 +8,9 @@ from maxo.types.audio_attachment_request import AudioAttachmentRequest
 from maxo.types.contact_attachment_request import ContactAttachmentRequest
 from maxo.types.file_attachment_request import FileAttachmentRequest
 from maxo.types.image_attachment_request import ImageAttachmentRequest
-from maxo.types.inline_keyboard_attachment_request import InlineKeyboardAttachmentRequest
+from maxo.types.inline_keyboard_attachment_request import (
+    InlineKeyboardAttachmentRequest,
+)
 from maxo.types.keyboard_buttons import KeyboardButtons
 from maxo.types.location_attachment_request import LocationAttachmentRequest
 from maxo.types.request_attachments import AttachmentsRequests

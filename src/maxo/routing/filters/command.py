@@ -36,7 +36,7 @@ class Command(BaseFilter[MessageCreated]):
         self.ignore_case = ignore_case
         self.ignore_mention = ignore_mention
 
-    async def execute(
+    async def __call__(
         self,
         update: MessageCreated,
         ctx: Ctx[MessageCreated],

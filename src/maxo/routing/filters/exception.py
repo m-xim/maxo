@@ -24,7 +24,7 @@ class ExceptionFilter(BaseFilter[ExceptionEvent[_ExceptionT]], Generic[_Exceptio
         else:
             self._handler = lambda e: type(e) is error
 
-    async def execute(
+    async def __call__(
         self,
         update: ExceptionEvent[Any],
         ctx: Ctx[ExceptionEvent[Any]],

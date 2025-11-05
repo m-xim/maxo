@@ -8,7 +8,9 @@ from maxo.routing.updates.base import BaseUpdate
 
 def resolve_middlewares(
     router: Router,
-    middlewares_map: MutableMapping[type[BaseUpdate], MutableSequence[BaseMiddleware[Any]]],
+    middlewares_map: MutableMapping[
+        type[BaseUpdate], MutableSequence[BaseMiddleware[Any]]
+    ],
 ) -> None:
     for update_tp, observer in router.observers.items():
         middlewares = (*middlewares_map[update_tp],)
@@ -26,7 +28,9 @@ def resolving_inner_middlewares(
 @overload
 def resolving_inner_middlewares(
     router: Router,
-    middlewares_map: MutableMapping[type[BaseUpdate], MutableSequence[BaseMiddleware[Any]]],
+    middlewares_map: MutableMapping[
+        type[BaseUpdate], MutableSequence[BaseMiddleware[Any]]
+    ],
 ) -> None: ...
 
 

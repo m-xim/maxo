@@ -4,11 +4,9 @@ from typing import Optional
 
 from maxo import Bot
 from maxo.fsm import State, StatesGroup
-from maxo.fsm.storage.base import (
-    BaseEventIsolation,
-    BaseStorage,
-    StorageKey,
-)
+from maxo.fsm.event_isolations import BaseEventIsolation
+from maxo.fsm.key_builder import StorageKey
+from maxo.fsm.storages.base import BaseStorage
 from maxo_dialog.api.entities import (
     DEFAULT_STACK_ID,
     AccessSettings,
@@ -25,8 +23,6 @@ class StorageProxy:
         events_isolation: BaseEventIsolation,
         user_id: Optional[int],
         chat_id: int,
-        thread_id: Optional[int],
-        business_connection_id: Optional[str],
         bot: Bot,
         state_groups: dict[str, type[StatesGroup]],
     ):
@@ -35,8 +31,6 @@ class StorageProxy:
         self.state_groups = state_groups
         self.user_id = user_id
         self.chat_id = chat_id
-        self.thread_id = thread_id
-        self.business_connection_id = business_connection_id
         self.bot = bot
         self.lock_stack = AsyncExitStack()
 
@@ -132,8 +126,6 @@ class StorageProxy:
             bot_id=self.bot.id,
             chat_id=self.chat_id,
             user_id=self.chat_id,
-            thread_id=self.thread_id,
-            business_connection_id=self.business_connection_id,
             destiny=f"aiogd:context:{intent_id}",
         )
 
@@ -151,15 +143,13 @@ class StorageProxy:
             bot_id=self.bot.id,
             chat_id=self.chat_id,
             user_id=self.chat_id,
-            thread_id=self.thread_id,
-            business_connection_id=self.business_connection_id,
             destiny=f"aiogd:stack:{stack_id}",
         )
 
     def _state(self, state: str) -> State:
         group, *_ = state.partition(":")
         try:
-            for real_state in self.state_groups[group].__all_states__:
+            for real_state in self.state_groups[group].__states__:
                 if real_state.state == state:
                     return real_state
         except KeyError:

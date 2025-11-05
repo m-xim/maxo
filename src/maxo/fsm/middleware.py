@@ -24,7 +24,7 @@ class FSMContextMiddleware(BaseMiddleware[Update[Any]]):
         self._storage = storage
         self._event_isolation = event_isolation
 
-    async def execute(
+    async def __call__(
         self,
         update: Update[Any],
         ctx: Ctx[Update[Any]],

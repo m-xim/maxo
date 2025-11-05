@@ -16,3 +16,11 @@ class Recipient(MaxoType):
     chat_type: ChatType
     user_id: int | None = None
     chat_id: int | None = None
+
+    @property
+    def id(self) -> int:
+        if self.chat_type == ChatType.DIALOG:
+            return self.user_id
+        if self.chat_type == ChatType.CHAT:
+            return self.chat_id
+        raise RuntimeError("Неизвестный тип чата")

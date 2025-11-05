@@ -5,13 +5,12 @@ from uuid import uuid4
 
 from maxo import Bot
 from maxo.types import (
-    Audio,
+    AudioAttachment,
     Callback,
-    Document,
+    FileAttachment,
+    Keyboard,
     Message,
-    PhotoSize,
-    ReplyKeyboardMarkup,
-    Video,
+    VideoAttachment,
 )
 from maxo_dialog import ShowMode
 from maxo_dialog.api.entities import MediaAttachment, NewMessage, OldMessage
@@ -36,12 +35,12 @@ def file_unique_id(media: MediaAttachment) -> str:
 
 
 MEDIA_CLASSES = {
-    "audio": lambda x: Audio(
+    "audio": lambda x: AudioAttachment(
         file_id=file_id(x),
         file_unique_id=file_unique_id(x),
         duration=1024,
     ),
-    "document": lambda x: Document(
+    "document": lambda x: FileAttachment(
         file_id=file_id(x),
         file_unique_id=file_unique_id(x),
     ),
@@ -53,7 +52,7 @@ MEDIA_CLASSES = {
             height=1024,
         )
     ],
-    "video": lambda x: Video(
+    "video": lambda x: VideoAttachment(
         file_id=file_id(x),
         file_unique_id=file_unique_id(x),
         width=1024,
@@ -154,10 +153,12 @@ class MockMessageManager(MessageManagerProtocol):
             chat=new_message.chat,
             text=new_message.text,
             media_id=(file_id(new_message.media) if new_message.media else None),
-            media_uniq_id=(file_unique_id(new_message.media) if new_message.media else None),
+            media_uniq_id=(
+                file_unique_id(new_message.media) if new_message.media else None
+            ),
             has_reply_keyboard=isinstance(
                 new_message.reply_markup,
-                ReplyKeyboardMarkup,
+                Keyboard,
             ),
             business_connection_id=None,
         )

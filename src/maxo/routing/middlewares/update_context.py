@@ -20,7 +20,7 @@ UPDATE_CONTEXT_ATTR: Final = "update_context"
 
 
 class UpdateContextMiddleware(BaseMiddleware[Update[Any]]):
-    async def execute(
+    async def __call__(
         self,
         update: Update[Any],
         ctx: Ctx[Update[Any]],
@@ -36,22 +36,38 @@ class UpdateContextMiddleware(BaseMiddleware[Update[Any]]):
         user_id = None
 
         if isinstance(
-            update, (BotAdded, BotRemoved, BotStarted, ChatTitileChanged, UserAdded, UserRemoved)
+            update,
+            (
+                BotAdded,
+                BotRemoved,
+                BotStarted,
+                ChatTitileChanged,
+                UserAdded,
+                UserRemoved,
+            ),
         ):
             chat_id = update.chat_id
             user_id = update.user.user_id
         elif isinstance(update, MessageCallback):
             user_id = update.user.user_id
             if update.message is not None and update.message.body is not None:
-                chat_id = update.message.recipient.chat_id or update.message.recipient.user_id
+                chat_id = (
+                    update.message.recipient.chat_id or update.message.recipient.user_id
+                )
 
         elif isinstance(update, MessageChatCreated):
             chat_id = update.chat.chat_id
         elif isinstance(update, (MessageEdited, MessageCreated)):
-            user_id = update.message.sender.user_id if is_defined(update.message.sender) else None
+            user_id = (
+                update.message.sender.user_id
+                if is_defined(update.message.sender)
+                else None
+            )
 
             if update.message and update.message.body is not None:
-                chat_id = update.message.recipient.chat_id or update.message.recipient.user_id
+                chat_id = (
+                    update.message.recipient.chat_id or update.message.recipient.user_id
+                )
 
         return UpdateContext(
             chat_id=chat_id,

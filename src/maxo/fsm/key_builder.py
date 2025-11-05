@@ -66,7 +66,9 @@ class DefaultKeyBuilder(KeyBuilder):
         if self.with_destiny:
             parts.append(key.destiny)
         elif key.destiny != DESTINY_DEFAULT:
-            raise ValueError(f"Use `with_destiny=True` in for {self.__class__.__name__}")
+            raise ValueError(
+                f"Use `with_destiny=True` in for {self.__class__.__name__}"
+            )
 
         if type_:
             parts.append(type_.value)

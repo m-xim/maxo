@@ -2,7 +2,9 @@ from collections.abc import Sequence
 
 from retejo.http.markers import Body, UrlVar
 
-from maxo.bot.method_results.chats.add_chat_administrators import AddChatAdministratorsResult
+from maxo.bot.method_results.chats.add_chat_administrators import (
+    AddChatAdministratorsResult,
+)
 from maxo.bot.methods.base import MaxoMethod
 from maxo.types.chat_admin import ChatAdmin
 

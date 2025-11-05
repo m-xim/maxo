@@ -68,7 +68,7 @@ class BaseObserver(Observer[_UpdateT, _HandlerT, _HandlerFnT]):
         self._filter = filter
 
     async def execute_filter(self, ctx: Ctx[_UpdateT]) -> bool:
-        return await self._filter.execute(ctx.update, ctx)
+        return await self._filter(ctx.update, ctx)
 
     async def handler_lookup(self, ctx: Ctx[_UpdateT]) -> Any:
         for handler in self._handlers:

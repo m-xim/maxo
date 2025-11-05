@@ -6,6 +6,8 @@ from maxo.fsm.event_isolations.base import BaseEventIsolation
 from maxo.fsm.storages.base import BaseStorage
 from maxo.routing.interfaces import BaseMiddleware, Router
 from maxo.routing.sentinels import UNHANDLED
+from maxo.routing.signals.exception import ExceptionEvent
+from maxo.tools.facades import MessageCallbackFacade, MessageCreatedFacade
 from maxo.types import Callback, Message
 from maxo_dialog.api.entities import (
     DEFAULT_STACK_ID,
@@ -44,23 +46,19 @@ logger = getLogger(__name__)
 FORBIDDEN_STACK_KEY = "aiogd_stack_forbidden"
 
 
-def event_context_from_callback(event: Callback) -> EventContext:
+def event_context_from_callback(event: MessageCallbackFacade) -> EventContext:
     return EventContext(
         bot=event.bot,
-        user=event.from_user,
-        chat=event.message.chat,
-        thread_id=None,
-        business_connection_id=None,
+        user=event.callback.user,
+        chat=event.callback.user,  # TODO: ???
     )
 
 
-def event_context_from_message(event: Message) -> EventContext:
+def event_context_from_message(event: MessageCreatedFacade) -> EventContext:
     return EventContext(
         bot=event.bot,
-        user=event.from_user,
-        chat=event.chat,
-        thread_id=None,
-        business_connection_id=event.business_connection_id,
+        user=event.message.sender,
+        chat=event.chat,  # TODO: ???
     )
 
 
@@ -69,17 +67,14 @@ def event_context_from_aiogd(event: DialogUpdateEvent) -> EventContext:
         bot=event.bot,
         user=event.from_user,
         chat=event.chat,
-        thread_id=event.thread_id,
-        business_connection_id=event.business_connection_id,
     )
 
 
-def event_context_from_error(event: ErrorEvent) -> EventContext:
+def event_context_from_error(event: ExceptionEvent) -> EventContext:
+    # TODO: ???
     if event.update.message:
         return event_context_from_message(event.update.message)
-    elif event.update.business_message:
-        return event_context_from_message(event.update.business_message)
-    elif event.update.callback_query:
+    elif event.update.callback:
         return event_context_from_callback(event.update.callback_query)
     elif isinstance(event.update, DialogUpdate) and event.update.aiogd_update:
         return event_context_from_aiogd(event.update.aiogd_update)
@@ -110,8 +105,6 @@ class IntentMiddlewareFactory:
             state_groups=self.registry.states_groups(),
             user_id=event_context.user.id,
             chat_id=event_context.chat.id,
-            thread_id=event_context.thread_id,
-            business_connection_id=event_context.business_connection_id,
         )
 
     def _check_outdated(self, intent_id: str, stack: Stack):

@@ -51,7 +51,9 @@ class KeyboardValidator:
             self.validate_row(row)
             count += len(row)
         if count > self.max_buttons:
-            raise ValueError(f"Too much buttons detected Max allowed count - {self.max_buttons}")
+            raise ValueError(
+                f"Too much buttons detected Max allowed count - {self.max_buttons}"
+            )
         return True
 
     def validate_row(self, row: Sequence[KeyboardButtons]) -> None:
@@ -136,7 +138,9 @@ class KeyboardBuilder:
         )
         return self
 
-    def add_request_geo_location(self, text: str, quick: Omittable[bool] = Omitted()) -> Self:
+    def add_request_geo_location(
+        self, text: str, quick: Omittable[bool] = Omitted()
+    ) -> Self:
         self.add(
             RequestGeoLocationKeyboardButton(
                 text=text,

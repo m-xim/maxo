@@ -3,7 +3,10 @@ from typing import Any, Generic, TypeVar, cast
 
 from maxo.routing.ctx import Ctx
 from maxo.routing.interfaces.middleware import BaseMiddleware, NextMiddleware
-from maxo.routing.middlewares.state import EmptyMiddlewareManagerState, MiddlewareManagerState
+from maxo.routing.middlewares.state import (
+    EmptyMiddlewareManagerState,
+    MiddlewareManagerState,
+)
 from maxo.routing.updates.base import BaseUpdate
 
 _ReturnT = TypeVar("_ReturnT")
@@ -15,7 +18,7 @@ def _partial_middleware(
     next: NextMiddleware[_UpdateT],
 ) -> NextMiddleware[_UpdateT]:
     async def wrapper(ctx: Ctx[_UpdateT]) -> Any:
-        return await middleware.execute(
+        return await middleware(
             ctx=ctx,
             update=ctx.update,
             next=next,

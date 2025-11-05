@@ -21,18 +21,10 @@ class BaseMiddleware(Protocol[_UpdateT]):
     __slots__ = ()
 
     @abstractmethod
-    async def execute(
-        self,
-        update: _UpdateT,
-        ctx: Ctx[_UpdateT],
-        next: NextMiddleware[_UpdateT],
-    ) -> Any:
-        raise NotImplementedError
-
     async def __call__(
         self,
         update: _UpdateT,
         ctx: Ctx[_UpdateT],
         next: NextMiddleware[_UpdateT],
     ) -> Any:
-        return self.execute(update, ctx, next)
+        raise NotImplementedError

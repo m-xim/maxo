@@ -1,3 +1,4 @@
+import dataclasses
 from collections.abc import Awaitable, Callable
 from logging import getLogger
 from typing import (
@@ -7,10 +8,12 @@ from typing import (
     Union,
 )
 
+from maxo import SimpleRouter
 from maxo.enums import ChatType
 from maxo.fsm import State, StatesGroup
 from maxo.routing.interfaces import Router
-from maxo.types.api import Callback, Chat
+from maxo.tools.facades import MessageCallbackFacade, MessageCreatedFacade
+from maxo.types import Callback, Chat
 from maxo.types.message import Message
 from maxo_dialog.api.entities import Context, Data, LaunchMode, NewMessage
 from maxo_dialog.api.exceptions import (
@@ -36,7 +39,7 @@ OnResultEvent = Callable[[Data, Any, DialogManager], Awaitable]
 W = TypeVar("W", bound=Widget)
 
 
-class Dialog(Router, DialogProtocol):
+class Dialog(SimpleRouter, DialogProtocol):
     def __init__(
         self,
         *windows: WindowProtocol,
@@ -134,7 +137,7 @@ class Dialog(Router, DialogProtocol):
 
     async def _message_handler(
         self,
-        message: Message,
+        message: MessageCreatedFacade,
         dialog_manager: DialogManager,
     ):
         old_context = dialog_manager.current_context()
@@ -152,16 +155,22 @@ class Dialog(Router, DialogProtocol):
 
     async def _callback_handler(
         self,
-        callback: Callback,
+        callback: MessageCallbackFacade,
         dialog_manager: DialogManager,
     ):
         old_context = dialog_manager.current_context()
-        intent_id, callback_data = remove_intent_id(callback.payload)
-        cleaned_callback = callback.model_copy(update={"data": callback_data})
+        intent_id, callback_data = remove_intent_id(callback.callback.payload)
+
+        cleaned_callback = dataclasses.replace(callback.callback, payload=callback_data)
+        cleaned_facade = MessageCallbackFacade(
+            bot=callback.bot,
+            update=dataclasses.replace(callback.update, callback=cleaned_callback),
+        )
+
         window = await self._current_window(dialog_manager)
         try:
             processed = await window.process_callback(
-                cleaned_callback,
+                cleaned_facade,
                 self,
                 dialog_manager,
             )
@@ -200,15 +209,14 @@ class Dialog(Router, DialogProtocol):
             observer.filter(intent_filter)
 
     def _register_handlers(self) -> None:
-        self.callback_query.register(self._callback_handler)
-        self.message.register(self._message_handler)
-        self.business_message.register(self._message_handler)
+        self.message_callback.handler(self._callback_handler)
+        self.message_created.handler(self._message_handler)
 
     def states_group(self) -> type[StatesGroup]:
         return self._states_group
 
     def states_group_name(self) -> str:
-        return self._states_group.__full_group_name__
+        return repr(self._states_group)
 
     async def process_result(
         self,
@@ -240,7 +248,7 @@ class Dialog(Router, DialogProtocol):
     ) -> None:
         await self._process_callback(self.on_close, result, manager)
 
-    def find(self, widget_id) -> Optional[W]:
+    def find(self, widget_id: Any) -> Optional[W]:
         for w in self.windows.values():
             widget = w.find(widget_id)
             if widget:

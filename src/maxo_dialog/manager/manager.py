@@ -367,7 +367,10 @@ class ManagerImpl(DialogManager):
     ) -> None:
         if stack.id == DEFAULT_STACK_ID:
             return  # no limitations for default stack
-        if any(isinstance(button, MessageKeyboardButton) for button in new_message.reply_markup):
+        if any(
+            isinstance(button, MessageKeyboardButton)
+            for button in new_message.reply_markup
+        ):
             raise InvalidKeyboardType(
                 "Cannot use ReplyKeyboardMarkup in non default stack",
             )
@@ -513,7 +516,10 @@ class ManagerImpl(DialogManager):
             # TODO: ???
             if self.event.media_group_id is None:
                 return ShowMode.SEND
-            elif self.event.media_group_id == self.current_stack().last_income_media_group_id:
+            elif (
+                self.event.media_group_id
+                == self.current_stack().last_income_media_group_id
+            ):
                 return ShowMode.EDIT
             else:
                 return ShowMode.SEND

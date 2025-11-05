@@ -13,14 +13,18 @@ from maxo.types.chat_membership import ChatMembership
 from maxo.types.contact_attachment import ContactAttachment
 from maxo.types.contact_attachment_payload import ContactAttachmentPayload
 from maxo.types.contact_attachment_request import ContactAttachmentRequest
-from maxo.types.contact_attachment_request_payload import ContactAttachmentRequestPayload
+from maxo.types.contact_attachment_request_payload import (
+    ContactAttachmentRequestPayload,
+)
 from maxo.types.file_attachment import FileAttachment
 from maxo.types.file_attachment_payload import FileAttachmentPayload
 from maxo.types.file_attachment_request import FileAttachmentRequest
 from maxo.types.image_attachment import ImageAttachment
 from maxo.types.image_attachment_request import ImageAttachmentRequest
 from maxo.types.inline_keyboard_attachment import InlineKeyboardAttachment
-from maxo.types.inline_keyboard_attachment_request import InlineKeyboardAttachmentRequest
+from maxo.types.inline_keyboard_attachment_request import (
+    InlineKeyboardAttachmentRequest,
+)
 from maxo.types.inline_keyboard_attachment_request_payload import (
     InlineKeyboardAttachmentRequestPayload,
 )
@@ -60,7 +64,9 @@ from maxo.types.share_attachment_request import ShareAttachmentRequest
 from maxo.types.sticker_attachment import StickerAttachment
 from maxo.types.sticker_attachment_payload import StickerAttachmentPayload
 from maxo.types.sticker_attachment_request import StickerAttachmentRequest
-from maxo.types.sticker_attachment_request_payload import StickerAttachmentRequestPayload
+from maxo.types.sticker_attachment_request_payload import (
+    StickerAttachmentRequestPayload,
+)
 from maxo.types.uploaded_info import UploadedInfo
 from maxo.types.user import User
 from maxo.types.user_with_photo import UserWithPhoto

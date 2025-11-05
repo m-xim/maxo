@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any, Optional
 
+from maxo import Bot
 from maxo.fsm import State
 from maxo.routing.updates.base import MaxUpdate
 from maxo.types import Chat, MaxoType, User
@@ -28,6 +29,7 @@ class DialogUpdateEvent(MaxoType):
     thread_id: Optional[int]
     business_connection_id: Optional[str]
     show_mode: Optional[ShowMode] = None
+    bot: Bot
 
 
 class DialogStartEvent(DialogUpdateEvent):
