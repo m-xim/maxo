@@ -8,17 +8,17 @@ from maxo.routing.filters.command import CommandStart
 from maxo.routing.interfaces import BaseMiddleware, NextMiddleware
 from maxo.routing.updates.base import MaxUpdate
 from maxo.types.message import Message
-from maxo_dialog import (
+from maxo.dialogs import (
     Dialog,
     DialogManager,
     StartMode,
     Window,
     setup_dialogs,
 )
-from maxo_dialog.test_tools import BotClient, MockMessageManager
-from maxo_dialog.test_tools.bot_client import FakeBot
-from maxo_dialog.test_tools.memory_storage import JsonMemoryStorage
-from maxo_dialog.widgets.text import Format
+from maxo.dialogs import BotClient, MockMessageManager
+from maxo.dialogs import FakeBot
+from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
+from maxo.dialogs.widgets.text import Format
 
 
 class MainSG(StatesGroup):

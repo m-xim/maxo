@@ -7,19 +7,19 @@ from maxo.fsm.state import State, StatesGroup
 from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters.command import CommandStart
 from maxo.types.message import Message
-from maxo_dialog import (
+from maxo.dialogs import (
     Dialog,
     DialogManager,
     StartMode,
     Window,
     setup_dialogs,
 )
-from maxo_dialog.test_tools import BotClient, MockMessageManager
-from maxo_dialog.test_tools.bot_client import FakeBot
-from maxo_dialog.test_tools.keyboard import InlineButtonTextLocator
-from maxo_dialog.test_tools.memory_storage import JsonMemoryStorage
-from maxo_dialog.widgets.kbd import Back, Cancel, Next, Start
-from maxo_dialog.widgets.text import Const, Format
+from maxo.dialogs import BotClient, MockMessageManager
+from maxo.dialogs import FakeBot
+from maxo.dialogs.test_tools.keyboard import InlineButtonTextLocator
+from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
+from maxo.dialogs.widgets import Back, Cancel, Next, Start
+from maxo.dialogs.widgets.text import Const, Format
 
 
 class MainSG(StatesGroup):

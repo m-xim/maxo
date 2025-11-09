@@ -2,8 +2,8 @@ from aiogram.types import User
 
 from maxo.enums import ChatType
 from maxo.types import Recipient
-from maxo_dialog.api.internal import FakeRecipient, FakeUser
-from maxo_dialog.utils import is_recipient_loaded, is_user_loaded
+from maxo.dialogs.api.internal import FakeRecipient, FakeUser
+from maxo.dialogs.utils import is_recipient_loaded, is_user_loaded
 
 
 def test_is_recipient_loaded():

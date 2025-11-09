@@ -2,10 +2,6 @@
 requires = ["uv_build==0.7.19"]
 build-backend = "uv_build"
 
-[tool.uv.sources]
-maxo = { path = "./src/maxo" }
-maxo_dialog = { path = "./src/maxo_dialog" }
-
 [project]
 name = "maxo"
 description = "Modern framework for max bots"

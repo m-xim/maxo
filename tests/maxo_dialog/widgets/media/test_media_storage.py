@@ -5,7 +5,7 @@ import tempfile
 import pytest
 from aiogram.enums import ContentType
 
-from maxo_dialog.context.media_storage import MediaIdStorage
+from maxo.dialogs.context import MediaIdStorage
 
 
 @pytest.mark.asyncio
