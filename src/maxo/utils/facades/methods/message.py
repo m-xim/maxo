@@ -48,7 +48,11 @@ class MessageMethodsFacade(BaseMethodsFacade, ABC):
             chat_type=recipient.chat_type,
         )
 
-        attachments = self._build_attachments(base=[], keyboard=keyboard, media=media)
+        attachments = await self._build_attachments(
+            base=[],
+            keyboard=keyboard,
+            media=media,
+        )
 
         result = await self.bot.send_message(
             chat_id=chat_id or Omitted(),
@@ -115,6 +119,35 @@ class MessageMethodsFacade(BaseMethodsFacade, ABC):
             keyboard=keyboard,
             disable_link_preview=disable_link_preview,
             link=self._make_new_message_link(MessageLinkType.REPLY),
+        )
+
+    async def edit_message(
+        self,
+        text: str | None = None,
+        keyboard: Sequence[Sequence[KeyboardButtons]] | None = None,
+        media: Sequence[InputFile] | None = None,
+        link: NewMessageLink | None = None,
+        notify: bool = True,
+        format: TextFormat | None = None
+    ) -> Message:
+        message_id = self.message.unsafe_body.mid
+
+        if text is None:
+            text = self.message.unsafe_body.text
+
+        attachments = await self._build_attachments(
+            base=[],
+            keyboard=keyboard,
+            media=media,
+        )
+
+        return await self.bot.edit_message(
+            message_id=message_id,
+            text=text,
+            attachments=attachments,
+            link=link,
+            notify=notify,
+            format=format,
         )
 
     def _make_new_message_link(self, type: MessageLinkType) -> NewMessageLink:
