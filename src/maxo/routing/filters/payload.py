@@ -194,11 +194,19 @@ class MessageCallbackFilter(BaseFilter[MessageCallback]):
         except (TypeError, ValueError):
             return False
 
-        if self.filter is None or await self.filter(update, ctx):
-            ctx["payload"] = payload
+        ctx["payload"] = payload
+
+        if self.filter is None:
             return True
 
-        return False
+        result = False
+        try:
+            result = await self.filter(update, ctx)
+        finally:
+            if not result:
+                ctx.pop("payload", None)
+
+        return result
 
 
 def _check_field_is_nullable(field: dataclasses.Field) -> bool:

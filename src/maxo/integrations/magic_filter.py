@@ -12,14 +12,25 @@ from maxo.routing.filters.base import BaseFilter
 
 @final
 class MagicData(BaseFilter[Any]):
-    __slots__ = ("_magic_filter",)
+    __slots__ = ("_magic_filter", "_result_key")
 
-    def __init__(self, magic_filter: OriginMagicFilter) -> None:
-        self._magic_filter = magic_filter
+    def __init__(
+        self,
+        magic_filter: OriginMagicFilter,
+        result_key: str | None = None,
+    ) -> None:
+        self._magic_filter = magic_filter.cast(bool)
+        self._result_key = result_key
 
     async def __call__(self, update: Any, ctx: Ctx) -> bool:
         result = self._magic_filter.resolve(AttrDict({"update": update, **ctx}))
-        return bool(result)
+        if not result:
+            return False
+
+        if self._result_key is not None:
+            ctx[self._result_key] = result
+
+        return True
 
 
 @final
@@ -31,8 +42,8 @@ class MagicFilter(BaseFilter[Any]):
         magic_filter: OriginMagicFilter,
         result_key: str | None = None,
     ) -> None:
-        self._result_key = result_key
         self._magic_filter = magic_filter.cast(bool)
+        self._result_key = result_key
 
     async def __call__(self, update: Any, ctx: Ctx) -> bool:
         result = self._magic_filter.resolve(update)
