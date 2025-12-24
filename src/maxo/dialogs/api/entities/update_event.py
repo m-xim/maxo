@@ -3,8 +3,8 @@ from typing import Any
 
 from maxo import Bot
 from maxo.fsm import State
-from maxo.routing.updates.base import MaxUpdate
-from maxo.types import Chat, MaxoType, Recipient, User
+from maxo.routing.updates import BaseUpdate
+from maxo.types import Chat, Recipient, User
 
 from .modes import ShowMode, StartMode
 from .stack import AccessSettings
@@ -19,7 +19,7 @@ class DialogAction(Enum):
     SWITCH = "SWITCH"
 
 
-class DialogUpdateEvent(MaxoType):
+class DialogUpdateEvent(BaseUpdate):
     sender: User
     chat: Chat
     recipient: Recipient
@@ -41,13 +41,5 @@ class DialogSwitchEvent(DialogUpdateEvent):
     new_state: State
 
 
-class DialogUpdate(MaxUpdate):
-    aiogd_update: DialogUpdateEvent
-
-    @property
-    def type(self) -> str:
-        return DIALOG_EVENT_NAME
-
-    @property
-    def event(self) -> DialogUpdateEvent:
-        return self.aiogd_update
+class DialogUpdate(BaseUpdate):
+    update: DialogUpdateEvent

@@ -117,7 +117,7 @@ class BgManager(BaseDialogManager):
     async def _notify(self, event: DialogUpdateEvent) -> None:
         bot = self._event_context.bot
         event.bot = bot  # TODO: ???
-        update = DialogUpdate(aiogd_update=event)
+        update = DialogUpdate(update=event)
         await self._updater.notify(bot=bot, update=update)
 
     async def _load(self) -> None:

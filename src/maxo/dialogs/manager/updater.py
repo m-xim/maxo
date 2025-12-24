@@ -20,13 +20,12 @@ class Updater:
         asyncio.get_running_loop().call_soon(callback, context=copy_context())
 
     async def _process_update(self, update: DialogUpdate, bot: Bot) -> None:
-        event = update.event
         await self.dp.feed_update(
             DialogUpdate(
-                aiogd_update=DialogUpdateEvent(
+                update=DialogUpdateEvent(
                     bot=bot,
-                    sender=event.sender,
-                    chat=event.chat,
+                    sender=update.update.sender,
+                    chat=update.update.chat,
                     **self.dp.workflow_data,
                 ),
             ),
