@@ -20,4 +20,5 @@ class CallbackButton(Button):
     type: ButtonType = ButtonType.CALLBACK
 
     payload: str
+
     intent: Omittable[Intent] = Omitted()

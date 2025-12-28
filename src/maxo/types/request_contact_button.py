@@ -1,14 +1,8 @@
-from maxo.enums import ButtonType
+from maxo.enums.button_type import ButtonType
 from maxo.types.button import Button
 
 
 class RequestContactButton(Button):
-    """
-    Инлайн кнопка запроса контакта.
-
-    Args:
-        text: Видимый текст кнопки. От 1 до 128 символов.
-
-    """
+    """AПосле нажатия на такую кнопку клиент отправляет новое сообщение с вложением текущего контакта пользователя"""
 
     type: ButtonType = ButtonType.REQUEST_CONTACT

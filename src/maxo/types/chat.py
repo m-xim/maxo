@@ -37,19 +37,21 @@ class Chat(MaxoType):
     """
 
     chat_id: int
-    type: ChatType
-    status: ChatStatus
-    title: str | None = None
-    icon: Image | None = None
+    is_public: bool
     last_event_time: datetime
     participants_count: int
+    status: ChatStatus
+    type: ChatType
+
+    description: str | None = None
+    icon: Image | None = None
+    title: str | None = None
+
+    chat_message_id: Omittable[str | None] = Omitted()
+    dialog_with_user: Omittable[UserWithPhoto | None] = Omitted()
+    link: Omittable[str | None] = Omitted()
     owner_id: Omittable[int | None] = Omitted()
     participants: Omittable[dict[str, Any] | None] = Omitted()
-    is_public: bool
-    link: Omittable[str | None] = Omitted()
-    description: str | None = None
-    dialog_with_user: Omittable[UserWithPhoto | None] = Omitted()
-    chat_message_id: Omittable[str | None] = Omitted()
     pinned_message: Omittable[Message | None] = Omitted()
 
     @property

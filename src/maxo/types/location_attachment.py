@@ -3,15 +3,6 @@ from maxo.types.attachment import Attachment
 
 
 class LocationAttachment(Attachment):
-    """
-    Вложение локации.
-
-    Args:
-        latitude: Широта
-        longitude: Долгота
-
-    """
-
     type: AttachmentType = AttachmentType.LOCATION
 
     latitude: float

@@ -18,8 +18,8 @@ class FileAttachment(Attachment):
 
     type: AttachmentType = AttachmentType.FILE
 
-    payload: FileAttachmentPayload
     filename: str
+    payload: FileAttachmentPayload
     size: int
 
     @classmethod

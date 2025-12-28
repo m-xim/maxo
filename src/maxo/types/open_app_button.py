@@ -4,13 +4,10 @@ from maxo.types.button import Button
 
 
 class OpenAppButton(Button):
-    """
-    Кнопка для запуска мини-приложения.
-    Инлайн кнопка для открытия приложения.
-    """
+    """Кнопка для запуска мини-приложения"""
 
     type: ButtonType = ButtonType.OPEN_APP
 
-    web_app: Omittable[str] = Omitted()
     contact_id: Omittable[int] = Omitted()
     payload: Omittable[str] = Omitted()
+    web_app: Omittable[str] = Omitted()

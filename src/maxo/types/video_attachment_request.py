@@ -1,23 +1,15 @@
-from typing import Self
-
 from maxo.enums.attachment_request_type import AttachmentRequestType
 from maxo.omit import Omittable, Omitted
 from maxo.types.attachment_request import AttachmentRequest
-from maxo.types.upload_endpoint import UploadEndpoint
+from maxo.types.uploaded_info import UploadedInfo
 
 
 class VideoAttachmentRequest(AttachmentRequest):
-    """
-    Запрос на прикрепление видео к сообщению.
-    Запрос на прикрепление изображения.
-
-    Args:
-        payload: Данные запроса на прикрепление изображения
-
-    """
+    """Запрос на прикрепление видео к сообщению"""
 
     type: AttachmentRequestType = AttachmentRequestType.VIDEO
-    payload: UploadEndpoint
+
+    payload: UploadedInfo
 
     @classmethod
     def factory(cls, token: Omittable[str] = Omitted()) -> Self:
@@ -29,7 +21,7 @@ class VideoAttachmentRequest(AttachmentRequest):
 
         """
         return cls(
-            payload=UploadEndpoint(
+            payload=UploadedInfo(
                 token=token,
             ),
         )

@@ -19,6 +19,7 @@ class AudioAttachment(Attachment):
     type: AttachmentType = AttachmentType.AUDIO
 
     payload: MediaAttachmentPayload
+
     transcription: Omittable[str | None] = Omitted()
 
     @classmethod

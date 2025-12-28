@@ -6,12 +6,13 @@ from maxo.types.user import User
 
 
 class Callback(MaxoType):
-    """Объект, отправленный боту, когда пользователь нажимает кнопку."""
+    """Объект, отправленный боту, когда пользователь нажимает кнопку"""
 
-    timestamp: datetime
     callback_id: str
-    payload: Omittable[str] = Omitted()
+    timestamp: datetime
     user: User
+
+    payload: Omittable[str] = Omitted()
 
     @property
     def id(self) -> str:

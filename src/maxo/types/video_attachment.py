@@ -8,25 +8,14 @@ from maxo.types.video_thumbnail import VideoThumbnail
 
 
 class VideoAttachment(Attachment):
-    """
-    Видео вложение.
-
-    Args:
-        payload: Содержимое мультимедийного вложения.
-        thumbnail: Миниатюра видео
-        width: Ширина видео
-        height: Высота видео
-        duration: Длина видео в секундах
-
-    """
-
     type: AttachmentType = AttachmentType.VIDEO
 
     payload: MediaAttachmentPayload
+
+    duration: Omittable[int | None] = Omitted()
+    height: Omittable[int | None] = Omitted()
     thumbnail: Omittable[VideoThumbnail | None] = Omitted()
     width: Omittable[int | None] = Omitted()
-    height: Omittable[int | None] = Omitted()
-    duration: Omittable[int | None] = Omitted()
 
     @classmethod
     def factory(

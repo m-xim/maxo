@@ -6,7 +6,8 @@ from maxo.types.contact_attachment_request_payload import (
 
 
 class ContactAttachmentRequest(AttachmentRequest):
-    """Запрос на прикрепление карточки контакта к сообщению. MДОЛЖЕН быть единственным вложением в сообщении."""
+    """Запрос на прикрепление карточки контакта к сообщению. MДОЛЖЕН быть единственным вложением в сообщении"""
 
     type: AttachmentRequestType = AttachmentRequestType.CONTACT
+
     payload: ContactAttachmentRequestPayload

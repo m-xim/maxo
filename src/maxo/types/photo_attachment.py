@@ -6,13 +6,7 @@ from maxo.types.photo_attachment_payload import PhotoAttachmentPayload
 
 
 class PhotoAttachment(Attachment):
-    """
-    Вложение изображения.
-
-    Args:
-        payload: Содержимое вложения изображения.
-
-    """
+    """Вложение изображения"""
 
     type: AttachmentType = AttachmentType.IMAGE
 

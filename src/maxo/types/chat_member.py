@@ -19,9 +19,10 @@ class ChatMember(UserWithPhoto):
 
     """
 
-    last_access_time: datetime
-    is_owner: bool
-    is_admin: bool
-    join_time: datetime
-    permissions: list[ChatAdminPermission] | None = None
     alias: str
+    is_admin: bool
+    is_owner: bool
+    join_time: datetime
+    last_access_time: datetime
+
+    permissions: list[ChatAdminPermission] | None = None

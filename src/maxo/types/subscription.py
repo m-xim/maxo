@@ -4,8 +4,9 @@ from maxo.types.base import MaxoType
 
 
 class Subscription(MaxoType):
-    """Схема для описания подписки на WebHook."""
+    """Схема для описания подписки на WebHook"""
 
-    url: str
     time: datetime
+    url: str
+
     update_types: list[str] | None = None

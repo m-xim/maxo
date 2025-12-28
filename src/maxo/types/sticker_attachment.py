@@ -6,21 +6,11 @@ from maxo.types.sticker_attachment_payload import StickerAttachmentPayload
 
 
 class StickerAttachment(Attachment):
-    """
-    Вложение стикера.
-
-    Args:
-        payload: Данные вложения стикера.
-        width: Ширина стикера.
-        height: Высота стикера.
-
-    """
-
     type: AttachmentType = AttachmentType.STICKER
 
+    height: int
     payload: StickerAttachmentPayload
     width: int
-    height: int
 
     @classmethod
     def factory(

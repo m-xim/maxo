@@ -8,16 +8,10 @@ from maxo.types.sticker_attachment_request_payload import (
 
 
 class StickerAttachmentRequest(AttachmentRequest):
-    """
-    Запрос на прикрепление стикера. ДОЛЖЕН быть единственным вложением в сообщении.
-    Запрос на прикрепление стикера.
-
-    Args:
-        payload: Данные для запроса прикрепления стикера.
-
-    """
+    """Запрос на прикрепление стикера. ДОЛЖЕН быть единственным вложением в сообщении"""
 
     type: AttachmentRequestType = AttachmentRequestType.STICKER
+
     payload: StickerAttachmentRequestPayload
 
     @classmethod

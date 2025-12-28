@@ -2,6 +2,6 @@ from maxo.types.base import MaxoType
 
 
 class MessageStat(MaxoType):
-    """Статистика сообщения."""
+    """Статистика сообщения"""
 
     views: int

@@ -7,15 +7,7 @@ from maxo.types.share_attachment_payload import ShareAttachmentPayload
 
 
 class ShareAttachmentRequest(AttachmentRequest):
-    """
-    Запрос на прикрепление предпросмотра медиафайла по внешнему URL.
-
-    Запрос на прикрепление вложения обмена.
-
-    Args:
-        payload: Полезная нагрузка вложения обмена.
-
-    """
+    """Запрос на прикрепление предпросмотра медиафайла по внешнему URL"""
 
     type: AttachmentRequestType = AttachmentRequestType.SHARE
 

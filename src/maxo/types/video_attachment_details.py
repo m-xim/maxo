@@ -5,9 +5,10 @@ from maxo.types.video_urls import VideoUrls
 
 
 class VideoAttachmentDetails(MaxoType):
-    token: str
-    urls: Omittable[VideoUrls | None] = Omitted()
-    thumbnail: Omittable[PhotoAttachmentPayload | None] = Omitted()
-    width: int
-    height: int
     duration: int
+    height: int
+    token: str
+    width: int
+
+    thumbnail: Omittable[PhotoAttachmentPayload | None] = Omitted()
+    urls: Omittable[VideoUrls | None] = Omitted()

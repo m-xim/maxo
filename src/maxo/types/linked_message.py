@@ -17,7 +17,8 @@ class LinkedMessage(MaxoType):
 
     """
 
-    type: MessageLinkType
-    sender: Omittable[User] = Omitted()
-    chat_id: Omittable[int] = Omitted()
     message: MessageBody
+    type: MessageLinkType
+
+    chat_id: Omittable[int] = Omitted()
+    sender: Omittable[User] = Omitted()

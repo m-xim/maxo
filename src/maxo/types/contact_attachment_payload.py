@@ -13,5 +13,5 @@ class ContactAttachmentPayload(MaxoType):
 
     """
 
-    vcf_info: Omittable[str | None] = Omitted()
     max_info: Omittable[User | None] = Omitted()
+    vcf_info: Omittable[str | None] = Omitted()

@@ -13,4 +13,5 @@ class BotCommand(MaxoType):
     """
 
     name: str
+
     description: Omittable[str | None] = Omitted()

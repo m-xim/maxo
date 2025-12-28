@@ -11,9 +11,10 @@ class ShareAttachment(Attachment):
     type: AttachmentType = AttachmentType.SHARE
 
     payload: ShareAttachmentPayload = field(default_factory=ShareAttachmentPayload)
-    title: Omittable[str | None] = Omitted()
+
     description: Omittable[str | None] = Omitted()
     image_url: Omittable[str | None] = Omitted()
+    title: Omittable[str | None] = Omitted()
 
     @classmethod
     def factory(

@@ -17,6 +17,6 @@ class ChatAdmin(MaxoType):
 
     """
 
-    user_id: int
-    permissions: list[ChatAdminPermission]
     alias: str
+    permissions: list[ChatAdminPermission]
+    user_id: int

@@ -6,34 +6,23 @@ from maxo.types.base import MaxoType
 
 class User(MaxoType):
     """
-    Объект, описывающий пользователя. Имеет несколько вариаций (наследований):  - [`User`](/docs-api/objects/User) - [`UserWithPhoto`](/docs-api/objects/UserWithPhoto) - [`BotInfo`](/docs-api/objects/BotInfo) - [`ChatMember`](/docs-api/objects/ChatMember).
-    Информация о пользователе.
+    Объект, описывающий пользователя. Имеет несколько вариаций (наследований):
 
-    Args:
-        user_id: ID пользователя.
-        first_name: Отображаемое имя пользователя.
-        last_name: Отображаемая фамилия пользователя.
-        username:
-            Уникальное публичное имя пользователя.
-            Может быть null, если пользователь недоступен или имя не задано.
-        is_bot: True, если пользователь является ботом.
-        last_activity_time:
-            Время последней активности пользователя в MAX (Unix-время в миллисекундах).
-            Может быть неактуальным, если пользователь отключил статус "онлайн" в настройках.
-        description:
-            Описание пользователя.
-            Может быть null, если пользователь его не заполнил.
-            До 16000 символов.
-
+    - [`User`](/docs-api/objects/User)
+    - [`UserWithPhoto`](/docs-api/objects/UserWithPhoto)
+    - [`BotInfo`](/docs-api/objects/BotInfo)
+    - [`ChatMember`](/docs-api/objects/ChatMember)
     """
 
-    user_id: int
     first_name: str
-    last_name: str | None = None
-    name: Omittable[str | None] = Omitted()
-    username: str | None = None
     is_bot: bool
     last_activity_time: datetime
+    user_id: int
+
+    last_name: str | None = None
+    username: str | None = None
+
+    name: Omittable[str | None] = Omitted()
 
     @property
     def id(self) -> int:
