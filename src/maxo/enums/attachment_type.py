@@ -6,6 +6,7 @@ class AttachmentType(StrEnum):
 
     AUDIO = "audio"
     CONTACT = "contact"
+    DATA = "data"
     FILE = "file"
     IMAGE = "image"
     INLINE_KEYBOARD = "inline_keyboard"
@@ -14,4 +15,3 @@ class AttachmentType(StrEnum):
     SHARE = "share"
     STICKER = "sticker"
     VIDEO = "video"
-    DATA = "data"

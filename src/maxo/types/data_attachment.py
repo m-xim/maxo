@@ -1,4 +1,4 @@
-from maxo.enums import AttachmentType
+from maxo.enums.attachment_type import AttachmentType
 from maxo.types.attachment import Attachment
 
 

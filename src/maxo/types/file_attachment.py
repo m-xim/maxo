@@ -6,16 +6,6 @@ from maxo.types.file_attachment_payload import FileAttachmentPayload
 
 
 class FileAttachment(Attachment):
-    """
-    Файловое вложение.
-
-    Args:
-        payload: Содержимое файлового вложения.
-        filename: Имя загруженного файла
-        size: Размер файла в байтах
-
-    """
-
     type: AttachmentType = AttachmentType.FILE
 
     filename: str

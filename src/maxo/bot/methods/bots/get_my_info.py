@@ -3,7 +3,7 @@ from maxo.types.bot_info import BotInfo
 
 
 class GetMyInfo(MaxoMethod[BotInfo]):
-    """Получение информации о текущем боте."""
+    """Получение информации о боте."""
 
     __url__ = "me"
     __http_method__ = "get"

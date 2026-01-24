@@ -1,6 +1,6 @@
 from maxo.types.base import MaxoType
-from maxo.types.buttons import InlineButtons
+from maxo.types.button import Button
 
 
 class InlineKeyboardAttachmentRequestPayload(MaxoType):
-    buttons: list[list[InlineButtons]]
+    buttons: list[list[Button]]

@@ -8,14 +8,6 @@ from maxo.types.user import User
 
 
 class ContactAttachment(Attachment):
-    """
-    Вложение контактов.
-
-    Args:
-        payload: Содержимо вложения контактов.
-
-    """
-
     type: AttachmentType = AttachmentType.CONTACT
 
     payload: ContactAttachmentPayload

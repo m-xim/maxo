@@ -3,7 +3,7 @@ from retejo.http.markers import Body, QueryParam
 from maxo.bot.methods.base import MaxoMethod
 from maxo.enums.text_format import TextFormat
 from maxo.omit import Omittable, Omitted
-from maxo.types import AttachmentsRequests
+from maxo.types.attachments import AttachmentsRequests
 from maxo.types.new_message_link import NewMessageLink
 from maxo.types.send_message_result import SendMessageResult
 

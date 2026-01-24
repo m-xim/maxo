@@ -6,12 +6,12 @@ from maxo.types.base import MaxoType
 
 class User(MaxoType):
     """
-    Объект, описывающий пользователя. Имеет несколько вариаций (наследований):
+    Объект, описывающий один из вариантов наследования:
 
-    - [`User`](/docs-api/objects/User)
-    - [`UserWithPhoto`](/docs-api/objects/UserWithPhoto)
-    - [`BotInfo`](/docs-api/objects/BotInfo)
-    - [`ChatMember`](/docs-api/objects/ChatMember)
+    - [`User`](/docs-api/objects/User) — объект содержит общую информацию о пользователе или боте без аватара
+    - [`UserWithPhoto`](/docs-api/objects/UserWithPhoto) — объект с общей информацией о пользователе или боте, дополнительно содержит URL аватара и описание
+    - [`BotInfo`](/docs-api/objects/BotInfo) — объект включает общую информацию о боте, URL аватара и описание. Дополнительно содержит список команд, поддерживаемых ботом. Возвращается только при вызове метода [`GET /me`](/docs-api/methods/GET/me)
+    - [`ChatMember`](/docs-api/objects/ChatMember) — объект включает общую информацию о пользователе или боте, URL аватара и описание при его наличии. Дополнительно содержит данные для пользователей-участников чата. Возвращается только при вызове некоторых методов группы `/chats`, например [`GET /chats/{chatId}/members`](/docs-api/methods/GET/chats/-chatId-/members)
     """
 
     first_name: str
