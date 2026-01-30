@@ -3,7 +3,7 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-from adaptix import name_mapping, P, Retort, dumper, loader
+from adaptix import P, Retort, dumper, loader
 from aiohttp import ClientSession
 from unihttp.clients.aiohttp import AiohttpAsyncClient
 from unihttp.http import HTTPResponse
@@ -12,9 +12,9 @@ from unihttp.method import BaseMethod
 from unihttp.middlewares import AsyncMiddleware
 from unihttp.serializers.adaptix import DEFAULT_RETORT, for_marker
 
+from maxo.__meta__ import __version__
 from maxo._internal._adaptix.concat_provider import concat_provider
 from maxo._internal._adaptix.has_tag_provider import has_tag_provider
-from maxo.bot.methods.base import MaxoMethod
 from maxo.bot.warming_up import WarmingUpType, warming_up_retort
 from maxo.enums import (
     AttachmentRequestType,
@@ -200,9 +200,12 @@ class MaxApiClient(AiohttpAsyncClient):
         self._text_format = text_format
 
         if session is None:
-            # Пока есть этот комментарий, автор не придумал, как лучше прокинуть токен
-            # Если пробрасываете session, пробрасывайте токен в заголовки
-            session = ClientSession(headers={"Authorization": self._token})
+            session = ClientSession()
+
+        if "Authorization" not in session.headers:
+            session.headers["Authorization"] = self._token
+        if "User-Agent" not in session.headers:
+            session.headers["User-Agent"] = f"maxo/{__version__}"
 
         request_dumper = self._init_method_dumper()
         response_loader = self._init_response_loader()
