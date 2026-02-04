@@ -10,7 +10,6 @@ from .bot_info import BotInfo
 from .button import Button
 from .buttons import InlineButtons, ReplyButtons
 from .callback import Callback
-from .callback_answer import CallbackAnswer
 from .callback_button import CallbackButton
 from .chat import Chat
 from .chat_admin import ChatAdmin
@@ -61,8 +60,6 @@ from .photo_attachment_payload import PhotoAttachmentPayload
 from .photo_attachment_request import PhotoAttachmentRequest
 from .photo_attachment_request_payload import PhotoAttachmentRequestPayload
 from .photo_token import PhotoToken
-from .photo_tokens import PhotoTokens
-from .pin_message_body import PinMessageBody
 from .recipient import Recipient
 from .reply_button import ReplyButton
 from .reply_keyboard_attachment import ReplyKeyboardAttachment
@@ -110,7 +107,6 @@ __all__ = (
     "BotInfo",
     "Button",
     "Callback",
-    "CallbackAnswer",
     "CallbackButton",
     "Chat",
     "ChatAdmin",
@@ -162,8 +158,6 @@ __all__ = (
     "PhotoAttachmentRequest",
     "PhotoAttachmentRequestPayload",
     "PhotoToken",
-    "PhotoTokens",
-    "PinMessageBody",
     "Recipient",
     "ReplyButton",
     "ReplyButtons",

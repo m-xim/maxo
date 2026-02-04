@@ -1,4 +1,4 @@
-from typing import Any
+from datetime import datetime
 
 from maxo.bot.methods.base import MaxoMethod
 from maxo.bot.methods.markers import Query
@@ -14,6 +14,6 @@ class GetMessages(MaxoMethod[MessageList]):
 
     chat_id: Query[Omittable[int]] = Omitted()
     count: Query[Omittable[int]] = Omitted()
-    from_: Query[Omittable[int]] = Omitted()
-    message_ids: Query[Omittable[Any | None]] = Omitted()
-    to: Query[Omittable[int]] = Omitted()
+    from_: Query[Omittable[datetime]] = Omitted()
+    message_ids: Query[Omittable[list[str] | None]] = Omitted()
+    to: Query[Omittable[datetime]] = Omitted()

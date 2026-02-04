@@ -32,14 +32,14 @@
 
 Через `pip`:
 ```commandline
-pip install "maxo[magic-filter,dishka,redis] @ git+https://github.com/K1rL3s/maxo.git@master"
+pip install maxo==0.2.0
 ```
 
 В `pyproject.toml`:
 ```toml
 [project]
 dependencies = [
-    "maxo[magic-filter,dishka,redis] @ git+https://github.com/K1rL3s/maxo.git@master",
+    "maxo==0.2.0,
 ]
 ```
 
