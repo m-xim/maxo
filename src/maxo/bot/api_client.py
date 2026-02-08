@@ -299,7 +299,9 @@ class MaxApiClient(AiohttpAsyncClient):
                 response_data = None
                 content = await response.read()
                 if content:
-                    if b"retval" in content:
+                    if content == b"<retval>1</retval>":
+                        # https://dev.max.ru/docs-api/methods/POST/uploads
+                        # "После загрузки видео или аудио сервер возвращает retval"
                         raise RetvalReturnedServerException
                     response_data = self.json_loads(content)
 
