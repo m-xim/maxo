@@ -10,7 +10,6 @@ from maxo.routing.updates.bot_removed_from_chat import BotRemovedFromChat
 from maxo.routing.updates.bot_started import BotStarted
 from maxo.routing.updates.chat_title_changed import ChatTitleChanged
 from maxo.routing.updates.message_callback import MessageCallback
-from maxo.routing.updates.message_chat_created import MessageChatCreated
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.routing.updates.message_edited import MessageEdited
 from maxo.routing.updates.user_added_to_chat import UserAddedToChat
@@ -63,8 +62,6 @@ class UpdateContextMiddleware(BaseMiddleware[MaxoUpdate[Any]]):
                     update.message.recipient.chat_id or update.message.recipient.user_id
                 )
 
-        elif isinstance(update, MessageChatCreated):
-            chat_id = update.chat.chat_id
         elif isinstance(update, (MessageEdited, MessageCreated)):
             user_id = (
                 update.message.sender.user_id

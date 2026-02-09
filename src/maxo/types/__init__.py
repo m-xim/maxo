@@ -8,7 +8,7 @@ from .base import MaxoType
 from .bot_command import BotCommand
 from .bot_info import BotInfo
 from .button import Button
-from .buttons import InlineButtons, ReplyButtons
+from .buttons import InlineButtons
 from .callback import Callback
 from .callback_button import CallbackButton
 from .chat import Chat
@@ -23,7 +23,6 @@ from .contact_attachment import ContactAttachment
 from .contact_attachment_payload import ContactAttachmentPayload
 from .contact_attachment_request import ContactAttachmentRequest
 from .contact_attachment_request_payload import ContactAttachmentRequestPayload
-from .data_attachment import DataAttachment
 from .emphasized_markup import EmphasizedMarkup
 from .file_attachment import FileAttachment
 from .file_attachment_payload import FileAttachmentPayload
@@ -61,14 +60,8 @@ from .photo_attachment_request import PhotoAttachmentRequest
 from .photo_attachment_request_payload import PhotoAttachmentRequestPayload
 from .photo_token import PhotoToken
 from .recipient import Recipient
-from .reply_button import ReplyButton
-from .reply_keyboard_attachment import ReplyKeyboardAttachment
-from .reply_keyboard_attachment_request import ReplyKeyboardAttachmentRequest
 from .request_contact_button import RequestContactButton
 from .request_geo_location_button import RequestGeoLocationButton
-from .send_contact_button import SendContactButton
-from .send_geo_location_button import SendGeoLocationButton
-from .send_message_button import SendMessageButton
 from .send_message_result import SendMessageResult
 from .share_attachment import ShareAttachment
 from .share_attachment_payload import ShareAttachmentPayload
@@ -121,7 +114,6 @@ __all__ = (
     "ContactAttachmentPayload",
     "ContactAttachmentRequest",
     "ContactAttachmentRequestPayload",
-    "DataAttachment",
     "EmphasizedMarkup",
     "FileAttachment",
     "FileAttachmentPayload",
@@ -160,15 +152,8 @@ __all__ = (
     "PhotoAttachmentRequestPayload",
     "PhotoToken",
     "Recipient",
-    "ReplyButton",
-    "ReplyButtons",
-    "ReplyKeyboardAttachment",
-    "ReplyKeyboardAttachmentRequest",
     "RequestContactButton",
     "RequestGeoLocationButton",
-    "SendContactButton",
-    "SendGeoLocationButton",
-    "SendMessageButton",
     "SendMessageResult",
     "ShareAttachment",
     "ShareAttachmentPayload",

@@ -23,5 +23,3 @@ class UpdateType(StrEnum):
     MESSAGE_REMOVED = "message_removed"
     USER_ADDED = "user_added"
     USER_REMOVED = "user_removed"
-
-    MESSAGE_CHAT_CREATED = "message_chat_created"  # ????

@@ -4,7 +4,6 @@ from maxo.routing.updates.bot_started import BotStarted
 from maxo.routing.updates.bot_stopped import BotStopped
 from maxo.routing.updates.chat_title_changed import ChatTitleChanged
 from maxo.routing.updates.message_callback import MessageCallback
-from maxo.routing.updates.message_chat_created import MessageChatCreated
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.routing.updates.message_edited import MessageEdited
 from maxo.routing.updates.message_removed import MessageRemoved
@@ -19,7 +18,6 @@ Updates = (
     | ChatTitleChanged
     | MessageCallback
     | MessageCreated
-    | MessageChatCreated
     | MessageEdited
     | MessageRemoved
     | UserAddedToChat

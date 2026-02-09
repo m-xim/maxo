@@ -27,7 +27,6 @@ from maxo.routing.updates import (
     DialogRemoved,
     DialogUnmuted,
     MessageCallback,
-    MessageChatCreated,
     MessageCreated,
     MessageEdited,
     MessageRemoved,
@@ -50,7 +49,6 @@ class Router(BaseRouter):
         self.dialog_removed = UpdateObserver[DialogRemoved]()
         self.dialog_unmuted = UpdateObserver[DialogUnmuted]()
         self.message_callback = UpdateObserver[MessageCallback]()
-        self.message_chat_created = UpdateObserver[MessageChatCreated]()
         self.message_created = UpdateObserver[MessageCreated]()
         self.message_edited = UpdateObserver[MessageEdited]()
         self.message_removed = UpdateObserver[MessageRemoved]()
@@ -82,7 +80,6 @@ class Router(BaseRouter):
             DialogRemoved: self.dialog_removed,
             DialogUnmuted: self.dialog_unmuted,
             MessageCallback: self.message_callback,
-            MessageChatCreated: self.message_chat_created,
             MessageCreated: self.message_created,
             MessageEdited: self.message_edited,
             MessageRemoved: self.message_removed,

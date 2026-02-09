@@ -9,7 +9,6 @@ from maxo.routing.updates.dialog_muted import DialogMuted
 from maxo.routing.updates.dialog_removed import DialogRemoved
 from maxo.routing.updates.dialog_unmuted import DialogUnmuted
 from maxo.routing.updates.message_callback import MessageCallback
-from maxo.routing.updates.message_chat_created import MessageChatCreated
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.routing.updates.message_edited import MessageEdited
 from maxo.routing.updates.message_removed import MessageRemoved
@@ -30,7 +29,6 @@ __all__ = (
     "DialogUnmuted",
     "MaxUpdate",
     "MessageCallback",
-    "MessageChatCreated",
     "MessageCreated",
     "MessageEdited",
     "MessageRemoved",
