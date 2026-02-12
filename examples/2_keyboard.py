@@ -26,10 +26,6 @@ async def start_handler(
             text="Кликни на меня",
             payload="click_me",
         )
-        .add_chat(
-            text="Создать чат",
-            title="Чат",
-        )
         .add_link(text="Ссылка на google", url="https://google.com")
         .add_request_contact(text="Поделится контактами")
         .add_request_geo_location(text="Поделится гео позицией")
@@ -42,7 +38,7 @@ async def start_handler(
     )
 
 
-@router.message_callback(MagicFilter(F.callback_id == "click_me"))
+@router.message_callback(MagicFilter(F.payload == "click_me"))
 async def click_me_handler(
     update: MessageCallback,
     facade: MessageCallbackFacade,
