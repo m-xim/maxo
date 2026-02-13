@@ -63,6 +63,6 @@ jobs:
         run: |
           uv pip install -e ".[test]" --system
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
-          pytest
+          pytest --cov=src --cov-report=xml
