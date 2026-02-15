@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from maxo.dialogs.api.internal import FakeRecipient, FakeUser
 from maxo.dialogs.utils import is_recipient_loaded, is_user_loaded
