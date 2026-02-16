@@ -73,7 +73,7 @@ class MockMessageManager(MessageManagerProtocol):
         self.answered_callbacks.clear()
 
     def assert_one_message(self) -> None:
-        assert len(self.sent_messages) == 1  # noqa: S101
+        assert len(self.sent_messages) == 1
 
     def last_message(self) -> Message:
         return self.sent_messages[-1]
@@ -95,7 +95,7 @@ class MockMessageManager(MessageManagerProtocol):
             return None
         if show_mode in (ShowMode.DELETE_AND_SEND, ShowMode.NO_UPDATE):
             return None
-        assert isinstance(old_message, OldMessage)  # noqa: S101
+        assert isinstance(old_message, OldMessage)
 
         message = Message(
             timestamp=datetime.now(UTC),

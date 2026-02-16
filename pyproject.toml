@@ -166,7 +166,9 @@ ignore = [
 "src/maxo/types/*.py" = ["E501", "D"]
 "src/maxo/enums/*.py" = ["E501", "D"]
 "src/maxo/bot/updates/*.py" = ["E501", "D"]
+"src/maxo/bot/methods/*.py" = ["E501", "D"]
 "src/maxo/routing/updates/*.py" = ["E501", "D"]
+"src/maxo/dialogs/test_tools/**/*.py" = ["S101"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true
