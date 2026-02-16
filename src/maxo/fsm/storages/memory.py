@@ -84,7 +84,7 @@ class SimpleEventIsolation(BaseEventIsolation):
 
 class DisabledEventIsolation(BaseEventIsolation):
     @asynccontextmanager
-    async def lock(self, key: StorageKey) -> AsyncIterator[None]:  # noqa: ARG002
+    async def lock(self, key: StorageKey) -> AsyncIterator[None]:
         yield
 
     async def close(self) -> None:

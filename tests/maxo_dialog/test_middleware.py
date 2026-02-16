@@ -36,7 +36,7 @@ class MyMiddleware(BaseMiddleware[MaxUpdate]):
         return await next(ctx)
 
 
-async def start(message: Message, dialog_manager: DialogManager):
+async def start(message: Message, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
@@ -76,4 +76,4 @@ def bot() -> Bot:
 async def test_middleware(bot, message_manager, client) -> None:
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.unsafe_body.text == "my_value"
+    assert first_message.body.text == "my_value"

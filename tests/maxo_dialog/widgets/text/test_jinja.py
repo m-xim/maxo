@@ -37,6 +37,7 @@ async def test_render_jinja(mock_manager) -> None:
 <b>Animals list</b>
 * <a href="https://yandex.ru/search/?text=cat">Cat</a>
 * <a href="https://yandex.ru/search/?text=dog">Dog</a>
-* <a href="https://yandex.ru/search/?text=my brother&#39;s tortoise">My brother&#39;s tortoise</a>
+* <a href="https://yandex.ru/search/?text=my brother&#39;s tortoise">\
+My brother&#39;s tortoise</a>
 """
     )

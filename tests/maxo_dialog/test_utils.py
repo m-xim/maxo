@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from maxo.dialogs.api.internal import FakeRecipient, FakeUser
 from maxo.dialogs.utils import is_recipient_loaded, is_user_loaded
@@ -21,7 +21,7 @@ def test_is_user_loaded() -> None:
             user_id=1,
             is_bot=False,
             first_name="",
-            last_activity_time=datetime.fromtimestamp(1234567890),
+            last_activity_time=datetime.fromtimestamp(1234567890, tz=UTC),
         ),
     )
     assert not is_user_loaded(
@@ -29,6 +29,6 @@ def test_is_user_loaded() -> None:
             user_id=1,
             is_bot=False,
             first_name="",
-            last_activity_time=datetime.fromtimestamp(1234567890),
+            last_activity_time=datetime.fromtimestamp(1234567890, tz=UTC),
         ),
     )

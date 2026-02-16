@@ -15,7 +15,7 @@ class StateFilter(BaseFilter[Any]):
     ) -> None:
         self._states = states
 
-    async def __call__(self, update: Any, ctx: Ctx) -> bool:  # noqa: ARG002
+    async def __call__(self, update: Any, ctx: Ctx) -> bool:
         raw_state = ctx.get("raw_state")
 
         for state in self._states:
@@ -25,11 +25,7 @@ class StateFilter(BaseFilter[Any]):
                 return True
             if isinstance(state, State) and raw_state == state:
                 return True
-            if (
-                isclass(state)
-                and issubclass(state, StatesGroup)
-                and raw_state in StatesGroup
-            ):
+            if isclass(state) and issubclass(state, StatesGroup) and raw_state in state:
                 return True
 
         return False

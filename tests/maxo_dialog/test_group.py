@@ -32,16 +32,16 @@ window = Window(
 )
 
 
-async def start(event: Any, dialog_manager: DialogManager):
+async def start(event: Any, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
-async def start_shared(event: Any, dialog_manager: DialogManager):
+async def start_shared(event: Any, dialog_manager: DialogManager) -> None:
     dialog_manager = dialog_manager.bg(stack_id=GROUP_STACK_ID)
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
-async def add_shared(event: Any, dialog_manager: DialogManager):
+async def add_shared(event: Any, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(
         MainSG.start,
         access_settings=AccessSettings(
@@ -51,12 +51,12 @@ async def add_shared(event: Any, dialog_manager: DialogManager):
 
 
 @pytest.fixture
-def message_manager():
+def message_manager() -> MockMessageManager:
     return MockMessageManager()
 
 
 @pytest.fixture
-def dp(message_manager):
+def dp(message_manager) -> Dispatcher:
     dp = Dispatcher(storage=JsonMemoryStorage())
     dp.include(Dialog(window))
     setup_dialogs(dp, message_manager=message_manager)
@@ -64,17 +64,17 @@ def dp(message_manager):
 
 
 @pytest.fixture
-def client(dp):
+def client(dp) -> BotClient:
     return BotClient(dp, chat_id=-1, user_id=1, chat_type="group")
 
 
 @pytest.fixture
-def second_client(dp):
+def second_client(dp) -> BotClient:
     return BotClient(dp, chat_id=-1, user_id=2, chat_type="group")
 
 
 @pytest.mark.asyncio
-async def test_second_user(dp, client, second_client, message_manager):
+async def test_second_user(dp, client, second_client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
     await client.send("/start")
     first_message = message_manager.one_message()
@@ -90,7 +90,7 @@ async def test_second_user(dp, client, second_client, message_manager):
 
 
 @pytest.mark.asyncio
-async def test_change_settings(dp, client, second_client, message_manager):
+async def test_change_settings(dp, client, second_client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
     dp.message_created.handler(add_shared, Command("add"))
 
@@ -121,7 +121,7 @@ async def test_change_settings(dp, client, second_client, message_manager):
 
 
 @pytest.mark.asyncio
-async def test_change_settings_bg(dp, client, second_client, message_manager):
+async def test_change_settings_bg(dp, client, second_client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
     dp.message_created.handler(add_shared, Command("add"))
 
@@ -152,7 +152,7 @@ async def test_change_settings_bg(dp, client, second_client, message_manager):
 
 
 @pytest.mark.asyncio
-async def test_same_user(dp, client, message_manager):
+async def test_same_user(dp, client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
     await client.send("/start")
     first_message = message_manager.one_message()
@@ -169,7 +169,7 @@ async def test_same_user(dp, client, message_manager):
 
 
 @pytest.mark.asyncio
-async def test_shared_stack(dp, client, second_client, message_manager):
+async def test_shared_stack(dp, client, second_client, message_manager) -> None:
     dp.message_created.handler(start_shared, CommandStart())
     await client.send("/start")
     await asyncio.sleep(0.02)  # synchronization workaround, fixme

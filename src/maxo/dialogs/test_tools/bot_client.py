@@ -108,7 +108,7 @@ class BotClient:
                     type=MessageLinkType.REPLY,
                     sender=reply_to.sender,
                     chat_id=reply_to.recipient.chat_id,
-                    message=reply_to.unsafe_body,
+                    message=reply_to.body,
                 )
                 if reply_to
                 else None

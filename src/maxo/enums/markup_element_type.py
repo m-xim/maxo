@@ -1,6 +1,8 @@
 from enum import StrEnum
 
 
+# У клиента есть QUOTE (цитата), но в доке не описана и боту не приходит
+# https://t.me/maxo_py/671
 class MarkupElementType(StrEnum):
     EMPHASIZED = "emphasized"
     LINK = "link"

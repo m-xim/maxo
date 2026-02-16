@@ -418,11 +418,11 @@ class ManagerImpl(DialogManager):
         stack = self.current_stack()
         if isinstance(current_message, Message):
             return OldMessage(
-                text=current_message.unsafe_body.text,
+                text=current_message.body.text,
                 recipient=current_message.recipient,
-                message_id=current_message.unsafe_body.mid,
-                sequence_id=current_message.unsafe_body.seq,
-                attachments=current_message.unsafe_body.attachments or [],
+                message_id=current_message.body.mid,
+                sequence_id=current_message.body.seq,
+                attachments=current_message.body.attachments or [],
             )
         if not stack or not stack.last_message_id:
             return None

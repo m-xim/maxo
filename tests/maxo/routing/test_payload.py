@@ -347,8 +347,8 @@ class TestPayload:
     @pytest.mark.parametrize(
         "hint",
         [
-            Union[int, None],
-            Optional[int],
+            Union[int, None],  # noqa: UP007
+            Optional[int],  # noqa: UP045
             int | None,
         ],
     )

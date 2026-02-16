@@ -33,11 +33,11 @@ dialog = Dialog(
 )
 
 
-async def start_url(message: Message, dialog_manager: DialogManager):
+async def start_url(message: Message, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.with_url, mode=StartMode.RESET_STACK)
 
 
-async def start_path(message: Message, dialog_manager: DialogManager):
+async def start_path(message: Message, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.with_path, mode=StartMode.RESET_STACK)
 
 

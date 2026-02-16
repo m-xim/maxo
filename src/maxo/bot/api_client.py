@@ -10,7 +10,7 @@ from aiohttp import ClientSession, FormData
 from unihttp.clients.aiohttp import AiohttpAsyncClient
 from unihttp.exceptions import NetworkError, RequestTimeoutError
 from unihttp.http import HTTPRequest, HTTPResponse
-from unihttp.markers import BodyMarker, QueryMarker
+from unihttp.markers import QueryMarker
 from unihttp.method import BaseMethod
 from unihttp.middlewares import AsyncMiddleware
 from unihttp.serializers.adaptix import DEFAULT_RETORT, for_marker
@@ -40,6 +40,7 @@ from maxo.errors import (
     MaxBotUnknownServerError,
     RetvalReturnedServerException,
 )
+from maxo.omit import Omittable
 from maxo.routing.updates import (
     BotAddedToChat,
     BotRemovedFromChat,
@@ -120,8 +121,6 @@ _has_tag_providers = concat_provider(
     has_tag_provider(VideoAttachment, "type", AttachmentType.VIDEO),
     # ---> MarkupElementType <---
     has_tag_provider(EmphasizedMarkup, "type", MarkupElementType.EMPHASIZED),
-    # has_tag_provider(HeadingMarkupElement, "type", MarkupElementType.HEADING),
-    # has_tag_provider(HighlightedMarkupElement, "type", MarkupElementType.HIGHLIGHTED),
     has_tag_provider(LinkMarkup, "type", MarkupElementType.LINK),
     has_tag_provider(MonospacedMarkup, "type", MarkupElementType.MONOSPACED),
     has_tag_provider(
@@ -230,7 +229,10 @@ class MaxApiClient(AiohttpAsyncClient):
                     lambda seq: ",".join(str(el) for el in seq),
                 ),
                 dumper(
-                    for_marker(BodyMarker, P[TextFormat] | P[TextFormat | None]),
+                    P[TextFormat]
+                    | P[TextFormat | None]
+                    | P[Omittable[TextFormat]]
+                    | P[Omittable[TextFormat | None]],
                     lambda item: item or self._text_format,
                 ),
             ],

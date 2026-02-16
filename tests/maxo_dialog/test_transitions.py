@@ -31,7 +31,7 @@ class SecondarySG(StatesGroup):
     start = State()
 
 
-async def start(message: Message, ctx: Ctx, dialog_manager: DialogManager):
+async def start(message: Message, ctx: Ctx, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
@@ -94,8 +94,8 @@ async def test_start(bot, message_manager, client) -> None:
     # start
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.unsafe_body.text == "First"
-    assert first_message.unsafe_body.keyboard
+    assert first_message.body.text == "First"
+    assert first_message.body.keyboard
 
 
 @pytest.mark.asyncio
@@ -111,7 +111,7 @@ async def test_next_back(bot, message_manager, client) -> None:
     )
     message_manager.assert_answered(callback_id)
     second_message = message_manager.one_message()
-    assert second_message.unsafe_body.text == "Second"
+    assert second_message.body.text == "Second"
 
     # click back
     message_manager.reset_history()
@@ -121,8 +121,8 @@ async def test_next_back(bot, message_manager, client) -> None:
     )
     message_manager.assert_answered(callback_id)
     last_message = message_manager.one_message()
-    assert last_message.unsafe_body.text == "First"
-    assert last_message.unsafe_body.keyboard
+    assert last_message.body.text == "First"
+    assert last_message.body.keyboard
 
 
 @pytest.mark.asyncio
@@ -138,7 +138,7 @@ async def test_finish_last(bot, message_manager, client) -> None:
     )
     message_manager.assert_answered(callback_id)
     last_message = message_manager.one_message()
-    assert not last_message.unsafe_body.keyboard, "Keyboard closed"
+    assert not last_message.body.keyboard, "Keyboard closed"
 
 
 @pytest.mark.asyncio
@@ -147,7 +147,7 @@ async def test_reset_stack(bot, message_manager, client) -> None:
         message_manager.reset_history()
         await client.send("/start")
         first_message = message_manager.one_message()
-        assert first_message.unsafe_body.text == "First"
+        assert first_message.body.text == "First"
 
     message_manager.reset_history()
     callback_id = await client.click(
@@ -156,7 +156,7 @@ async def test_reset_stack(bot, message_manager, client) -> None:
     )
     message_manager.assert_answered(callback_id)
     last_message = message_manager.one_message()
-    assert not last_message.unsafe_body.keyboard, "Keyboard closed"
+    assert not last_message.body.keyboard, "Keyboard closed"
 
 
 @pytest.mark.asyncio
@@ -172,7 +172,7 @@ async def test_subdialog(bot, message_manager, client) -> None:
     )
     message_manager.assert_answered(callback_id)
     second_message = message_manager.one_message()
-    assert second_message.unsafe_body.text == "Subdialog"
+    assert second_message.body.text == "Subdialog"
 
     # close subdialog
     message_manager.reset_history()
@@ -182,5 +182,5 @@ async def test_subdialog(bot, message_manager, client) -> None:
     )
     message_manager.assert_answered(callback_id)
     last_message = message_manager.one_message()
-    assert last_message.unsafe_body.text == "First"
-    assert last_message.unsafe_body.keyboard
+    assert last_message.body.text == "First"
+    assert last_message.body.keyboard

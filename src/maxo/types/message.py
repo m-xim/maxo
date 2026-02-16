@@ -15,7 +15,9 @@ class Message(MaxoType):
     Сообщение в чате
 
     Args:
-        body: Содержимое сообщения. Текст + вложения. Может быть `null`, если сообщение содержит только пересланное сообщение
+        body: Содержимое сообщения. Текст + вложения. Может быть `null`, если сообщение содержит только пересланное сообщение.
+            Как показала практика, Message.body есть всегда,
+            но при Message.link.type = "FORWARD" в Message.body.text = ""
         link: Пересланное или ответное сообщение
         recipient: Получатель сообщения. Может быть пользователем или чатом
         sender: Пользователь, отправивший сообщение
@@ -41,16 +43,6 @@ class Message(MaxoType):
         raise AttributeIsEmptyError(
             obj=self,
             attr="link",
-        )
-
-    @property
-    def unsafe_body(self) -> MessageBody:
-        if is_defined(self.body):
-            return self.body
-
-        raise AttributeIsEmptyError(
-            obj=self,
-            attr="body",
         )
 
     @property

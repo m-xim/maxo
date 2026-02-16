@@ -95,7 +95,7 @@ def dp(message_manager: MockMessageManager) -> Dispatcher:
 
 
 @pytest.mark.asyncio
-async def test_start(dp, message_manager, client):
+async def test_start(dp, message_manager, client) -> None:
     # start
     await client.send("/start")
     first_message = message_manager.one_message()

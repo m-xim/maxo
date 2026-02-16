@@ -116,6 +116,8 @@ ignore = [
     "D212",
     "D203",
 
+    "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+    "ARG002", # https://docs.astral.sh/ruff/rules/unused-method-argument/
     "ANN401", # https://docs.astral.sh/ruff/rules/any-type/
     "EM", # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
     "FIX", # https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
@@ -158,11 +160,15 @@ ignore = [
     "ASYNC", # async правила
     "E501", # длинные строки
     "PLR", # complexity
+    "FBT003",
+    "SLF001",
 ]
 "src/maxo/types/*.py" = ["E501", "D"]
 "src/maxo/enums/*.py" = ["E501", "D"]
 "src/maxo/bot/updates/*.py" = ["E501", "D"]
+"src/maxo/bot/methods/*.py" = ["E501", "D"]
 "src/maxo/routing/updates/*.py" = ["E501", "D"]
+"src/maxo/dialogs/test_tools/**/*.py" = ["S101"]
 
 [tool.ruff.lint.isort]
 case-sensitive = true

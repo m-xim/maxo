@@ -20,9 +20,9 @@ class InlineButtonTextLocator:
         self,
         message: Message,
     ) -> CallbackButton | None:
-        if not message.unsafe_body.keyboard:
+        if not message.body.keyboard:
             return None
-        for row in message.unsafe_body.keyboard.buttons:
+        for row in message.body.keyboard.buttons:
             for button in row:
                 if self.regex.fullmatch(button.text):
                     return button
@@ -41,10 +41,10 @@ class InlineButtonPositionLocator:
         self,
         message: Message,
     ) -> CallbackButton | None:
-        if not message.unsafe_body.keyboard:
+        if not message.body.keyboard:
             return None
         try:
-            return message.unsafe_body.keyboard.payload.buttons[self.row][self.column]
+            return message.body.keyboard.payload.buttons[self.row][self.column]
         except IndexError:
             return None
 
@@ -60,9 +60,9 @@ class InlineButtonDataLocator:
         self,
         message: Message,
     ) -> CallbackButton | None:
-        if not message.unsafe_body.keyboard:
+        if not message.body.keyboard:
             return None
-        for row in message.unsafe_body.keyboard.buttons:
+        for row in message.body.keyboard.buttons:
             for button in row:
                 if not hasattr(button, "payload"):
                     continue

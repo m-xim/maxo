@@ -13,3 +13,8 @@ class MarkupElement(MaxoType):
     from_: int
     length: int
     type: MarkupElementType
+
+    @property
+    def offset(self) -> int:
+        # Подражание aiogram
+        return self.from_

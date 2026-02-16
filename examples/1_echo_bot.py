@@ -4,7 +4,7 @@ import os
 from maxo import Bot, Dispatcher
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.utils.facades.updates.message_created import MessageCreatedFacade
-from maxo.utils.long_polling.long_polling import LongPolling
+from maxo.utils.long_polling import LongPolling
 
 bot = Bot(os.environ["TOKEN"])
 dispatcher = Dispatcher()
@@ -15,7 +15,7 @@ async def echo_handler(
     update: MessageCreated,
     facade: MessageCreatedFacade,
 ) -> None:
-    text = update.message.unsafe_body.text or "Текста нет"
+    text = update.message.body.text or "Текста нет"
     await facade.answer_text(text)
 
 

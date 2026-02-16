@@ -36,11 +36,11 @@ _INVALID_QUERY_ID_MSG = (
 
 def _combine(sent_message: NewMessage, message_result: Message) -> OldMessage:
     return OldMessage(
-        message_id=message_result.unsafe_body.mid,
-        sequence_id=message_result.unsafe_body.seq,
+        message_id=message_result.body.mid,
+        sequence_id=message_result.body.seq,
         recipient=message_result.recipient,
-        text=message_result.unsafe_body.text,
-        attachments=message_result.unsafe_body.attachments or [],
+        text=message_result.body.text,
+        attachments=message_result.body.attachments or [],
     )
 
 

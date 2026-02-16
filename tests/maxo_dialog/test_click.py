@@ -56,7 +56,7 @@ dialog = Dialog(
 )
 
 
-async def start(message: Message, dialog_manager: DialogManager):
+async def start(message: Message, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 

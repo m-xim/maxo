@@ -29,8 +29,6 @@ from .file_attachment_payload import FileAttachmentPayload
 from .file_attachment_request import FileAttachmentRequest
 from .get_pinned_message_result import GetPinnedMessageResult
 from .get_subscriptions_result import GetSubscriptionsResult
-from .heading_markup import HeadingMarkup
-from .highlighted_markup import HighlightedMarkup
 from .image import Image
 from .inline_keyboard_attachment import InlineKeyboardAttachment
 from .inline_keyboard_attachment_request import InlineKeyboardAttachmentRequest
@@ -43,6 +41,7 @@ from .link_markup import LinkMarkup
 from .linked_message import LinkedMessage
 from .location_attachment import LocationAttachment
 from .location_attachment_request import LocationAttachmentRequest
+from .markup_element import MarkupElement
 from .markup_elements import MarkupElements
 from .media_attachment_payload import MediaAttachmentPayload
 from .message import Message
@@ -51,7 +50,6 @@ from .message_button import MessageButton
 from .message_list import MessageList
 from .message_stat import MessageStat
 from .monospaced_markup import MonospacedMarkup
-from .new_message import NewMessage
 from .new_message_body import NewMessageBody
 from .new_message_link import NewMessageLink
 from .open_app_button import OpenAppButton
@@ -94,7 +92,6 @@ __all__ = (
     "AttachmentPayload",
     "AttachmentRequest",
     "Attachments",
-    "Attachments",
     "AttachmentsRequests",
     "AudioAttachment",
     "AudioAttachmentRequest",
@@ -121,8 +118,6 @@ __all__ = (
     "FileAttachmentRequest",
     "GetPinnedMessageResult",
     "GetSubscriptionsResult",
-    "HeadingMarkup",
-    "HighlightedMarkup",
     "Image",
     "InlineButtons",
     "InlineKeyboardAttachment",
@@ -134,6 +129,7 @@ __all__ = (
     "LinkedMessage",
     "LocationAttachment",
     "LocationAttachmentRequest",
+    "MarkupElement",
     "MarkupElements",
     "MaxoType",
     "MediaAttachmentPayload",
@@ -144,7 +140,6 @@ __all__ = (
     "MessageList",
     "MessageStat",
     "MonospacedMarkup",
-    "NewMessage",
     "NewMessageBody",
     "NewMessageLink",
     "OpenAppButton",

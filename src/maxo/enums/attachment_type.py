@@ -13,3 +13,7 @@ class AttachmentType(StrEnum):
     SHARE = "share"
     STICKER = "sticker"
     VIDEO = "video"
+
+
+# Подражание aiogram
+ContentType = AttachmentType

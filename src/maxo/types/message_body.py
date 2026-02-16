@@ -4,6 +4,11 @@ from maxo.types.base import MaxoType
 from maxo.types.inline_keyboard_attachment import InlineKeyboardAttachment
 from maxo.types.keyboard import Keyboard
 from maxo.types.markup_elements import MarkupElements
+from maxo.utils.text_decorations import (
+    TextDecoration,
+    html_decoration,
+    markdown_decoration,
+)
 
 
 class MessageBody(MaxoType):
@@ -42,3 +47,16 @@ class MessageBody(MaxoType):
     @property
     def reply_markup(self) -> Keyboard | None:
         return self.keyboard
+
+    def _unparse_entities(self, text_decoration: TextDecoration) -> str:
+        text = self.text or ""
+        entities = self.markup or []
+        return text_decoration.unparse(text=text, entities=entities)
+
+    @property
+    def html_text(self) -> str:
+        return self._unparse_entities(html_decoration)
+
+    @property
+    def md_text(self) -> str:
+        return self._unparse_entities(markdown_decoration)

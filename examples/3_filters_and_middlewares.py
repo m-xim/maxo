@@ -7,7 +7,7 @@ from maxo.routing.filters.base import BaseFilter
 from maxo.routing.interfaces.middleware import BaseMiddleware, NextMiddleware
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.utils.facades import MessageCreatedFacade
-from maxo.utils.long_polling.long_polling import LongPolling
+from maxo.utils.long_polling import LongPolling
 
 
 class OuterMiddleware(BaseMiddleware[MessageCreated]):

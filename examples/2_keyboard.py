@@ -9,7 +9,7 @@ from maxo.routing.filters import CommandStart
 from maxo.routing.updates import MessageCallback, MessageCreated
 from maxo.utils.builders import KeyboardBuilder
 from maxo.utils.facades import MessageCallbackFacade, MessageCreatedFacade
-from maxo.utils.long_polling.long_polling import LongPolling
+from maxo.utils.long_polling import LongPolling
 
 router = Router()
 

@@ -10,7 +10,7 @@ from maxo.integrations.magic_filter import MagicFilter
 from maxo.routing.filters import CommandStart
 from maxo.routing.updates.message_created import MessageCreated
 from maxo.utils.facades import MessageCreatedFacade
-from maxo.utils.long_polling.long_polling import LongPolling
+from maxo.utils.long_polling import LongPolling
 
 router = Router(__name__)
 
@@ -42,7 +42,7 @@ async def input_name_handler(
 ) -> None:
     await facade.delete_message()
 
-    text = update.message.unsafe_body.text
+    text = update.message.body.text
     if text is None:
         await facade.answer_text("Отправь текстовое сообщение")
         return
@@ -67,14 +67,14 @@ async def input_age_handler(
 ) -> None:
     await facade.delete_message()
 
-    text = update.message.unsafe_body.text
+    text = update.message.body.text
     if text is None:
         await facade.answer_text("Отправь текстовое сообщение")
         return
 
     try:
         age = int(text)
-    except TypeError:
+    except ValueError:
         await facade.answer_text("Ты отправил не возраст. Попробуй еще раз")
         return
 
