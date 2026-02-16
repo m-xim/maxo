@@ -19,7 +19,6 @@ class GetMembership(MaxoMethod[ChatMember]):
         chat_id: ID чата
 
     Источник: https://dev.max.ru/docs-api/methods/GET/chats/-chatId-/members/me
-
     """
 
     __url__ = "chats/{chat_id}/members/me"

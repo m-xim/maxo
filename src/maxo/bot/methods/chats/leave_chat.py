@@ -19,7 +19,6 @@ class LeaveChat(MaxoMethod[SimpleQueryResult]):
         chat_id: ID чата
 
     Источник: https://dev.max.ru/docs-api/methods/DELETE/chats/-chatId-/members/me
-
     """
 
     __url__ = "chats/{chat_id}/members/me"

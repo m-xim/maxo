@@ -19,7 +19,6 @@ class GetChat(MaxoMethod[Chat]):
         chat_id: ID запрашиваемого чата
 
     Источник: https://dev.max.ru/docs-api/methods/GET/chats/-chatId-
-
     """
 
     __url__ = "chats/{chat_id}"

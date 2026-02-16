@@ -40,7 +40,6 @@ class SetAdmins(MaxoMethod[SimpleQueryResult]):
         marker: Указатель на следующую страницу данных
 
     Источник: https://dev.max.ru/docs-api/methods/POST/chats/-chatId-/members/admins
-
     """
 
     __url__ = "chats/{chat_id}/members/admins"

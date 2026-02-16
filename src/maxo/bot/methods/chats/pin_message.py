@@ -27,7 +27,6 @@ class PinMessage(MaxoMethod[SimpleQueryResult]):
         notify: Если `true`, участники получат уведомление с системным сообщением о закреплении
 
     Источник: https://dev.max.ru/docs-api/methods/PUT/chats/-chatId-/pin
-
     """
 
     __url__ = "chats/{chat_id}/pin"

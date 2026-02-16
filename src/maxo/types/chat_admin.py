@@ -1,5 +1,6 @@
 from maxo.enums.chat_admin_permission import ChatAdminPermission
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.base import MaxoType
 
 
@@ -29,3 +30,13 @@ class ChatAdmin(MaxoType):
     user_id: int
 
     alias: Omittable[str] = Omitted()
+
+    @property
+    def unsafe_alias(self) -> str:
+        if is_defined(self.alias):
+            return self.alias
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="alias",
+        )

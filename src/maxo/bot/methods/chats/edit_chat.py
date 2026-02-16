@@ -31,7 +31,6 @@ class EditChat(MaxoMethod[Chat]):
         title: 
 
     Источник: https://dev.max.ru/docs-api/methods/PATCH/chats/-chatId-
-
     """
 
     __url__ = "chats/{chat_id}"

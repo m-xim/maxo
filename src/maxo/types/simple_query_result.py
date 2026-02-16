@@ -1,4 +1,5 @@
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.base import MaxoType
 
 
@@ -14,3 +15,13 @@ class SimpleQueryResult(MaxoType):
     success: bool
 
     message: Omittable[str] = Omitted()
+
+    @property
+    def unsafe_message(self) -> str:
+        if is_defined(self.message):
+            return self.message
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="message",
+        )

@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.base import MaxoType
 
 
@@ -44,3 +45,33 @@ class User(MaxoType):
         if self.first_name:
             return self.first_name
         return None
+
+    @property
+    def unsafe_last_name(self) -> str:
+        if is_defined(self.last_name):
+            return self.last_name
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="last_name",
+        )
+
+    @property
+    def unsafe_name(self) -> str:
+        if is_defined(self.name):
+            return self.name
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="name",
+        )
+
+    @property
+    def unsafe_username(self) -> str:
+        if is_defined(self.username):
+            return self.username
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="username",
+        )

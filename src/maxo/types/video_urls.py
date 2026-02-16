@@ -1,4 +1,5 @@
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.base import MaxoType
 
 
@@ -22,3 +23,73 @@ class VideoUrls(MaxoType):
     mp4_360: Omittable[str | None] = Omitted()
     mp4_480: Omittable[str | None] = Omitted()
     mp4_720: Omittable[str | None] = Omitted()
+
+    @property
+    def unsafe_hls(self) -> str:
+        if is_defined(self.hls):
+            return self.hls
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="hls",
+        )
+
+    @property
+    def unsafe_mp4_1080(self) -> str:
+        if is_defined(self.mp4_1080):
+            return self.mp4_1080
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="mp4_1080",
+        )
+
+    @property
+    def unsafe_mp4_144(self) -> str:
+        if is_defined(self.mp4_144):
+            return self.mp4_144
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="mp4_144",
+        )
+
+    @property
+    def unsafe_mp4_240(self) -> str:
+        if is_defined(self.mp4_240):
+            return self.mp4_240
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="mp4_240",
+        )
+
+    @property
+    def unsafe_mp4_360(self) -> str:
+        if is_defined(self.mp4_360):
+            return self.mp4_360
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="mp4_360",
+        )
+
+    @property
+    def unsafe_mp4_480(self) -> str:
+        if is_defined(self.mp4_480):
+            return self.mp4_480
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="mp4_480",
+        )
+
+    @property
+    def unsafe_mp4_720(self) -> str:
+        if is_defined(self.mp4_720):
+            return self.mp4_720
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="mp4_720",
+        )

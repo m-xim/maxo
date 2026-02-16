@@ -19,7 +19,6 @@ class Unsubscribe(MaxoMethod[SimpleQueryResult]):
         url: URL, который нужно удалить из подписок на WebHook
 
     Источник: https://dev.max.ru/docs-api/methods/DELETE/subscriptions
-
     """
 
     __url__ = "subscriptions"

@@ -22,7 +22,6 @@ class RemoveMember(MaxoMethod[SimpleQueryResult]):
         user_id: ID пользователя, которого нужно удалить из чата
 
     Источник: https://dev.max.ru/docs-api/methods/DELETE/chats/-chatId-/members
-
     """
 
     __url__ = "chats/{chat_id}/members"

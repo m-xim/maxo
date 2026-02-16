@@ -1,5 +1,6 @@
 from maxo.enums.text_format import TextFormat
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.attachments import AttachmentsRequests
 from maxo.types.base import MaxoType
 from maxo.types.new_message_link import NewMessageLink
@@ -21,3 +22,53 @@ class NewMessageBody(MaxoType):
 
     format: Omittable[TextFormat | None] = Omitted()
     notify: Omittable[bool] = Omitted()
+
+    @property
+    def unsafe_attachments(self) -> list[AttachmentsRequests]:
+        if is_defined(self.attachments):
+            return self.attachments
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="attachments",
+        )
+
+    @property
+    def unsafe_format(self) -> TextFormat:
+        if is_defined(self.format):
+            return self.format
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="format",
+        )
+
+    @property
+    def unsafe_link(self) -> NewMessageLink:
+        if is_defined(self.link):
+            return self.link
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="link",
+        )
+
+    @property
+    def unsafe_notify(self) -> bool:
+        if is_defined(self.notify):
+            return self.notify
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="notify",
+        )
+
+    @property
+    def unsafe_text(self) -> str:
+        if is_defined(self.text):
+            return self.text
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="text",
+        )

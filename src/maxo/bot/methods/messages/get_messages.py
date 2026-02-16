@@ -36,7 +36,6 @@ class GetMessages(MaxoMethod[MessageList]):
         to: Время окончания для запрашиваемых сообщений (в формате Unix timestamp)
 
     Источник: https://dev.max.ru/docs-api/methods/GET/messages
-
     """
 
     __url__ = "messages"

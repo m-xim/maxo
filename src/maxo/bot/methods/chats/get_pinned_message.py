@@ -19,7 +19,6 @@ class GetPinnedMessage(MaxoMethod[GetPinnedMessageResult]):
         chat_id: ID чата
 
     Источник: https://dev.max.ru/docs-api/methods/GET/chats/-chatId-/pin
-
     """
 
     __url__ = "chats/{chat_id}/pin"

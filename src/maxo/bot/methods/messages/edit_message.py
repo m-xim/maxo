@@ -34,7 +34,6 @@ class EditMessage(MaxoMethod[SimpleQueryResult]):
         text: Новый текст сообщения
 
     Источник: https://dev.max.ru/docs-api/methods/PUT/messages
-
     """
 
     __url__ = "messages"

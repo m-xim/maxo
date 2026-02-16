@@ -23,7 +23,6 @@ class GetMembers(MaxoMethod[ChatMembersList]):
         user_ids: Список ID пользователей, чье членство нужно получить. Когда этот параметр передан, параметры `count` и `marker` игнорируются
 
     Источник: https://dev.max.ru/docs-api/methods/GET/chats/-chatId-/members
-
     """
 
     __url__ = "chats/{chat_id}/members"

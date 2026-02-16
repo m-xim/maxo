@@ -1,4 +1,5 @@
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.attachments import Attachments
 from maxo.types.base import MaxoType
 from maxo.types.inline_keyboard_attachment import InlineKeyboardAttachment
@@ -60,3 +61,33 @@ class MessageBody(MaxoType):
     @property
     def md_text(self) -> str:
         return self._unparse_entities(markdown_decoration)
+
+    @property
+    def unsafe_attachments(self) -> list[Attachments]:
+        if is_defined(self.attachments):
+            return self.attachments
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="attachments",
+        )
+
+    @property
+    def unsafe_markup(self) -> list[MarkupElements]:
+        if is_defined(self.markup):
+            return self.markup
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="markup",
+        )
+
+    @property
+    def unsafe_text(self) -> str:
+        if is_defined(self.text):
+            return self.text
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="text",
+        )

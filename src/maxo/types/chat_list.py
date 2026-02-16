@@ -1,3 +1,5 @@
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import is_defined
 from maxo.types.base import MaxoType
 from maxo.types.chat import Chat
 
@@ -12,3 +14,13 @@ class ChatList(MaxoType):
     chats: list[Chat]
 
     marker: int | None = None
+
+    @property
+    def unsafe_marker(self) -> int:
+        if is_defined(self.marker):
+            return self.marker
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="marker",
+        )

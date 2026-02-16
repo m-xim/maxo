@@ -24,7 +24,6 @@ class AddMembers(MaxoMethod[SimpleQueryResult]):
         user_ids: 
 
     Источник: https://dev.max.ru/docs-api/methods/POST/chats/-chatId-/members
-
     """
 
     __url__ = "chats/{chat_id}/members"

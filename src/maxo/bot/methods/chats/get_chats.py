@@ -21,7 +21,6 @@ class GetChats(MaxoMethod[ChatList]):
         marker: Указатель на следующую страницу данных. Для первой страницы передайте `null`
 
     Источник: https://dev.max.ru/docs-api/methods/GET/chats
-
     """
 
     __url__ = "chats"

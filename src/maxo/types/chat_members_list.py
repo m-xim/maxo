@@ -1,4 +1,5 @@
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.base import MaxoType
 from maxo.types.chat_member import ChatMember
 
@@ -13,3 +14,13 @@ class ChatMembersList(MaxoType):
     members: list[ChatMember]
 
     marker: Omittable[int | None] = Omitted()
+
+    @property
+    def unsafe_marker(self) -> int:
+        if is_defined(self.marker):
+            return self.marker
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="marker",
+        )

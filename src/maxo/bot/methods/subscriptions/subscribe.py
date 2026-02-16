@@ -29,7 +29,6 @@ class Subscribe(MaxoMethod[SimpleQueryResult]):
         url: URL HTTP(S)-эндпойнта вашего бота. Должен начинаться с `http(s)://`
 
     Источник: https://dev.max.ru/docs-api/methods/POST/subscriptions
-
     """
 
     __url__ = "subscriptions"

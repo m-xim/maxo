@@ -3,7 +3,8 @@ from typing import Any
 
 from maxo.enums.chat_status import ChatStatus
 from maxo.enums.chat_type import ChatType
-from maxo.omit import Omittable, Omitted
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types.base import MaxoType
 from maxo.types.image import Image
 from maxo.types.message import Message
@@ -56,3 +57,93 @@ class Chat(MaxoType):
     @property
     def id(self) -> int:
         return self.chat_id
+
+    @property
+    def unsafe_chat_message_id(self) -> str:
+        if is_defined(self.chat_message_id):
+            return self.chat_message_id
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="chat_message_id",
+        )
+
+    @property
+    def unsafe_description(self) -> str:
+        if is_defined(self.description):
+            return self.description
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="description",
+        )
+
+    @property
+    def unsafe_dialog_with_user(self) -> UserWithPhoto:
+        if is_defined(self.dialog_with_user):
+            return self.dialog_with_user
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="dialog_with_user",
+        )
+
+    @property
+    def unsafe_icon(self) -> Image:
+        if is_defined(self.icon):
+            return self.icon
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="icon",
+        )
+
+    @property
+    def unsafe_link(self) -> str:
+        if is_defined(self.link):
+            return self.link
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="link",
+        )
+
+    @property
+    def unsafe_owner_id(self) -> int:
+        if is_defined(self.owner_id):
+            return self.owner_id
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="owner_id",
+        )
+
+    @property
+    def unsafe_participants(self) -> dict[str, Any]:
+        if is_defined(self.participants):
+            return self.participants
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="participants",
+        )
+
+    @property
+    def unsafe_pinned_message(self) -> Message:
+        if is_defined(self.pinned_message):
+            return self.pinned_message
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="pinned_message",
+        )
+
+    @property
+    def unsafe_title(self) -> str:
+        if is_defined(self.title):
+            return self.title
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="title",
+        )

@@ -27,7 +27,6 @@ class GetUpdates(MaxoMethod[UpdateList]):
         types: Список типов обновлений, которые бот хочет получить (например, `message_created`, `message_callback`)
 
     Источник: https://dev.max.ru/docs-api/methods/GET/updates
-
     """
 
     __url__ = "updates"

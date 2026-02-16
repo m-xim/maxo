@@ -46,7 +46,6 @@ class AnswerOnCallback(MaxoMethod[SimpleQueryResult]):
         notification: Заполните это, если хотите просто отправить одноразовое уведомление пользователю
 
     Источник: https://dev.max.ru/docs-api/methods/POST/answers
-
     """
 
     __url__ = "answers"

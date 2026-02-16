@@ -49,7 +49,6 @@ class SendMessage(MaxoMethod[SendMessageResult]):
         user_id: Если вы хотите отправить сообщение пользователю, укажите его ID
 
     Источник: https://dev.max.ru/docs-api/methods/POST/messages
-
     """
 
     __url__ = "messages"

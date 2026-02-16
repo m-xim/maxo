@@ -19,7 +19,6 @@ class UnpinMessage(MaxoMethod[SimpleQueryResult]):
         chat_id: ID чата, из которого нужно удалить закреплённое сообщение
 
     Источник: https://dev.max.ru/docs-api/methods/DELETE/chats/-chatId-/pin
-
     """
 
     __url__ = "chats/{chat_id}/pin"

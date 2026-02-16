@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from maxo.enums.chat_admin_permission import ChatAdminPermission
+from maxo.errors import AttributeIsEmptyError
+from maxo.omit import is_defined
 from maxo.types.user_with_photo import UserWithPhoto
 
 
@@ -32,3 +34,13 @@ class ChatMember(UserWithPhoto):
     last_access_time: datetime
 
     permissions: list[ChatAdminPermission] | None = None
+
+    @property
+    def unsafe_permissions(self) -> list[ChatAdminPermission]:
+        if is_defined(self.permissions):
+            return self.permissions
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="permissions",
+        )

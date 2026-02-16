@@ -46,6 +46,16 @@ class Message(MaxoType):
         )
 
     @property
+    def unsafe_sender(self) -> User:
+        if is_defined(self.sender):
+            return self.sender
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="sender",
+        )
+
+    @property
     def unsafe_stat(self) -> MessageStat:
         if is_defined(self.stat):
             return self.stat
@@ -53,4 +63,14 @@ class Message(MaxoType):
         raise AttributeIsEmptyError(
             obj=self,
             attr="stat",
+        )
+
+    @property
+    def unsafe_url(self) -> str:
+        if is_defined(self.url):
+            return self.url
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="url",
         )
