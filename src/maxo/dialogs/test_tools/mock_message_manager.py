@@ -10,13 +10,10 @@ from maxo.dialogs.api.protocols import (
 )
 from maxo.enums import ChatType
 from maxo.types import (
-    AudioAttachment,
     Callback,
-    FileAttachment,
     Message,
     MessageBody,
     Recipient,
-    VideoAttachment,
 )
 
 
@@ -32,34 +29,6 @@ def file_unique_id(media: MediaAttachment) -> str:
     if media.file_id:
         file_unique_id_ = media.file_id.file_unique_id
     return file_unique_id_ or str(uuid4())
-
-
-MEDIA_CLASSES = {
-    "audio": lambda x: AudioAttachment(
-        file_id=file_id(x),
-        file_unique_id=file_unique_id(x),
-        duration=1024,
-    ),
-    "document": lambda x: FileAttachment(
-        file_id=file_id(x),
-        file_unique_id=file_unique_id(x),
-    ),
-    "photo": lambda x: [
-        PhotoSize(
-            file_id=file_id(x),
-            file_unique_id=file_unique_id(x),
-            width=1024,
-            height=1024,
-        ),
-    ],
-    "video": lambda x: VideoAttachment(
-        file_id=file_id(x),
-        file_unique_id=file_unique_id(x),
-        width=1024,
-        height=1024,
-        duration=1024,
-    ),
-}
 
 
 class MockMessageManager(MessageManagerProtocol):

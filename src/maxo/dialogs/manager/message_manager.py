@@ -13,6 +13,7 @@ from maxo.dialogs.api.protocols import (
 )
 from maxo.enums import AttachmentType
 from maxo.errors import MaxBotApiError, MaxBotBadRequestError
+from maxo.omit import Omitted
 from maxo.types import Callback, Message
 from maxo.utils.helpers import attachment_to_request
 from maxo.utils.upload_media import FSInputFile, InputFile
@@ -277,6 +278,14 @@ class MessageManager(MessageManagerProtocol):
         return await bot.get_message_by_id(message_id=old_message.message_id)
 
     async def send_message(self, bot: Bot, new_message: NewMessage) -> Message:
+        if (
+            new_message.link_preview_options is None
+            or new_message.link_preview_options.is_disabled is None
+        ):
+            disable_link_preview = Omitted()
+        else:
+            disable_link_preview = new_message.link_preview_options.is_disabled
+
         # TODO: Отправка медиа в несколько шагов
         result = await bot.send_message(
             chat_id=new_message.recipient.chat_id,
@@ -286,6 +295,6 @@ class MessageManager(MessageManagerProtocol):
             notify=True,
             attachments=new_message.attachments,
             format=new_message.parse_mode,
-            disable_link_preview=new_message.link_preview_options.is_disabled,
+            disable_link_preview=disable_link_preview,
         )
         return result.message
