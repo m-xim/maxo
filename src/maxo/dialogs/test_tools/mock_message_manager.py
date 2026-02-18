@@ -8,11 +8,15 @@ from maxo.dialogs.api.protocols import (
     MessageManagerProtocol,
     MessageNotModified,
 )
-from maxo.enums import ChatType
+from maxo.enums import AttachmentType, ChatType
 from maxo.types import (
     Callback,
+    InlineKeyboardAttachment,
+    Keyboard,
     Message,
     MessageBody,
+    PhotoAttachment,
+    PhotoAttachmentPayload,
     Recipient,
 )
 
@@ -56,7 +60,7 @@ class MockMessageManager(MessageManagerProtocol):
 
     async def remove_kbd(
         self,
-        _bot: Bot,
+        bot: Bot,
         show_mode: ShowMode,
         old_message: OldMessage | None,
     ) -> Message | None:
@@ -66,12 +70,24 @@ class MockMessageManager(MessageManagerProtocol):
             return None
         assert isinstance(old_message, OldMessage)
 
+        new_attachments = [
+            attach
+            for attach in old_message.attachments
+            if attach.type != AttachmentType.INLINE_KEYBOARD
+        ]
+
         message = Message(
             timestamp=datetime.now(UTC),
             recipient=Recipient(
                 chat_type=ChatType.CHAT,
                 chat_id=old_message.recipient.chat_id,
                 user_id=old_message.recipient.chat_id,
+            ),
+            body=MessageBody(
+                mid=old_message.message_id,
+                seq=old_message.sequence_id,
+                text=old_message.text,
+                attachments=new_attachments,
             ),
         )
         self.sent_messages.append(message)
@@ -101,6 +117,27 @@ class MockMessageManager(MessageManagerProtocol):
         message_id = self.last_message_id + 1
         self.last_message_id = message_id
 
+        converted_attachments = []
+        for new_attachment in new_message.attachments:
+            if new_attachment.type == AttachmentType.IMAGE:
+                converted_attachments.append(
+                    PhotoAttachment(
+                        payload=PhotoAttachmentPayload(
+                            photo_id=new_attachment.file_id or str(uuid4()),
+                            token=new_attachment.file_id or str(uuid4()),
+                            url=new_attachment.url,
+                        ),
+                    ),
+                )
+            elif new_attachment.type == AttachmentType.INLINE_KEYBOARD:
+                converted_attachments.append(
+                    InlineKeyboardAttachment(
+                        payload=Keyboard(buttons=new_attachment.payload.buttons),
+                    ),
+                )
+            else:
+                converted_attachments.append(new_attachment)
+
         self.sent_messages.append(
             Message(
                 sender=bot.state.info,
@@ -110,7 +147,7 @@ class MockMessageManager(MessageManagerProtocol):
                     mid=str(message_id),
                     seq=message_id,
                     text=new_message.text,
-                    attachments=new_message.attachments,
+                    attachments=converted_attachments,
                 ),
             ),
         )
@@ -120,5 +157,5 @@ class MockMessageManager(MessageManagerProtocol):
             sequence_id=message_id,
             recipient=new_message.recipient,
             text=new_message.text,
-            attachments=new_message.attachments,
+            attachments=converted_attachments,
         )

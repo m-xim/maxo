@@ -26,7 +26,6 @@ class Updater:
                     bot=bot,
                     sender=update.update.sender,
                     chat=update.update.chat,
-                    **self.dp.workflow_data,
                 ),
             ),
             bot,

@@ -175,9 +175,9 @@ class MessageManager(MessageManagerProtocol):
         bot: Bot,
         show_mode: ShowMode,
         old_message: OldMessage | None,
-    ) -> bool:  # TODO: Аннотация
+    ) -> Message | None:
         if show_mode is ShowMode.NO_UPDATE:
-            return False
+            return None
         if show_mode is ShowMode.DELETE_AND_SEND and old_message:
             return await self.remove_message_safe(bot, old_message, None)
         return await self._remove_kbd(bot, old_message, None)
@@ -187,14 +187,14 @@ class MessageManager(MessageManagerProtocol):
         bot: Bot,
         old_message: OldMessage | None,
         new_message: NewMessage | None,
-    ) -> bool:
+    ) -> Message | None:
         return await self.remove_inline_kbd(bot, old_message)
 
     async def remove_inline_kbd(
         self,
         bot: Bot,
         old_message: OldMessage | None,
-    ) -> bool:  # TODO: Аннотация
+    ) -> Message | None:
         if not old_message:
             return None
         logger.debug("remove_inline_kbd in %s", old_message.recipient)
@@ -204,12 +204,11 @@ class MessageManager(MessageManagerProtocol):
                 for attach in old_message.attachments
                 if attach.type != AttachmentType.INLINE_KEYBOARD
             ]
-            return (
-                await bot.edit_message(
-                    message_id=old_message.message_id,
-                    attachments=new_attachments,
-                )
-            ).success
+            await bot.edit_message(
+                message_id=old_message.message_id,
+                attachments=new_attachments,
+            )
+            return await bot.get_message_by_id(message_id=old_message.message_id)
         except MaxBotBadRequestError as err:
             if "message is not modified" in err.message:
                 pass  # nothing to remove
@@ -227,12 +226,12 @@ class MessageManager(MessageManagerProtocol):
         bot: Bot,
         old_message: OldMessage,
         new_message: NewMessage | None,
-    ) -> bool:
+    ) -> Message | None:
         try:
             await bot.delete_message(
                 message_id=old_message.message_id,
             )
-            return True
+            return None
         except MaxBotBadRequestError as err:
             if "message to delete not found" in err.message:
                 pass
@@ -241,7 +240,7 @@ class MessageManager(MessageManagerProtocol):
             else:
                 raise
 
-        return False
+        return None
 
     async def edit_message_safe(
         self,

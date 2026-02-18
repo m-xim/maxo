@@ -495,7 +495,15 @@ class ManagerImpl(DialogManager):
 
     def _get_fake_user(self, user_id: int | None = None) -> User:
         """Get User if we have info about him or FakeUser instead."""
-        current_user = self.event.sender
+        # TODO: Сделать нормально, это нейрослоп
+        from maxo.routing.updates import MessageCreated
+
+        if isinstance(self.event, MessageCreated):
+            current_user = self.event.message.unsafe_sender
+        else:
+            current_user = self.event.sender
+        ###
+
         if user_id is None or user_id == current_user.id:
             return current_user
         return FakeUser(
@@ -508,7 +516,7 @@ class ManagerImpl(DialogManager):
     def _get_fake_chat(self, chat_id: int | None = None) -> Chat:
         """Get Chat if we have info about him or FakeChat instead."""
         if current_chat := self._ctx.get(UPDATE_CONTEXT_KEY):
-            if chat_id in (None, current_chat.id):
+            if chat_id in (None, current_chat.chat_id):
                 return current_chat
         elif chat_id is None:
             raise ValueError(
@@ -556,8 +564,9 @@ class ManagerImpl(DialogManager):
 
         return BgManager(
             user=new_event_context.user,
-            chat_id=new_event_context.update_context.chat_id,
+            chat_id=new_event_context.chat_id,
             bot=new_event_context.bot,
+            dp=self._router,
             intent_id=intent_id,
             stack_id=stack_id,
             load=load,

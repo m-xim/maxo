@@ -7,6 +7,8 @@ from maxo import Dispatcher
 from maxo.dialogs import setup_dialogs
 from maxo.dialogs.test_tools import BotClient, MockMessageManager
 from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
+from maxo.fsm.key_builder import DefaultKeyBuilder
+from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
 from maxo.types import Message
 
@@ -25,15 +27,19 @@ async def start(
 async def test_concurrent_events() -> None:
     event_common = Event()
     data = []
+    key_builder = DefaultKeyBuilder(with_destiny=True)
+    event_isolation = SimpleEventIsolation(key_builder=key_builder)
     dp = Dispatcher(
         workflow_data={"event_common": event_common, "data": data},
         storage=JsonMemoryStorage(),
+        events_isolation=event_isolation,
+        key_builder=key_builder,
     )
     dp.message_created.handler(start, CommandStart())
 
     client = BotClient(dp)
     message_manager = MockMessageManager()
-    setup_dialogs(dp, message_manager=message_manager)
+    setup_dialogs(dp, message_manager=message_manager, events_isolation=event_isolation)
 
     # start
     t1 = asyncio.create_task(client.send("/start"))

@@ -22,8 +22,6 @@ from maxo.routing.ctx import Ctx
 from maxo.routing.interfaces import BaseRouter
 from maxo.routing.middlewares.update_context import UPDATE_CONTEXT_KEY
 from maxo.routing.updates import MessageCallback, MessageCreated
-from maxo.types import Callback
-from maxo.types.message import Message
 from maxo.types.update_context import UpdateContext
 
 from .context.intent_filter import IntentFilter
@@ -33,7 +31,6 @@ from .widgets.utils import GetterVariant, ensure_data_getter
 
 logger = getLogger(__name__)
 
-ChatEvent = Callback | Message
 OnDialogEvent = Callable[[Any, DialogManager], Awaitable]
 OnResultEvent = Callable[[Data, Any, DialogManager], Awaitable]
 _W = TypeVar("_W", bound=Widget)

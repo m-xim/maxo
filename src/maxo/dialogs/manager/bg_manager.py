@@ -29,7 +29,7 @@ from maxo.dialogs.utils import is_user_loaded
 from maxo.enums import ChatStatus, ChatType
 from maxo.fsm import State
 from maxo.routing.interfaces import BaseRouter
-from maxo.types import User
+from maxo.types import Recipient, User
 
 logger = getLogger(__name__)
 
@@ -108,8 +108,14 @@ class BgManager(BaseDialogManager):
 
     def _base_event_params(self) -> dict[str, Any]:
         return {
-            "from_user": self._event_context.user,
+            "sender": self._event_context.user,
             "chat": self._event_context.chat,
+            "recipient": Recipient(
+                user_id=self._event_context.user.id,
+                chat_id=self._event_context.chat_id,
+                chat_type=self._event_context.chat_type,
+            ),
+            "bot": self._event_context.bot,
             "intent_id": self.intent_id,
             "stack_id": self.stack_id,
         }

@@ -19,6 +19,7 @@ from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
 from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
+from maxo.routing.signals import AfterStartup, BeforeStartup
 from maxo.types import Message
 
 
@@ -99,7 +100,10 @@ async def test_start(bot, message_manager, client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_next_back(bot, message_manager, client) -> None:
+async def test_next_back(dp, bot, message_manager, client) -> None:
+    await dp.feed_signal(BeforeStartup())
+    await dp.feed_signal(AfterStartup())
+
     await client.send("/start")
     first_message = message_manager.one_message()
 
@@ -126,7 +130,10 @@ async def test_next_back(bot, message_manager, client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_finish_last(bot, message_manager, client) -> None:
+async def test_finish_last(dp, bot, message_manager, client) -> None:
+    await dp.feed_signal(BeforeStartup())
+    await dp.feed_signal(AfterStartup())
+
     await client.send("/start")
     first_message = message_manager.one_message()
 
@@ -142,7 +149,10 @@ async def test_finish_last(bot, message_manager, client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_reset_stack(bot, message_manager, client) -> None:
+async def test_reset_stack(dp, bot, message_manager, client) -> None:
+    await dp.feed_signal(BeforeStartup())
+    await dp.feed_signal(AfterStartup())
+
     for _ in range(200):
         message_manager.reset_history()
         await client.send("/start")
@@ -160,7 +170,10 @@ async def test_reset_stack(bot, message_manager, client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_subdialog(bot, message_manager, client) -> None:
+async def test_subdialog(dp, bot, message_manager, client) -> None:
+    await dp.feed_signal(BeforeStartup())
+    await dp.feed_signal(AfterStartup())
+
     await client.send("/start")
     first_message = message_manager.one_message()
 

@@ -1,4 +1,4 @@
-from unihttp.http import UploadFile, HTTPResponse
+from unihttp.http import HTTPResponse, UploadFile
 
 from maxo.bot.methods.base import MaxoMethod
 from maxo.bot.methods.markers import File, Path

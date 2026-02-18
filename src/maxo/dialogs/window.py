@@ -177,11 +177,16 @@ class Window(WindowProtocol):
             logger.exception("Cannot get window data for state %s", self.state)
             raise
         try:
+            attachments = []
+            # TODO: Переделать с MediaAttachment на MediaAttachmentsRequests
+            # if self.media:
+            #     media_attachment = await self.render_media(current_data, manager)
+            #     if media_attachment:
+            #         attachments.append(media_attachment)
+
             keyboard = await self.render_kbd(current_data, manager)
             if any(row for row in keyboard):
-                attachments = [InlineKeyboardAttachmentRequest.factory(keyboard)]
-            else:
-                attachments = []
+                attachments.append(InlineKeyboardAttachmentRequest.factory(keyboard))
 
             return NewMessage(
                 recipient=Recipient(
