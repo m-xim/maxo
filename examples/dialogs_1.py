@@ -1,5 +1,5 @@
 import logging
-import os.path
+import os
 from pathlib import Path
 from typing import Any
 

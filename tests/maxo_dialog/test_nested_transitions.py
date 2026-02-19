@@ -15,6 +15,7 @@ from maxo.dialogs.widgets.kbd import Cancel
 from maxo.dialogs.widgets.text import Const, Format
 from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
+from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
 from maxo.routing.signals import AfterStartup, BeforeStartup
 from maxo.types import Message
@@ -60,9 +61,12 @@ def client(dp) -> BotClient:
 
 @pytest.fixture
 def dp(message_manager: MockMessageManager) -> Dispatcher:
+    key_builder = DefaultKeyBuilder(with_destiny=True)
+    event_isolation = SimpleEventIsolation(key_builder=key_builder)
     dp = Dispatcher(
         storage=JsonMemoryStorage(),
-        key_builder=DefaultKeyBuilder(with_destiny=True),
+        events_isolation=event_isolation,
+        key_builder=key_builder,
     )
     dp.message_created.handler(start, CommandStart())
 
@@ -95,7 +99,7 @@ def dp(message_manager: MockMessageManager) -> Dispatcher:
             ),
         ),
     )
-    setup_dialogs(dp, message_manager=message_manager)
+    setup_dialogs(dp, message_manager=message_manager, events_isolation=event_isolation)
     return dp
 
 

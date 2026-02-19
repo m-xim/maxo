@@ -10,9 +10,6 @@ from maxo.utils.long_polling import LongPolling
 
 logger = logging.getLogger(__name__)
 
-
-TOKEN = os.environ["TOKEN"]
-
 dp = Dispatcher()
 
 
@@ -51,7 +48,7 @@ async def handle_invalid_exceptions(
     This handler receives error events with "Invalid" message in them.
     """
     logger.error(
-        "Error `Invalid` caught: %r while processing %r",
+        "Unhandled error caught: %r while processing %r",
         event.error,
         event.update,
     )
@@ -115,7 +112,7 @@ async def handle_set_name(
 
 def main() -> None:
     logging.basicConfig(level=logging.DEBUG)
-    bot = Bot(token=TOKEN)
+    bot = Bot(token=os.environ["TOKEN"])
     LongPolling(dp).run(bot)
 
 
