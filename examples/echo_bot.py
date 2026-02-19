@@ -2,15 +2,15 @@ import logging
 import os
 
 from maxo import Bot, Dispatcher
-from maxo.routing.updates.message_created import MessageCreated
-from maxo.utils.facades.updates.message_created import MessageCreatedFacade
+from maxo.routing.updates import MessageCreated
+from maxo.utils.facades import MessageCreatedFacade
 from maxo.utils.long_polling import LongPolling
 
 bot = Bot(os.environ["TOKEN"])
-dispatcher = Dispatcher()
+dp = Dispatcher()
 
 
-@dispatcher.message_created()
+@dp.message_created()
 async def echo_handler(
     update: MessageCreated,
     facade: MessageCreatedFacade,
@@ -19,5 +19,10 @@ async def echo_handler(
     await facade.answer_text(text)
 
 
-logging.basicConfig(level=logging.DEBUG)
-LongPolling(dispatcher).run(bot)
+def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+    LongPolling(dp).run(bot)
+
+
+if __name__ == "__main__":
+    main()

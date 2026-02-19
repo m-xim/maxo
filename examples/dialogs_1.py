@@ -1,0 +1,153 @@
+import logging
+import os.path
+from typing import Any
+
+from maxo import Bot, Dispatcher
+from maxo.dialogs import (
+    ChatEvent,
+    Dialog,
+    DialogManager,
+    StartMode,
+    Window,
+    setup_dialogs,
+)
+from maxo.dialogs.widgets.input import MessageInput
+from maxo.dialogs.widgets.kbd import Back, Button, Row, Select, SwitchTo
+from maxo.dialogs.widgets.media import StaticMedia
+from maxo.dialogs.widgets.text import Const, Format, Multi
+from maxo.fsm import State, StatesGroup
+from maxo.fsm.key_builder import DefaultKeyBuilder
+from maxo.routing.filters import CommandStart
+from maxo.routing.updates import MessageCallback, MessageCreated
+from maxo.utils.facades import MessageCallbackFacade, MessageCreatedFacade
+from maxo.utils.long_polling import LongPolling
+
+src_dir = os.path.normpath(os.path.join(__file__, os.path.pardir))
+
+key_builder = DefaultKeyBuilder(with_destiny=True)
+dp = Dispatcher(key_builder=key_builder)
+
+
+class DialogSG(StatesGroup):
+    greeting = State()
+    age = State()
+    finish = State()
+
+
+async def get_data(dialog_manager: DialogManager, **__: Any) -> dict[str, Any]:
+    age = dialog_manager.dialog_data.get("age", None)
+    return {
+        "name": dialog_manager.dialog_data.get("name", ""),
+        "age": age,
+        "can_smoke": age in ("18-25", "25-40", "40+"),
+    }
+
+
+async def name_handler(
+    message: MessageCreated,
+    message_input: MessageInput,
+    dialog_manager: DialogManager,
+) -> None:
+    if dialog_manager.is_preview():
+        await dialog_manager.next()
+        return
+    dialog_manager.dialog_data["name"] = message.message.body.text
+
+    facade: MessageCreatedFacade = dialog_manager.middleware_data["facade"]
+    await facade.answer_text(f"Nice to meet you, {message.message.body.text}")
+
+    await dialog_manager.next()
+
+
+async def other_type_handler(
+    message: MessageCreated,
+    message_input: MessageInput,
+    dialog_manager: DialogManager,
+) -> None:
+    facade: MessageCreatedFacade = dialog_manager.middleware_data["facade"]
+    await facade.answer_text("Text is expected")
+
+
+async def on_finish(
+    callback: MessageCallback,
+    button: Button,
+    dialog_manager: DialogManager,
+) -> None:
+    if dialog_manager.is_preview():
+        await dialog_manager.done()
+        return
+
+    facade: MessageCallbackFacade = dialog_manager.middleware_data["facade"]
+    await facade.callback_answer("Thank you. To start again click /start")
+
+    await dialog_manager.done()
+
+
+async def on_age_changed(
+    callback: ChatEvent,
+    select: Any,
+    dialog_manager: DialogManager,
+    item_id: str,
+) -> None:
+    dialog_manager.dialog_data["age"] = item_id
+    await dialog_manager.next()
+
+
+dialog = Dialog(
+    Window(
+        Const("Greetings! Please, introduce yourself:"),
+        StaticMedia(
+            path=os.path.join(os.path.dirname(__file__), "files/watermelon.jpg"),
+        ),
+        MessageInput(name_handler),
+        MessageInput(other_type_handler),
+        state=DialogSG.greeting,
+    ),
+    Window(
+        Format("{name}! How old are you?"),
+        Select(
+            Format("{item}"),
+            items=["0-12", "12-18", "18-25", "25-40", "40+"],
+            item_id_getter=lambda x: x,
+            id="w_age",
+            on_click=on_age_changed,
+        ),
+        state=DialogSG.age,
+        getter=get_data,
+        preview_data={"name": "Tishka17"},
+    ),
+    Window(
+        Multi(
+            Format("{name}! Thank you for your answers."),
+            Const("Hope you are not smoking", when="can_smoke"),
+            sep="\n\n",
+        ),
+        Row(
+            Back(),
+            SwitchTo(Const("Restart"), id="restart", state=DialogSG.greeting),
+            Button(Const("Finish"), on_click=on_finish, id="finish"),
+        ),
+        getter=get_data,
+        state=DialogSG.finish,
+    ),
+)
+
+
+@dp.message_created(CommandStart())
+async def start(message: MessageCreated, dialog_manager: DialogManager) -> None:
+    # it is important to reset stack because user wants to restart everything
+    await dialog_manager.start(DialogSG.greeting, mode=StartMode.RESET_STACK)
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+
+    bot = Bot(os.environ["TOKEN"])
+
+    setup_dialogs(dp)
+    dp.include(dialog)
+    LongPolling(dp).run(bot)
+
+
+if __name__ == "__main__":
+    main()

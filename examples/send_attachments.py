@@ -7,10 +7,10 @@ from maxo.utils.facades import MessageCreatedFacade
 from maxo.utils.long_polling import LongPolling
 from maxo.utils.upload_media import FSInputFile
 
-dispatcher = Dispatcher()
+dp = Dispatcher()
 
 
-@dispatcher.message_created()
+@dp.message_created()
 async def attachments_handler(
     update: MessageCreated,
     facade: MessageCreatedFacade,
@@ -27,9 +27,9 @@ async def attachments_handler(
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     bot = Bot(token=os.environ["TOKEN"])
-    LongPolling(dispatcher).run(bot)
+    LongPolling(dp).run(bot)
 
 
 if __name__ == "__main__":

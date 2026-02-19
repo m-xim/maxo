@@ -173,6 +173,7 @@ ignore = [
     "FBT003",
     "SLF001",
 ]
+"examples/**/*.py" = ["T201"]
 "src/maxo/types/*.py" = ["E501", "D", "W291", "W293"]
 "src/maxo/enums/*.py" = ["E501", "D", "W291", "W293"]
 "src/maxo/bot/updates/*.py" = ["E501", "D", "W291", "W293"]

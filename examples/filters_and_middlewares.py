@@ -4,8 +4,8 @@ from typing import Any
 
 from maxo import Bot, Ctx, Dispatcher
 from maxo.routing.filters.base import BaseFilter
-from maxo.routing.interfaces.middleware import BaseMiddleware, NextMiddleware
-from maxo.routing.updates.message_created import MessageCreated
+from maxo.routing.interfaces import BaseMiddleware, NextMiddleware
+from maxo.routing.updates import MessageCreated
 from maxo.utils.facades import MessageCreatedFacade
 from maxo.utils.long_polling import LongPolling
 
@@ -17,9 +17,9 @@ class OuterMiddleware(BaseMiddleware[MessageCreated]):
         ctx: Ctx,
         next: NextMiddleware[MessageCreated],
     ) -> Any:
-        print("Исполнится перед фильтрами")  # noqa: T201
+        print("Исполнится перед фильтрами")
         result = await next(ctx)
-        print("Исполнится после фильтров")  # noqa: T201
+        print("Исполнится после фильтров")
         return result
 
 
@@ -30,9 +30,9 @@ class InnerMiddleware(BaseMiddleware[MessageCreated]):
         ctx: Ctx,
         next: NextMiddleware[MessageCreated],
     ) -> Any:
-        print("Исполнится перед хендлером")  # noqa: T201
+        print("Исполнится перед хендлером")
         result = await next(ctx)
-        print("Исполнится после хендлера")  # noqa: T201
+        print("Исполнится после хендлера")
         return result
 
 
@@ -53,12 +53,12 @@ class ContainsTextFilter(BaseFilter[MessageCreated]):
         return self._text in update.message.body.text
 
 
-dispatcher = Dispatcher()
-dispatcher.message_created.middleware.inner(InnerMiddleware())
-dispatcher.message_created.middleware.outer(OuterMiddleware())
+dp = Dispatcher()
+dp.message_created.middleware.inner(InnerMiddleware())
+dp.message_created.middleware.outer(OuterMiddleware())
 
 
-@dispatcher.message_created(
+@dp.message_created(
     (ContainsTextFilter("gojo") & ContainsTextFilter("maki"))
     | ContainsTextFilter("sukuna"),
 )
@@ -67,9 +67,14 @@ async def echo_handler(
     ctx: Ctx,
     facade: MessageCreatedFacade,
 ) -> None:
-    print("Исполнение хендлера")  # noqa: T201
+    print("Исполнение хендлера")
 
 
-logging.basicConfig(level=logging.INFO)
-bot = Bot(os.environ["TOKEN"])
-LongPolling(dispatcher).run(bot)
+def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+    bot = Bot(os.environ["TOKEN"])
+    LongPolling(dp).run(bot)
+
+
+if __name__ == "__main__":
+    main()

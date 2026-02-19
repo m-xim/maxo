@@ -47,12 +47,14 @@ async def click_me_handler(
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+
     bot = Bot(os.environ["TOKEN"])
-    dispatcher = Dispatcher()
-    dispatcher.include(router)
+    dp = Dispatcher()
+    dp.include(router)
 
-    LongPolling(dispatcher).run(bot)
+    LongPolling(dp).run(bot)
 
 
-logging.basicConfig(level=logging.INFO)
-main()
+if __name__ == "__main__":
+    main()

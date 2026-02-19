@@ -41,59 +41,59 @@ from maxo.utils.long_polling import LongPolling
 logger = logging.getLogger(__name__)
 
 bot = Bot(token=os.environ["TOKEN"])
-dispatcher = Dispatcher()
+dp = Dispatcher()
 
 
-@dispatcher.message_created()
+@dp.message_created()
 async def message_created_handler(
-    update: MessageCreated,
+    message_created: MessageCreated,
     facade: MessageCreatedFacade,
 ) -> None:
     await facade.reply_text(
-        f"Привет! Я получил твое сообщение: '{update.message.body.text}'",
+        f"Привет! Я получил твое сообщение: '{message_created.message.body.text}'",
     )
 
 
-@dispatcher.message_edited()
+@dp.message_edited()
 async def message_edited_handler(
-    update: MessageEdited,
+    message_edited: MessageEdited,
     facade: MessageEditedFacade,
 ) -> None:
     await facade.send_message(
         "Я заметил, что ты отредактировал сообщение "
-        f"(ID: {update.message.body.mid})\n"
-        f"Новый текст: '{update.message.body.text}'",
+        f"(ID: {message_edited.message.body.mid})\n"
+        f"Новый текст: '{message_edited.message.body.text}'",
     )
 
 
-@dispatcher.message_callback()
+@dp.message_callback()
 async def message_callback_handler(
-    update: MessageCallback,
+    messag_callback: MessageCallback,
     facade: MessageCallbackFacade,
 ) -> None:
     await facade.callback_answer(notification="Ты нажал кнопку!")
     await facade.answer_text(
         f"Данные колбэка "
-        f"(ID: {update.callback.callback_id}, "
-        f"сообщение ID: {update.unsafe_message.body.mid}): "
-        f"{update.callback.payload}",
+        f"(ID: {messag_callback.callback.callback_id}, "
+        f"сообщение ID: {messag_callback.unsafe_message.body.mid}): "
+        f"{messag_callback.callback.payload}",
     )
 
 
-@dispatcher.message_removed()
+@dp.message_removed()
 async def message_removed_handler(
-    update: MessageRemoved,
+    message_removed: MessageRemoved,
     facade: MessageRemovedFacade,
 ) -> None:
     await facade.send_message(
-        f"Сообщение (ID: {update.message_id}) "
-        f"было удалено из чата (ID: {update.chat_id})",
+        f"Сообщение (ID: {message_removed.message_id}) "
+        f"было удалено из чата (ID: {message_removed.chat_id})",
     )
 
 
-@dispatcher.bot_started()
+@dp.bot_started()
 async def bot_started_handler(
-    update: BotStarted,
+    bot_started: BotStarted,
     facade: BotStartedFacade,
 ) -> None:
     bot_info = await facade.get_my_info()
@@ -102,9 +102,9 @@ async def bot_started_handler(
     )
 
 
-@dispatcher.bot_stopped()
+@dp.bot_stopped()
 async def bot_stopped_handler(
-    update: BotStopped,
+    bot_stopped: BotStopped,
     facade: BotStoppedFacade,
 ) -> None:
     logger.info(
@@ -114,9 +114,9 @@ async def bot_stopped_handler(
     )
 
 
-@dispatcher.bot_added_to_chat()
+@dp.bot_added_to_chat()
 async def bot_added_to_chat_handler(
-    update: BotAddedToChat,
+    bot_added: BotAddedToChat,
     facade: BotAddedToChatFacade,
 ) -> None:
     await facade.send_message(
@@ -127,9 +127,9 @@ async def bot_added_to_chat_handler(
     await facade.send_message(f"Я вижу здесь {len(members.members)} участников")
 
 
-@dispatcher.bot_removed_from_chat()
+@dp.bot_removed_from_chat()
 async def bot_removed_from_chat_handler(
-    update: BotRemovedFromChat,
+    bot_removed: BotRemovedFromChat,
     facade: BotRemovedFromChatFacade,
 ) -> None:
     logger.info(
@@ -139,43 +139,44 @@ async def bot_removed_from_chat_handler(
     )
 
 
-@dispatcher.user_added_to_chat()
+@dp.user_added_to_chat()
 async def user_added_to_chat_handler(
-    update: UserAddedToChat,
+    user_added: UserAddedToChat,
     facade: UserAddedToChatFacade,
 ) -> None:
     await facade.send_message(
-        f"Добро пожаловать в чат, {update.user.first_name} "
-        f"(ID: {update.user.user_id})! "
+        f"Добро пожаловать в чат, {user_added.user.first_name} "
+        f"(ID: {user_added.user.user_id})! "
         f"Я успешно обработал добавление нового пользователя",
     )
 
 
-@dispatcher.user_removed_from_chat()
+@dp.user_removed_from_chat()
 async def user_removed_from_chat_handler(
-    update: UserRemovedFromChat,
+    user_removed: UserRemovedFromChat,
     facade: UserRemovedFromChatFacade,
 ) -> None:
     await facade.send_message(
-        f"Пользователь {update.user.first_name} "
-        f"(ID: {update.user.user_id}) покинул чат (ID: {facade.chat_id})",
+        f"Пользователь {user_removed.user.first_name} "
+        f"(ID: {user_removed.user.user_id}) покинул чат (ID: {facade.chat_id})",
     )
 
 
-@dispatcher.chat_title_changed()
+@dp.chat_title_changed()
 async def chat_title_changed_handler(
-    update: ChatTitleChanged,
+    chat_title_changed: ChatTitleChanged,
     facade: ChatTitleChangedFacade,
 ) -> None:
     await facade.send_message(
-        f"Название чата (ID: {facade.chat_id}) было изменено на '{update.title}' "
+        f"Название чата (ID: {facade.chat_id}) "
+        f"было изменено на '{chat_title_changed.title}' "
         f"пользователем (ID: {facade.user.user_id})",
     )
 
 
-@dispatcher.dialog_cleared()
+@dp.dialog_cleared()
 async def dialog_cleared_handler(
-    update: DialogCleared,
+    dialog_cleared: DialogCleared,
     facade: DialogClearedFacade,
 ) -> None:
     await facade.send_message(
@@ -184,9 +185,9 @@ async def dialog_cleared_handler(
     )
 
 
-@dispatcher.dialog_muted()
+@dp.dialog_muted()
 async def dialog_muted_handler(
-    update: DialogMuted,
+    dialog_muted: DialogMuted,
     facade: DialogMutedFacade,
 ) -> None:
     await facade.send_message(
@@ -195,9 +196,9 @@ async def dialog_muted_handler(
     )
 
 
-@dispatcher.dialog_removed()
+@dp.dialog_removed()
 async def dialog_removed_handler(
-    update: DialogRemoved,
+    dialog_removed: DialogRemoved,
     facade: DialogRemovedFacade,
 ) -> None:
     logger.info(
@@ -207,9 +208,9 @@ async def dialog_removed_handler(
     )
 
 
-@dispatcher.dialog_unmuted()
+@dp.dialog_unmuted()
 async def dialog_unmuted_handler(
-    update: DialogUnmuted,
+    dialog_unmuted: DialogUnmuted,
     facade: DialogUnmutedFacade,
 ) -> None:
     await facade.send_message(
@@ -218,5 +219,10 @@ async def dialog_unmuted_handler(
     )
 
 
-logging.basicConfig(level=logging.DEBUG)
-LongPolling(dispatcher).run(bot)
+def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+    LongPolling(dp).run(bot)
+
+
+if __name__ == "__main__":
+    main()

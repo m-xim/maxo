@@ -8,7 +8,7 @@ from maxo.enums import TextFormat
 from maxo.fsm import FSMContext, State, StateFilter, StatesGroup
 from maxo.integrations.magic_filter import MagicFilter
 from maxo.routing.filters import CommandStart
-from maxo.routing.updates.message_created import MessageCreated
+from maxo.routing.updates import MessageCreated
 from maxo.utils.facades import MessageCreatedFacade
 from maxo.utils.long_polling import LongPolling
 
@@ -90,13 +90,15 @@ async def input_age_handler(
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+
     bot = Bot(os.environ["TOKEN"])
-    dispatcher = Dispatcher()
+    dp = Dispatcher()
 
-    dispatcher.include(router)
+    dp.include(router)
 
-    LongPolling(dispatcher).run(bot)
+    LongPolling(dp).run(bot)
 
 
-logging.basicConfig(level=logging.INFO)
-main()
+if __name__ == "__main__":
+    main()
