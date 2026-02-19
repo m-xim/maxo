@@ -13,6 +13,7 @@ from maxo.dialogs.test_tools import MockMessageManager
 from maxo.dialogs.test_tools.bot_client import BotClient, FakeBot
 from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.text import Format
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
 from maxo.routing.ctx import Ctx
 from maxo.routing.filters.command import CommandStart
@@ -47,12 +48,15 @@ def message_manager() -> MockMessageManager:
 
 @pytest.fixture
 def dp(message_manager: MockMessageManager) -> Dispatcher:
-    dp = Dispatcher(storage=JsonMemoryStorage())
+    dp = Dispatcher(
+        storage=JsonMemoryStorage(),
+        key_builder=DefaultKeyBuilder(with_destiny=True),
+    )
     dp.message_created.handler(start, CommandStart())
     dp.include(
         Dialog(
             Window(
-                Format("{data[my_key]}"),
+                Format("{middleware_data[my_key]}"),
                 state=MainSG.start,
             ),
         ),

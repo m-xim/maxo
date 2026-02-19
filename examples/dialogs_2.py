@@ -78,17 +78,18 @@ def main() -> None:
     storage = MemoryStorage(key_builder=key_builder)
     events_isolation = SimpleEventIsolation(key_builder=key_builder)
 
-    dispatcher = Dispatcher(
+    dp = Dispatcher(
         storage=storage,
         events_isolation=events_isolation,
         key_builder=key_builder,
     )
 
-    dispatcher.include(start_router, start_dialog)
-    setup_dialogs(dispatcher, events_isolation=events_isolation)
+    dp.include(start_router, start_dialog)
+    setup_dialogs(dp, events_isolation=events_isolation)
 
-    LongPolling(dispatcher).run(bot)
+    LongPolling(dp).run(bot)
 
 
-logging.basicConfig(level=logging.DEBUG)
-main()
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    main()

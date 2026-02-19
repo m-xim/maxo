@@ -1,3 +1,4 @@
+import random
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -8,15 +9,16 @@ from maxo.dialogs.api.protocols import (
     MessageManagerProtocol,
     MessageNotModified,
 )
-from maxo.enums import ChatType
+from maxo.enums import AttachmentType, ChatType
 from maxo.types import (
-    AudioAttachment,
     Callback,
-    FileAttachment,
+    InlineKeyboardAttachment,
+    Keyboard,
     Message,
     MessageBody,
+    PhotoAttachment,
+    PhotoAttachmentPayload,
     Recipient,
-    VideoAttachment,
 )
 
 
@@ -32,34 +34,6 @@ def file_unique_id(media: MediaAttachment) -> str:
     if media.file_id:
         file_unique_id_ = media.file_id.file_unique_id
     return file_unique_id_ or str(uuid4())
-
-
-MEDIA_CLASSES = {
-    "audio": lambda x: AudioAttachment(
-        file_id=file_id(x),
-        file_unique_id=file_unique_id(x),
-        duration=1024,
-    ),
-    "document": lambda x: FileAttachment(
-        file_id=file_id(x),
-        file_unique_id=file_unique_id(x),
-    ),
-    "photo": lambda x: [
-        PhotoSize(
-            file_id=file_id(x),
-            file_unique_id=file_unique_id(x),
-            width=1024,
-            height=1024,
-        ),
-    ],
-    "video": lambda x: VideoAttachment(
-        file_id=file_id(x),
-        file_unique_id=file_unique_id(x),
-        width=1024,
-        height=1024,
-        duration=1024,
-    ),
-}
 
 
 class MockMessageManager(MessageManagerProtocol):
@@ -87,7 +61,7 @@ class MockMessageManager(MessageManagerProtocol):
 
     async def remove_kbd(
         self,
-        _bot: Bot,
+        bot: Bot,
         show_mode: ShowMode,
         old_message: OldMessage | None,
     ) -> Message | None:
@@ -97,12 +71,24 @@ class MockMessageManager(MessageManagerProtocol):
             return None
         assert isinstance(old_message, OldMessage)
 
+        new_attachments = [
+            attach
+            for attach in old_message.attachments
+            if attach.type != AttachmentType.INLINE_KEYBOARD
+        ]
+
         message = Message(
             timestamp=datetime.now(UTC),
             recipient=Recipient(
                 chat_type=ChatType.CHAT,
                 chat_id=old_message.recipient.chat_id,
                 user_id=old_message.recipient.chat_id,
+            ),
+            body=MessageBody(
+                mid=old_message.message_id,
+                seq=old_message.sequence_id,
+                text=old_message.text,
+                attachments=new_attachments,
             ),
         )
         self.sent_messages.append(message)
@@ -132,6 +118,27 @@ class MockMessageManager(MessageManagerProtocol):
         message_id = self.last_message_id + 1
         self.last_message_id = message_id
 
+        converted_attachments = []
+        for new_attachment in new_message.attachments:
+            if new_attachment.type == AttachmentType.IMAGE:
+                converted_attachments.append(
+                    PhotoAttachment(
+                        payload=PhotoAttachmentPayload(
+                            photo_id=random.randint(1, 1_000_000),
+                            token=new_attachment.file_id or str(uuid4()),
+                            url=new_attachment.url,
+                        ),
+                    ),
+                )
+            elif new_attachment.type == AttachmentType.INLINE_KEYBOARD:
+                converted_attachments.append(
+                    InlineKeyboardAttachment(
+                        payload=Keyboard(buttons=new_attachment.payload.buttons),
+                    ),
+                )
+            else:
+                converted_attachments.append(new_attachment)
+
         self.sent_messages.append(
             Message(
                 sender=bot.state.info,
@@ -141,7 +148,7 @@ class MockMessageManager(MessageManagerProtocol):
                     mid=str(message_id),
                     seq=message_id,
                     text=new_message.text,
-                    attachments=new_message.attachments,
+                    attachments=converted_attachments,
                 ),
             ),
         )
@@ -151,5 +158,5 @@ class MockMessageManager(MessageManagerProtocol):
             sequence_id=message_id,
             recipient=new_message.recipient,
             text=new_message.text,
-            attachments=new_message.attachments,
+            attachments=converted_attachments,
         )

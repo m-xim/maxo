@@ -1,12 +1,17 @@
 import uuid
 from datetime import UTC, datetime
-from typing import Any, Union
+from typing import Any
 
 from maxo import Bot, Dispatcher
 from maxo.bot.state import RunningBotState
 from maxo.enums import ChatStatus, ChatType, MessageLinkType
 from maxo.routing.signals import MaxoUpdate
-from maxo.routing.updates import MessageCallback, MessageCreated
+from maxo.routing.updates import (
+    BotAddedToChat,
+    MessageCallback,
+    MessageCreated,
+    UserAddedToChat,
+)
 from maxo.types import (
     BotInfo,
     Callback,
@@ -25,7 +30,7 @@ from .keyboard import InlineButtonLocator
 
 class FakeBot(Bot):
     def __init__(self) -> None:
-        super().__init__("", None, False)
+        super().__init__("", None, warming_up=False)
         info = BotInfo(
             user_id=1,
             first_name="bot",
@@ -40,17 +45,6 @@ class FakeBot(Bot):
 
     def __eq__(self, other: object) -> bool:
         return self is other
-
-
-ChatMember = Union[
-    None,
-    # ChatMemberOwner,
-    # ChatMemberAdministrator,
-    # ChatMemberMember,
-    # ChatMemberRestricted,
-    # ChatMemberLeft,
-    # ChatMemberBanned,
-]
 
 
 class BotClient:
@@ -161,13 +155,41 @@ class BotClient:
             )
 
         callback = self._new_callback(button)
-        await self.dp.feed_update(
-            MessageCallback(
-                timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
-                callback=callback,
-                message=message,
-                user_locale="ru",
+        await self.dp.feed_max_update(
+            MaxoUpdate(
+                update=MessageCallback(
+                    timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
+                    callback=callback,
+                    message=message,
+                    user_locale="ru",
+                ),
             ),
             self.bot,
         )
         return callback.callback_id
+
+    async def user_added_to_chat(self) -> Any:
+        return await self.dp.feed_max_update(
+            MaxoUpdate(
+                update=UserAddedToChat(
+                    chat_id=self.chat.chat_id,
+                    is_channel=self.chat.type == ChatType.CHANNEL,
+                    user=self.user,
+                    timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
+                ),
+            ),
+            self.bot,
+        )
+
+    async def bot_added_to_chat(self) -> Any:
+        return await self.dp.feed_max_update(
+            MaxoUpdate(
+                update=BotAddedToChat(
+                    chat_id=self.chat.chat_id,
+                    is_channel=self.chat.type == ChatType.CHANNEL,
+                    user=self.user,
+                    timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
+                ),
+            ),
+            self.bot,
+        )

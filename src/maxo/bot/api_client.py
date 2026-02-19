@@ -277,12 +277,12 @@ class MaxApiClient(AiohttpAsyncClient):
 
     def validate_response(self, response: HTTPResponse, method: BaseMethod) -> None:
         if (
-                response.ok
-                and isinstance(response.data, dict)
-                and (
+            response.ok
+            and isinstance(response.data, dict)
+            and (
                 response.data.get("error_code")
                 or response.data.get("success", None) is False
-        )
+            )
         ):
             loggers.bot_session.warning(
                 "Patch the status code from %d to 400 due to an error on the MAX API",

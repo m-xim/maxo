@@ -1,6 +1,7 @@
 from maxo.types import MaxoType
 
 
+# TODO: Убрать лишнее, заменить None на Omitted при необходимости
 class LinkPreviewOptions(MaxoType):
     is_disabled: bool | None
     url: str | None

@@ -13,10 +13,11 @@ from maxo.dialogs import (
 from maxo.dialogs.test_tools import BotClient, MockMessageManager
 from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.text import Format
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
+from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
-
-# from maxo.types import ChatMemberMember, ChatMemberOwner
+from maxo.routing.signals import AfterStartup, BeforeStartup
 
 
 class MainSG(StatesGroup):
@@ -40,9 +41,15 @@ def message_manager() -> MockMessageManager:
 
 @pytest.fixture
 def dp(message_manager) -> Dispatcher:
-    dp = Dispatcher(storage=JsonMemoryStorage())
+    key_builder = DefaultKeyBuilder(with_destiny=True)
+    event_isolation = SimpleEventIsolation(key_builder=key_builder)
+    dp = Dispatcher(
+        storage=JsonMemoryStorage(),
+        events_isolation=event_isolation,
+        key_builder=key_builder,
+    )
     dp.include(Dialog(window))
-    setup_dialogs(dp, message_manager=message_manager)
+    setup_dialogs(dp, message_manager=message_manager, events_isolation=event_isolation)
     return dp
 
 
@@ -56,24 +63,28 @@ async def test_click(dp, client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
 
 
 @pytest.mark.asyncio
 async def test_request_join(dp, client, message_manager) -> None:
     dp.user_added_to_chat.handler(start)
-    await client.request_chat_join()
+
+    await dp.feed_signal(BeforeStartup(), client.bot)
+    await dp.feed_signal(AfterStartup(), client.bot)
+
+    await client.user_added_to_chat()
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
 
 
-# TODO: Fix
 @pytest.mark.asyncio
 async def test_my_chat_member_update(dp, client, message_manager) -> None:
     dp.bot_added_to_chat.handler(start)
-    await client.my_chat_member_update(
-        ChatMemberMember(user=client.user),
-        ChatMemberOwner(user=client.user, is_anonymous=False),
-    )
+
+    await dp.feed_signal(BeforeStartup(), client.bot)
+    await dp.feed_signal(AfterStartup(), client.bot)
+
+    await client.bot_added_to_chat()
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"

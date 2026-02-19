@@ -13,6 +13,7 @@ from maxo.dialogs.api.protocols import (
 )
 from maxo.enums import AttachmentType
 from maxo.errors import MaxBotApiError, MaxBotBadRequestError
+from maxo.omit import Omitted
 from maxo.types import Callback, Message
 from maxo.utils.helpers import attachment_to_request
 from maxo.utils.upload_media import FSInputFile, InputFile
@@ -174,9 +175,9 @@ class MessageManager(MessageManagerProtocol):
         bot: Bot,
         show_mode: ShowMode,
         old_message: OldMessage | None,
-    ) -> bool:  # TODO: Аннотация
+    ) -> Message | None:
         if show_mode is ShowMode.NO_UPDATE:
-            return False
+            return None
         if show_mode is ShowMode.DELETE_AND_SEND and old_message:
             return await self.remove_message_safe(bot, old_message, None)
         return await self._remove_kbd(bot, old_message, None)
@@ -186,14 +187,14 @@ class MessageManager(MessageManagerProtocol):
         bot: Bot,
         old_message: OldMessage | None,
         new_message: NewMessage | None,
-    ) -> bool:
+    ) -> Message | None:
         return await self.remove_inline_kbd(bot, old_message)
 
     async def remove_inline_kbd(
         self,
         bot: Bot,
         old_message: OldMessage | None,
-    ) -> bool:  # TODO: Аннотация
+    ) -> Message | None:
         if not old_message:
             return None
         logger.debug("remove_inline_kbd in %s", old_message.recipient)
@@ -203,12 +204,11 @@ class MessageManager(MessageManagerProtocol):
                 for attach in old_message.attachments
                 if attach.type != AttachmentType.INLINE_KEYBOARD
             ]
-            return (
-                await bot.edit_message(
-                    message_id=old_message.message_id,
-                    attachments=new_attachments,
-                )
-            ).success
+            await bot.edit_message(
+                message_id=old_message.message_id,
+                attachments=new_attachments,
+            )
+            return await bot.get_message_by_id(message_id=old_message.message_id)
         except MaxBotBadRequestError as err:
             if "message is not modified" in err.message:
                 pass  # nothing to remove
@@ -219,19 +219,18 @@ class MessageManager(MessageManagerProtocol):
             ):
                 pass
             else:
-                raise err
+                raise
 
     async def remove_message_safe(
         self,
         bot: Bot,
         old_message: OldMessage,
         new_message: NewMessage | None,
-    ) -> bool:
+    ) -> Message | None:
         try:
             await bot.delete_message(
                 message_id=old_message.message_id,
             )
-            return True
         except MaxBotBadRequestError as err:
             if "message to delete not found" in err.message:
                 pass
@@ -240,7 +239,7 @@ class MessageManager(MessageManagerProtocol):
             else:
                 raise
 
-        return False
+        return None
 
     async def edit_message_safe(
         self,
@@ -277,6 +276,14 @@ class MessageManager(MessageManagerProtocol):
         return await bot.get_message_by_id(message_id=old_message.message_id)
 
     async def send_message(self, bot: Bot, new_message: NewMessage) -> Message:
+        if (
+            new_message.link_preview_options is None
+            or new_message.link_preview_options.is_disabled is None
+        ):
+            disable_link_preview = Omitted()
+        else:
+            disable_link_preview = new_message.link_preview_options.is_disabled
+
         # TODO: Отправка медиа в несколько шагов
         result = await bot.send_message(
             chat_id=new_message.recipient.chat_id,
@@ -286,6 +293,6 @@ class MessageManager(MessageManagerProtocol):
             notify=True,
             attachments=new_message.attachments,
             format=new_message.parse_mode,
-            disable_link_preview=new_message.link_preview_options.is_disabled,
+            disable_link_preview=disable_link_preview,
         )
         return result.message

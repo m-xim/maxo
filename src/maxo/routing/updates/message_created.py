@@ -32,3 +32,7 @@ class MessageCreated(MaxUpdate):
             obj=self,
             attr="user_locale",
         )
+
+    @property
+    def text(self) -> str | None:
+        return self.message.body.text

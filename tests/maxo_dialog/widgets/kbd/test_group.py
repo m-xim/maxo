@@ -12,10 +12,13 @@ from maxo.dialogs import (
 )
 from maxo.dialogs.test_tools import BotClient, MockMessageManager
 from maxo.dialogs.test_tools.keyboard import InlineButtonTextLocator
+from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.kbd import Button, Group
 from maxo.dialogs.widgets.text import Const
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
 from maxo.routing.filters import CommandStart
+from maxo.routing.signals import AfterStartup, BeforeStartup
 from maxo.types import Message
 
 
@@ -93,13 +96,19 @@ async def start(message: Message, dialog_manager: DialogManager) -> None:
 
 @pytest.mark.asyncio
 async def test_click_buttons_in_group() -> None:
-    dp = Dispatcher()
+    dp = Dispatcher(
+        storage=JsonMemoryStorage(),
+        key_builder=DefaultKeyBuilder(with_destiny=True),
+    )
     dp.include(dialog)
     dp.message_created.handler(start, CommandStart())
 
     client = BotClient(dp)
     message_manager = MockMessageManager()
     setup_dialogs(dp, message_manager=message_manager)
+
+    await dp.feed_signal(BeforeStartup(), client.bot)
+    await dp.feed_signal(AfterStartup(), client.bot)
 
     # start
     await client.send("/start")

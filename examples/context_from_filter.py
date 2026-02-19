@@ -1,0 +1,49 @@
+import logging
+import os
+from typing import Any
+
+from maxo import Bot, Ctx, Dispatcher
+from maxo.routing.filters import BaseFilter
+from maxo.routing.updates import MessageCreated
+from maxo.types.user import User
+from maxo.utils.facades import MessageCreatedFacade
+from maxo.utils.long_polling import LongPolling
+
+dp = Dispatcher()
+
+
+class HelloFilter(BaseFilter[MessageCreated]):
+    def __init__(self, name: str | None = None) -> None:
+        self.name = name
+
+    async def __call__(
+        self,
+        update: MessageCreated,
+        ctx: Ctx,
+    ) -> bool:
+        text = update.message.body.text
+        if text is not None and text.casefold() == "hello":
+            user: User = ctx["event_from_user"]
+            ctx["name"] = user.fullname
+            return True
+
+        return False
+
+
+@dp.message_created(HelloFilter())
+async def my_handler(
+    message: MessageCreated,
+    facade: MessageCreatedFacade,
+    name: str,
+) -> Any:
+    return await facade.answer_text(f"Hello, {name}!")
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.DEBUG)
+    bot = Bot(os.environ["TOKEN"])
+    LongPolling(dp).run(bot)
+
+
+if __name__ == "__main__":
+    main()

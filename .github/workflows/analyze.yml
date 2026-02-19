@@ -27,7 +27,7 @@ jobs:
 
       - name: Install lint dependencies
         run: |
-          uv pip install -e . --group=lint --system
+          uv pip install -e . --group=dev --system
 
       - name: Run ruff
         run: |
@@ -61,7 +61,7 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          uv pip install -e . --group=tests --system
+          uv pip install -e . --group=dev --system
 
       - name: Run tests with coverage
         id: pytest

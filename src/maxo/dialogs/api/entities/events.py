@@ -10,6 +10,8 @@ from maxo.types import Chat, User
 
 from .update_event import DialogUpdateEvent
 
+# TODO: Добавить остальные ивенты
+#  (добавление бота, удаление бота, добавление юзера, удаление юзера)
 ChatEvent = (
     MessageCreated
     | MessageCallback

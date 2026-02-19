@@ -13,8 +13,11 @@ from maxo.dialogs.test_tools.keyboard import InlineButtonTextLocator
 from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.kbd import Cancel
 from maxo.dialogs.widgets.text import Const, Format
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
+from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
+from maxo.routing.signals import AfterStartup, BeforeStartup
 from maxo.types import Message
 
 
@@ -58,7 +61,13 @@ def client(dp) -> BotClient:
 
 @pytest.fixture
 def dp(message_manager: MockMessageManager) -> Dispatcher:
-    dp = Dispatcher(storage=JsonMemoryStorage())
+    key_builder = DefaultKeyBuilder(with_destiny=True)
+    event_isolation = SimpleEventIsolation(key_builder=key_builder)
+    dp = Dispatcher(
+        storage=JsonMemoryStorage(),
+        events_isolation=event_isolation,
+        key_builder=key_builder,
+    )
     dp.message_created.handler(start, CommandStart())
 
     dp.include(
@@ -90,20 +99,23 @@ def dp(message_manager: MockMessageManager) -> Dispatcher:
             ),
         ),
     )
-    setup_dialogs(dp, message_manager=message_manager)
+    setup_dialogs(dp, message_manager=message_manager, events_isolation=event_isolation)
     return dp
 
 
 @pytest.mark.asyncio
 async def test_start(dp, message_manager, client) -> None:
+    await dp.feed_signal(BeforeStartup(), client.bot)
+    await dp.feed_signal(AfterStartup(), client.bot)
+
     # start
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.text == "Third"
-    assert first_message.reply_markup
+    assert first_message.body.text == "Third"
+    assert first_message.body.reply_markup
 
     message_manager.reset_history()
     await client.click(first_message, InlineButtonTextLocator("Cancel"))
     second_message = message_manager.one_message()
-    assert second_message.text == "First"
-    assert second_message.reply_markup
+    assert second_message.body.text == "First"
+    assert second_message.body.reply_markup

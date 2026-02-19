@@ -16,8 +16,11 @@ from maxo.dialogs.test_tools.keyboard import InlineButtonTextLocator
 from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.kbd import Button
 from maxo.dialogs.widgets.text import Const, Format
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
+from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
+from maxo.routing.signals import AfterStartup, BeforeStartup
 from maxo.types import Message
 
 
@@ -64,22 +67,29 @@ async def start(message: Message, dialog_manager: DialogManager) -> None:
 async def test_click() -> None:
     usecase = Mock()
     user_getter = Mock(side_effect=["Username"])
+    key_builder = DefaultKeyBuilder(with_destiny=True)
+    event_isolation = SimpleEventIsolation(key_builder=key_builder)
     dp = Dispatcher(
         workflow_data={"usecase": usecase, "user_getter": user_getter},
         storage=JsonMemoryStorage(),
+        events_isolation=event_isolation,
+        key_builder=key_builder,
     )
     dp.include(dialog)
     dp.message_created.handler(start, CommandStart())
 
     client = BotClient(dp)
     message_manager = MockMessageManager()
-    setup_dialogs(dp, message_manager=message_manager)
+    setup_dialogs(dp, message_manager=message_manager, events_isolation=event_isolation)
+
+    await dp.feed_signal(BeforeStartup(), client.bot)
+    await dp.feed_signal(AfterStartup(), client.bot)
 
     # start
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
-    assert first_message.reply_markup
+    assert first_message.body.text == "stub"
+    assert first_message.body.reply_markup
     user_getter.assert_not_called()
 
     # redraw
@@ -87,7 +97,7 @@ async def test_click() -> None:
     await client.send("whatever")
 
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
 
     # click next
     message_manager.reset_history()
@@ -99,6 +109,6 @@ async def test_click() -> None:
     message_manager.assert_answered(callback_id)
     usecase.assert_called()
     second_message = message_manager.one_message()
-    assert second_message.text == "Next Username"
-    assert second_message.reply_markup.inline_keyboard
+    assert second_message.body.text == "Next Username"
+    assert second_message.body.reply_markup
     user_getter.assert_called_once()

@@ -9,9 +9,11 @@ from maxo.dialogs import (
     setup_dialogs,
 )
 from maxo.dialogs.test_tools import BotClient, MockMessageManager
+from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.media.static import StaticMedia
+from maxo.enums import AttachmentType
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
-from maxo.fsm.storages.memory import MemoryStorage
 from maxo.routing.filters import Command
 from maxo.types import Message
 
@@ -44,7 +46,8 @@ async def start_path(message: Message, dialog_manager: DialogManager) -> None:
 @pytest.mark.asyncio
 async def test_click() -> None:
     dp = Dispatcher(
-        storage=MemoryStorage(),
+        storage=JsonMemoryStorage(),
+        key_builder=DefaultKeyBuilder(with_destiny=True),
     )
     dp.include(dialog)
     dp.message_created.handler(start_url, Command("url"))
@@ -57,11 +60,11 @@ async def test_click() -> None:
     # with url parameter
     await client.send("/url")
     first_message = message_manager.one_message()
-    assert first_message.photo
+    assert any(a.type == AttachmentType.IMAGE for a in first_message.body.attachments)
 
     message_manager.reset_history()
 
     # with path parameter
     await client.send("/path")
     first_message = message_manager.one_message()
-    assert first_message.photo
+    assert any(a.type == AttachmentType.IMAGE for a in first_message.body.attachments)

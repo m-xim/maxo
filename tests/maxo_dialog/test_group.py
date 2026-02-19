@@ -17,8 +17,11 @@ from maxo.dialogs.test_tools.keyboard import InlineButtonTextLocator
 from maxo.dialogs.test_tools.memory_storage import JsonMemoryStorage
 from maxo.dialogs.widgets.kbd import Button
 from maxo.dialogs.widgets.text import Const, Format
+from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
+from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import Command, CommandStart
+from maxo.routing.signals import AfterStartup, BeforeStartup
 
 
 class MainSG(StatesGroup):
@@ -57,9 +60,15 @@ def message_manager() -> MockMessageManager:
 
 @pytest.fixture
 def dp(message_manager) -> Dispatcher:
-    dp = Dispatcher(storage=JsonMemoryStorage())
+    key_builder = DefaultKeyBuilder(with_destiny=True)
+    event_isolation = SimpleEventIsolation(key_builder=key_builder)
+    dp = Dispatcher(
+        storage=JsonMemoryStorage(),
+        events_isolation=event_isolation,
+        key_builder=key_builder,
+    )
     dp.include(Dialog(window))
-    setup_dialogs(dp, message_manager=message_manager)
+    setup_dialogs(dp, message_manager=message_manager, events_isolation=event_isolation)
     return dp
 
 
@@ -78,7 +87,7 @@ async def test_second_user(dp, client, second_client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
     message_manager.reset_history()
     await second_client.send("test")
     assert not message_manager.sent_messages
@@ -107,7 +116,7 @@ async def test_change_settings(dp, client, second_client, message_manager) -> No
     )
     window_message = message_manager.one_message()
     message_manager.reset_history()
-    assert window_message.text == "stub"
+    assert window_message.body.text == "stub"
 
     await client.send("/start")
     window_message = message_manager.one_message()
@@ -138,7 +147,7 @@ async def test_change_settings_bg(dp, client, second_client, message_manager) ->
     )
     window_message = message_manager.one_message()
     message_manager.reset_history()
-    assert window_message.text == "stub"
+    assert window_message.body.text == "stub"
 
     await client.send("/start")
     window_message = message_manager.one_message()
@@ -154,9 +163,13 @@ async def test_change_settings_bg(dp, client, second_client, message_manager) ->
 @pytest.mark.asyncio
 async def test_same_user(dp, client, message_manager) -> None:
     dp.message_created.handler(start, CommandStart())
+
+    await dp.feed_signal(BeforeStartup(), client.bot)
+    await dp.feed_signal(AfterStartup(), client.bot)
+
     await client.send("/start")
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
     message_manager.reset_history()
     await client.send("test")
     assert not message_manager.sent_messages  # no resend
@@ -165,7 +178,7 @@ async def test_same_user(dp, client, message_manager) -> None:
         InlineButtonTextLocator("Button"),
     )
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
 
 
 @pytest.mark.asyncio
@@ -175,7 +188,7 @@ async def test_shared_stack(dp, client, second_client, message_manager) -> None:
     await asyncio.sleep(0.02)  # synchronization workaround, fixme
 
     first_message = message_manager.one_message()
-    assert first_message.text == "stub"
+    assert first_message.body.text == "stub"
     message_manager.reset_history()
     await second_client.send("test")
     assert not message_manager.sent_messages
@@ -184,4 +197,4 @@ async def test_shared_stack(dp, client, second_client, message_manager) -> None:
         InlineButtonTextLocator("Button"),
     )
     second_message = message_manager.one_message()
-    assert second_message.text == "stub"
+    assert second_message.body.text == "stub"

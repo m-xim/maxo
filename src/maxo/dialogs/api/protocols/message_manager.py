@@ -5,8 +5,7 @@ from maxo import Bot
 from maxo.dialogs import ShowMode
 from maxo.dialogs.api.entities import NewMessage, OldMessage
 from maxo.dialogs.api.exceptions import DialogsError
-from maxo.routing.updates import MessageEdited
-from maxo.types import Callback
+from maxo.types import Callback, Message
 
 
 class MessageNotModified(DialogsError):
@@ -20,7 +19,7 @@ class MessageManagerProtocol(Protocol):
         bot: Bot,
         show_mode: ShowMode,
         old_message: OldMessage | None,
-    ) -> MessageEdited | None:
+    ) -> Message | None:
         raise NotImplementedError
 
     @abstractmethod
