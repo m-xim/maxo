@@ -98,9 +98,9 @@ async def test_media_id_storage_integration():
         message_manager.show_message_mock.assert_called_once()
         first_call_args = message_manager.show_message_mock.call_args
         first_new_message: NewMessage = first_call_args.args[1]
-        first_media_attachment_request = first_new_message.media
-        assert len(first_media_attachment_request) == 1
-        assert first_media_attachment_request[0].media_id is None
+        first_media_attachment = first_new_message.media
+        assert len(first_media_attachment) == 1
+        assert first_media_attachment[0].media_id is None
 
         saved_media_id = await media_storage.get_media_id(
             path,
@@ -117,7 +117,7 @@ async def test_media_id_storage_integration():
         message_manager.show_message_mock.assert_called_once()
         second_call_args = message_manager.show_message_mock.call_args
         second_new_message: NewMessage = second_call_args.args[1]
-        second_media_attachment_request = second_new_message.media
-        assert len(second_media_attachment_request) == 1
-        assert second_media_attachment_request[0].media_id is not None
-        assert second_media_attachment_request[0].media_id.token == saved_media_id.token
+        second_media_attachment = second_new_message.media
+        assert len(second_media_attachment) == 1
+        assert second_media_attachment[0].media_id is not None
+        assert second_media_attachment[0].media_id.token == saved_media_id.token

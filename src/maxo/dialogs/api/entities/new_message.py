@@ -36,11 +36,12 @@ class OldMessage(MaxoType):
         return None
 
     @property
-    def media(self) -> MediaAttachments | None:
-        for attachment in self.attachments:
-            if isinstance(attachment, MediaAttachments):
-                return attachment
-        return None
+    def media(self) -> list[MediaAttachments]:
+        return [
+            attachment
+            for attachment in self.attachments
+            if isinstance(attachment, MediaAttachments)
+        ]
 
 
 class NewMessage(MaxoType):

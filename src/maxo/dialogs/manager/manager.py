@@ -14,7 +14,6 @@ from maxo.dialogs.api.entities import (
     Data,
     EventContext,
     LaunchMode,
-    MediaId,
     NewMessage,
     OldMessage,
     ShowMode,
@@ -404,21 +403,6 @@ class ManagerImpl(DialogManager):
                 logger.debug("MessageNotModified, not storing ids")
             else:
                 self._save_last_message(sent_message)
-                if not new_message.media:
-                    return
-
-                return
-                # TODO: Перенести в другое место, тут не получится
-
-                for request in new_message.media:
-                    for response in sent_message.attachments:
-                        if request.type == response.type:
-                            await self.media_id_storage.save_media_id(
-                                path=request.path,
-                                url=request.url,
-                                type=request.type,
-                                media_id=MediaId(token=response.payload.token),
-                            )
 
         except Exception as e:
             current_state = self.current_context().state

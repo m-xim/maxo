@@ -10,9 +10,11 @@ from maxo.dialogs.api.entities import (
     ShowMode,
 )
 from maxo.dialogs.api.protocols import (
+    MediaIdStorageProtocol,
     MessageManagerProtocol,
     MessageNotModified,
 )
+from maxo.dialogs.manager.attachment_facade import DialogAttachmentsFacade
 from maxo.enums import AttachmentType, UploadType
 from maxo.errors import MaxBotApiError, MaxBotBadRequestError
 from maxo.omit import Omitted
@@ -28,7 +30,6 @@ from maxo.types import (
     PhotoAttachmentRequest,
     VideoAttachmentRequest,
 )
-from maxo.utils.facades import AttachmentsFacade
 from maxo.utils.helpers import attachment_to_request
 from maxo.utils.upload_media import FSInputFile, InputFile
 
@@ -59,6 +60,9 @@ def _combine(sent_message: NewMessage, message_result: Message) -> OldMessage:
 
 
 class MessageManager(MessageManagerProtocol):
+    def __init__(self, media_id_storage: MediaIdStorageProtocol) -> None:
+        self.media_id_storage = media_id_storage
+
     async def answer_callback(
         self,
         bot: Bot,
@@ -130,10 +134,8 @@ class MessageManager(MessageManagerProtocol):
                 bool(old_message),
             )
             await self._remove_kbd(bot, old_message, new_message)
-            return _combine(
-                new_message,
-                await self.send_message(bot, new_message),
-            )
+            sent_message = await self.send_message(bot, new_message)
+            return _combine(new_message, sent_message)
 
         if not self._message_changed(new_message, old_message):
             logger.debug("Message dit not change")
@@ -142,14 +144,10 @@ class MessageManager(MessageManagerProtocol):
 
         if not self._can_edit(new_message, old_message):
             await self.remove_message_safe(bot, old_message, new_message)
-            return _combine(
-                new_message,
-                await self.send_message(bot, new_message),
-            )
-        return _combine(
-            new_message,
-            await self.edit_message_safe(bot, new_message, old_message),
-        )
+            sent_message = await self.send_message(bot, new_message)
+            return _combine(new_message, sent_message)
+        sent_message = await self.edit_message_safe(bot, new_message, old_message)
+        return _combine(new_message, sent_message)
 
     # Clear
     async def remove_kbd(
@@ -262,13 +260,10 @@ class MessageManager(MessageManagerProtocol):
         return await bot.get_message_by_id(message_id=old_message.message_id)
 
     async def send_message(self, bot: Bot, new_message: NewMessage) -> Message:
-        if (
-            new_message.link_preview_options is None
-            or new_message.link_preview_options.is_disabled is None
-        ):
-            disable_link_preview = Omitted()
-        else:
+        if new_message.link_preview_options:
             disable_link_preview = new_message.link_preview_options.is_disabled
+        else:
+            disable_link_preview = Omitted()
 
         attachments = await self._build_attachments(
             bot,
@@ -302,7 +297,7 @@ class MessageManager(MessageManagerProtocol):
             elif isinstance(attach, MediaAttachmentsRequests):
                 base.append(attach)
 
-        facade = AttachmentsFacade(bot)
+        facade = DialogAttachmentsFacade(bot, media_id_storage=self.media_id_storage)
         return await facade.build_attachments(base=base, keyboard=keyboard, files=files)
 
     def _convert_media(
@@ -313,6 +308,10 @@ class MessageManager(MessageManagerProtocol):
             token = media.media_id.token
             url = None
         elif media.url:
+            if media.type != AttachmentType.IMAGE:
+                raise ValueError(
+                    f"URL is supported only for IMAGE media, got: {media.type}",
+                )
             token = None
             url = media.url
         elif media.path:

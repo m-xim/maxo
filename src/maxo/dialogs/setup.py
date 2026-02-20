@@ -190,7 +190,7 @@ def _prepare_dialog_manager_factory(
     if media_id_storage is None:
         media_id_storage = MediaIdStorage()
     if message_manager is None:
-        message_manager = MessageManager()
+        message_manager = MessageManager(media_id_storage=media_id_storage)
     return DefaultManagerFactory(
         message_manager=message_manager,
         media_id_storage=media_id_storage,
