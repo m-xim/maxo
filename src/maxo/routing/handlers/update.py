@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 from functools import partial
-from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
+from typing import Any, Generic, ParamSpec, Protocol, TypeVar, runtime_checkable
 
 from maxo.routing.ctx import Ctx
 from maxo.routing.filters.always import AlwaysTrueFilter
@@ -11,6 +11,7 @@ from maxo.routing.updates.base import BaseUpdate
 
 _UpdateT = TypeVar("_UpdateT", bound=BaseUpdate)
 _ReturnT_co = TypeVar("_ReturnT_co", covariant=True)
+_ParamsP = ParamSpec("_ParamsP")
 
 
 @runtime_checkable
@@ -19,7 +20,8 @@ class UpdateHandlerFn(Protocol[_UpdateT, _ReturnT_co]):
         self,
         update: _UpdateT,
         /,
-        **kwargs: Any,
+        *args: _ParamsP.args,
+        **kwargs: _ParamsP.kwargs,
     ) -> _ReturnT_co: ...
 
 
