@@ -18,8 +18,7 @@ from maxo.fsm.state import State, StatesGroup
 from maxo.routing.ctx import Ctx
 from maxo.routing.filters.command import CommandStart
 from maxo.routing.interfaces import BaseMiddleware, NextMiddleware
-from maxo.routing.updates.base import MaxUpdate
-from maxo.types.message import Message
+from maxo.routing.updates import MessageCreated
 
 
 class MainSG(StatesGroup):
@@ -29,10 +28,10 @@ class MainSG(StatesGroup):
 class MyMiddleware(BaseMiddleware[MaxUpdate]):
     async def __call__(self, update: MaxUpdate, ctx: Ctx, next: NextMiddleware) -> None:
         ctx["my_key"] = "my_value"
-        return await next(ctx)
+        await next(ctx)
 
 
-async def start(message: Message, dialog_manager: DialogManager) -> None:
+async def start(message: MessageCreated, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
@@ -61,7 +60,7 @@ def dp(message_manager: MockMessageManager) -> Dispatcher:
 
 
 @pytest.fixture
-def client(dp) -> BotClient:
+def client(dp: Dispatcher) -> BotClient:
     return BotClient(dp)
 
 
@@ -71,7 +70,11 @@ def bot() -> Bot:
 
 
 @pytest.mark.asyncio
-async def test_middleware(bot, message_manager, client) -> None:
+async def test_middleware(
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await client.send("/start")
     first_message = message_manager.one_message()
     assert first_message.body.text == "my_value"
