@@ -1,4 +1,5 @@
 import dataclasses
+from typing import Any
 
 from maxo.dialogs.api.entities import (
     AccessSettings,
@@ -101,7 +102,7 @@ class SubManager(DialogManager):
 
     async def done(
         self,
-        result: Data | None = None,
+        result: Any = None,
         show_mode: ShowMode | None = None,
     ) -> None:
         await self.manager.done(result, show_mode)
