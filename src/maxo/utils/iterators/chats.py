@@ -11,7 +11,10 @@ class ChatsIterator(AsyncIterator[Chat]):
     __slots__ = ("_bot", "_chats", "_count", "_marker")
 
     def __init__(
-        self, bot: Bot, count: Omittable[int] = 50, marker: Omittable[int | None] = None
+        self,
+        bot: Bot,
+        count: Omittable[int] = 50,
+        marker: Omittable[int | None] = None,
     ) -> None:
         self._bot = bot
         self._count = count

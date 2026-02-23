@@ -45,7 +45,7 @@ class AttachmentRequestBuilder:
         photos: Omittable[list[str] | None] = Omitted(),
     ) -> Self:
         self._items.append(
-            PhotoAttachmentRequest.factory(url=url, token=token, photos=photos)
+            PhotoAttachmentRequest.factory(url=url, token=token, photos=photos),
         )
         return self
 
@@ -74,7 +74,10 @@ class AttachmentRequestBuilder:
     ) -> Self:
         self._items.append(
             ContactAttachmentRequest.factory(
-                name=name, contact_id=contact_id, vcf_info=vcf_info, vcf_phone=vcf_phone
+                name=name,
+                contact_id=contact_id,
+                vcf_info=vcf_info,
+                vcf_phone=vcf_phone,
             ),
         )
         return self
@@ -85,7 +88,7 @@ class AttachmentRequestBuilder:
 
     def add_location(self, latitude: Decimal, longitude: Decimal) -> Self:
         self._items.append(
-            LocationAttachmentRequest(latitude=latitude, longitude=longitude)
+            LocationAttachmentRequest(latitude=latitude, longitude=longitude),
         )
         return self
 

@@ -37,7 +37,8 @@ def message_manager() -> MockMessageManager:
 @pytest.fixture
 def dp(message_manager: MockMessageManager) -> Dispatcher:
     dp = Dispatcher(
-        storage=JsonMemoryStorage(), key_builder=DefaultKeyBuilder(with_destiny=True)
+        storage=JsonMemoryStorage(),
+        key_builder=DefaultKeyBuilder(with_destiny=True),
     )
     dp.message_created.handler(start, CommandStart())
     dp.include(
@@ -45,8 +46,8 @@ def dp(message_manager: MockMessageManager) -> Dispatcher:
             Window(
                 Format("{middleware_data[my_key]}"),
                 state=MainSG.start,
-            )
-        )
+            ),
+        ),
     )
     dp.message_created.middleware.outer(MyMiddleware())
     setup_dialogs(dp, message_manager=message_manager)
@@ -65,7 +66,9 @@ def bot() -> Bot:
 
 @pytest.mark.asyncio
 async def test_middleware(
-    bot: Bot, message_manager: MockMessageManager, client: BotClient
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
 ) -> None:
     await client.send("/start")
     first_message = message_manager.one_message()

@@ -33,7 +33,9 @@ class FSMContext:
         )
 
     async def update_data(
-        self, data: MutableMapping[str, Any] | None = None, **kwargs: Any
+        self,
+        data: MutableMapping[str, Any] | None = None,
+        **kwargs: Any,
     ) -> MutableMapping[str, Any]:
         if data:
             kwargs.update(data)

@@ -2,7 +2,7 @@ from abc import abstractmethod
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional, Protocol
 
-from maxo import Bot, Ctx
+from maxo import Bot
 from maxo.dialogs.api.entities import (
     AccessSettings,
     ChatEvent,
@@ -94,7 +94,7 @@ class DialogManager(BaseDialogManager, Protocol):
 
     @property
     @abstractmethod
-    def middleware_data(self) -> Ctx:
+    def middleware_data(self) -> dict:
         """Middleware data."""
         raise NotImplementedError
 

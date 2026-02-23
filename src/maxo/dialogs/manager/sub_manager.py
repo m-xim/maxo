@@ -1,6 +1,5 @@
 import dataclasses
 
-from maxo import Ctx
 from maxo.dialogs.api.entities import (
     AccessSettings,
     ChatEvent,
@@ -17,7 +16,11 @@ from maxo.fsm import State
 
 class SubManager(DialogManager):
     def __init__(
-        self, widget: Widget, manager: DialogManager, widget_id: str, item_id: str
+        self,
+        widget: Widget,
+        manager: DialogManager,
+        widget_id: str,
+        item_id: str,
     ) -> None:
         self.widget = widget
         self.manager = manager
@@ -29,7 +32,7 @@ class SubManager(DialogManager):
         return self.manager.event
 
     @property
-    def middleware_data(self) -> Ctx:
+    def middleware_data(self) -> dict:
         """Middleware data."""
         return self.manager.middleware_data
 
@@ -97,7 +100,9 @@ class SubManager(DialogManager):
         await self.manager.back(show_mode)
 
     async def done(
-        self, result: Data | None = None, show_mode: ShowMode | None = None
+        self,
+        result: Data | None = None,
+        show_mode: ShowMode | None = None,
     ) -> None:
         await self.manager.done(result, show_mode)
 
@@ -135,5 +140,8 @@ class SubManager(DialogManager):
         load: bool = False,
     ) -> BaseDialogManager:
         return self.manager.bg(
-            user_id=user_id, chat_id=chat_id, stack_id=stack_id, load=load
+            user_id=user_id,
+            chat_id=chat_id,
+            stack_id=stack_id,
+            load=load,
         )

@@ -86,7 +86,10 @@ class RedisStorage(BaseStorage):
 
     @classmethod
     def from_url(
-        cls, url: str, connection_kwargs: dict[str, Any] | None = None, **kwargs: Any
+        cls,
+        url: str,
+        connection_kwargs: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> "RedisStorage":
         if connection_kwargs is None:
             connection_kwargs = {}

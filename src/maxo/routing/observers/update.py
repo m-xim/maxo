@@ -12,7 +12,9 @@ _ReturnT_co = TypeVar("_ReturnT_co", covariant=True)
 
 class UpdateObserver(
     BaseObserver[
-        _UpdateT, UpdateHandler[_UpdateT, Any], UpdateHandlerFn[_UpdateT, Any]
+        _UpdateT,
+        UpdateHandler[_UpdateT, Any],
+        UpdateHandlerFn[_UpdateT, Any],
     ],
     Generic[_UpdateT],
 ):
@@ -30,5 +32,7 @@ class UpdateObserver(
     if TYPE_CHECKING:
 
         async def execute_handler(
-            self, ctx: Ctx, handler: UpdateHandler[_UpdateT, _ReturnT_co]
+            self,
+            ctx: Ctx,
+            handler: UpdateHandler[_UpdateT, _ReturnT_co],
         ) -> _ReturnT_co: ...

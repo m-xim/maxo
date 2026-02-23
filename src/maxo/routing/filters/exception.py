@@ -13,7 +13,8 @@ _ExceptionT = TypeVar("_ExceptionT", bound=Exception)
 
 @final
 class ExceptionTypeFilter(
-    BaseFilter[ErrorEvent[_ExceptionT, _UpdateT]], Generic[_ExceptionT, _UpdateT]
+    BaseFilter[ErrorEvent[_ExceptionT, _UpdateT]],
+    Generic[_ExceptionT, _UpdateT],
 ):
     _handler: Callable[[Any], bool]
 
@@ -30,7 +31,8 @@ class ExceptionTypeFilter(
 
 
 class ExceptionMessageFilter(
-    BaseFilter[ErrorEvent[_ExceptionT, _UpdateT]], Generic[_ExceptionT, _UpdateT]
+    BaseFilter[ErrorEvent[_ExceptionT, _UpdateT]],
+    Generic[_ExceptionT, _UpdateT],
 ):
     __slots__ = ("_pattern",)
 

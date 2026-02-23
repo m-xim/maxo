@@ -35,13 +35,18 @@ class BaseStorage(ABC):
         raise NotImplementedError
 
     async def get_value(
-        self, storage_key: StorageKey, value_key: str, default: Any | None = None
+        self,
+        storage_key: StorageKey,
+        value_key: str,
+        default: Any | None = None,
     ) -> Any | None:
         data = await self.get_data(storage_key)
         return copy(data.get(value_key, default))
 
     async def update_data(
-        self, key: StorageKey, data: MutableMapping[str, Any]
+        self,
+        key: StorageKey,
+        data: MutableMapping[str, Any],
     ) -> MutableMapping[str, Any]:
         current_data = await self.get_data(key=key)
         current_data.update(data)

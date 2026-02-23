@@ -11,7 +11,10 @@ class FSInputFile(InputFile):
     __slots__ = ("_file_name", "_path", "_type")
 
     def __init__(
-        self, path: str | Path, type: UploadType, file_name: str | None = None
+        self,
+        path: str | Path,
+        type: UploadType,
+        file_name: str | None = None,
     ) -> None:
         if file_name is None:
             file_name = os.path.basename(path)  # noqa: PTH119

@@ -61,7 +61,9 @@ class Dispatcher(Router):
         self.update.middleware.outer(FacadeMiddleware())
 
     async def feed_max_update(
-        self, update: MaxoUpdate[Any], bot: Bot | None = None
+        self,
+        update: MaxoUpdate[Any],
+        bot: Bot | None = None,
     ) -> Any:
         loop = asyncio.get_running_loop()
         start_time = loop.time()

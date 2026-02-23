@@ -141,5 +141,8 @@ class Command(BaseFilter[MessageCreated]):
 class CommandStart(Command):
     def __init__(self, ignore_case: bool = False, ignore_mention: bool = False) -> None:
         super().__init__(
-            "start", prefix="/", ignore_case=ignore_case, ignore_mention=ignore_mention
+            "start",
+            prefix="/",
+            ignore_case=ignore_case,
+            ignore_mention=ignore_mention,
         )

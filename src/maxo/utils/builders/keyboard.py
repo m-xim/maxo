@@ -73,7 +73,8 @@ class KeyboardBuilder:
     __slots__ = ("_keyboard", "_validator")
 
     def __init__(
-        self, keyboard: MutableSequence[MutableSequence[InlineButtons]] | None = None
+        self,
+        keyboard: MutableSequence[MutableSequence[InlineButtons]] | None = None,
     ) -> None:
         validator = KeyboardValidator()
 
@@ -104,7 +105,9 @@ class KeyboardBuilder:
         return self
 
     def add_request_geo_location(
-        self, text: str, quick: Omittable[bool] = Omitted()
+        self,
+        text: str,
+        quick: Omittable[bool] = Omitted(),
     ) -> Self:
         self.add(
             RequestGeoLocationButton(text=text, quick=quick),

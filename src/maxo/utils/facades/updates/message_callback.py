@@ -7,7 +7,9 @@ from maxo.utils.facades.updates.base import BaseUpdateFacade
 
 
 class MessageCallbackFacade(
-    BaseUpdateFacade[MessageCallback], MessageMethodsFacade, CallbackMethodsFacade
+    BaseUpdateFacade[MessageCallback],
+    MessageMethodsFacade,
+    CallbackMethodsFacade,
 ):
     @property
     def message(self) -> Message:

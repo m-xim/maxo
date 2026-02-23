@@ -6,7 +6,8 @@ from maxo.utils.facades.updates.base import BaseUpdateFacade
 
 
 class UserRemovedFromChatFacade(
-    BaseUpdateFacade[UserRemovedFromChat], ChatMethodsFacade
+    BaseUpdateFacade[UserRemovedFromChat],
+    ChatMethodsFacade,
 ):
     @property
     def chat_id(self) -> int:
