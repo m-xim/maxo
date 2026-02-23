@@ -28,7 +28,7 @@ async def test_get_media_id() -> None:
             filename,
             None,
             AttachmentType.FILE,
-            MediaId(token="test1"),
+            MediaId(token="test1"),  # noqa: S106
         )
 
         media_id = await manager.get_media_id(
@@ -36,7 +36,7 @@ async def test_get_media_id() -> None:
             None,
             AttachmentType.FILE,
         )
-        assert media_id == MediaId(token="test1")
+        assert media_id == MediaId(token="test1")  # noqa: S106
 
         await asyncio.sleep(0.1)
 

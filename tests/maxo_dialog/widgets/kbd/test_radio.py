@@ -1,11 +1,11 @@
 import operator
 from datetime import UTC, datetime
-from typing import cast, Any
+from typing import Any, cast
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from maxo.dialogs import Dialog, DialogManager
+from maxo.dialogs import DialogManager
 from maxo.dialogs.api.entities import ChatEvent
 from maxo.dialogs.widgets.kbd import Radio
 from maxo.dialogs.widgets.text import Format

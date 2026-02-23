@@ -68,9 +68,9 @@ async def handler(_: Any, ctx: Ctx) -> Any:
 
 def middleware_factory(name: str) -> Callable[..., Any]:
     async def middleware(
-            update: MessageCreated,
-            ctx: Ctx,
-            next: NextMiddleware[MessageCreated]
+        update: MessageCreated,
+        ctx: Ctx,
+        next: NextMiddleware[MessageCreated],
     ) -> Any:
         ctx["execution_order"].append(f"{name}_pre")
         result = await next(ctx)
@@ -117,9 +117,9 @@ async def test_middleware_stops_propagation(context: Ctx) -> None:
     dp = Dispatcher()
 
     async def stopping_middleware(
-            update: MessageCreated,
-            ctx: Ctx,
-            next: NextMiddleware[MessageCreated]
+        update: MessageCreated,
+        ctx: Ctx,
+        next: NextMiddleware[MessageCreated],
     ) -> Any:
         ctx["execution_order"].append("stopping_middleware")
         return "STOPPED"
@@ -201,9 +201,9 @@ async def test_nested_router_middleware_execution(context: Ctx) -> None:
 @pytest.mark.asyncio
 async def test_one_call_per_event_with_routers(context: Ctx) -> None:
     async def outer_middleware(
-            update: MessageCreated,
-            ctx: Ctx,
-            next: NextMiddleware[MessageCreated]
+        update: MessageCreated,
+        ctx: Ctx,
+        next: NextMiddleware[MessageCreated],
     ) -> Any:
         ctx["calls"] += 1
         return await next(ctx)

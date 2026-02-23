@@ -15,7 +15,6 @@ from maxo.enums import AttachmentType
 from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.state import State, StatesGroup
 from maxo.routing.filters import Command
-from maxo.types import Message
 from maxo.routing.updates import MessageCreated
 
 

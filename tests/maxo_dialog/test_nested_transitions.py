@@ -19,7 +19,6 @@ from maxo.fsm.state import State, StatesGroup
 from maxo.routing.filters import CommandStart
 from maxo.routing.signals import AfterStartup, BeforeStartup
 from maxo.routing.updates import MessageCreated
-from maxo.types import Message
 
 
 class MainSG(StatesGroup):
@@ -38,15 +37,15 @@ async def start(message: MessageCreated, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
-async def on_start_main(data:Any, dialog_manager: DialogManager) -> None:
+async def on_start_main(data: Any, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(SecondarySG.start)
 
 
-async def on_start_sub(_:Any, dialog_manager: DialogManager) -> None:
+async def on_start_sub(_: Any, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(ThirdSG.start)
 
 
-async def on_process_result_sub(_:Any, __:Any, dialog_manager: DialogManager) -> None:
+async def on_process_result_sub(_: Any, __: Any, dialog_manager: DialogManager) -> None:
     await dialog_manager.done()
 
 
@@ -99,7 +98,11 @@ def dp(message_manager: MockMessageManager) -> Dispatcher:
 
 
 @pytest.mark.asyncio
-async def test_start(dp: Dispatcher, message_manager: MockMessageManager, client: BotClient) -> None:
+async def test_start(
+    dp: Dispatcher,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await dp.feed_signal(BeforeStartup(), client.bot)
     await dp.feed_signal(AfterStartup(), client.bot)
 

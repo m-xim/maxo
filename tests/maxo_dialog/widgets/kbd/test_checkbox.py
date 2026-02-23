@@ -38,4 +38,3 @@ async def test_on_state_changed_checkbox(mock_manager: DialogManager) -> None:
     await checkbox.set_checked(cast(ChatEvent, Mock()), False, mock_manager)
 
     on_state_changed.assert_called_once()
-

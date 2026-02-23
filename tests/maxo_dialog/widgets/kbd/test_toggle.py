@@ -1,5 +1,5 @@
 import operator
-from typing import cast, Any
+from typing import Any, cast
 from unittest.mock import Mock
 
 import pytest

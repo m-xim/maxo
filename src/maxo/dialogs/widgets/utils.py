@@ -15,7 +15,7 @@ type WidgetSrc = (
     str | Text | Keyboard | MessageHandlerFunc | Media | BaseInput | LinkPreviewBase
 )
 
-SingleGetterBase = DataGetter | dict
+type SingleGetterBase = DataGetter | dict
 type GetterVariant = (
     SingleGetterBase | list[SingleGetterBase] | tuple[SingleGetterBase, ...] | None
 )

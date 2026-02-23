@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from magic_filter import F
 
@@ -15,7 +17,7 @@ class Static(Media):
 
     async def _render_media(
         self,
-        data: dict[str, object],
+        data: dict[Any, Any],
         manager: DialogManager,
     ) -> list[MediaAttachment]:
         return [MediaAttachment(AttachmentType.IMAGE, path=self.path)]

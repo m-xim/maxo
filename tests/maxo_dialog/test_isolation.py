@@ -11,11 +11,10 @@ from maxo.fsm.key_builder import DefaultKeyBuilder
 from maxo.fsm.storages.memory import SimpleEventIsolation
 from maxo.routing.filters import CommandStart
 from maxo.routing.updates import MessageCreated
-from maxo.types import Message
 
 
 async def start(
-    _message: MessageCreated,
+    message: MessageCreated,
     data: list[int],
     event_common: Event,
 ) -> None:

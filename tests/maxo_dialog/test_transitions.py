@@ -33,7 +33,11 @@ class SecondarySG(StatesGroup):
     start = State()
 
 
-async def start(message: MessageCreated, ctx: Ctx, dialog_manager: DialogManager) -> None:
+async def start(
+    message: MessageCreated,
+    ctx: Ctx,
+    dialog_manager: DialogManager,
+) -> None:
     await dialog_manager.start(MainSG.start, mode=StartMode.RESET_STACK)
 
 
@@ -92,7 +96,11 @@ def bot() -> Bot:
 
 
 @pytest.mark.asyncio
-async def test_start(bot:Bot, message_manager:MockMessageManager, client:BotClient) -> None:
+async def test_start(
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     # start
     await client.send("/start")
     first_message = message_manager.one_message()
@@ -101,7 +109,12 @@ async def test_start(bot:Bot, message_manager:MockMessageManager, client:BotClie
 
 
 @pytest.mark.asyncio
-async def test_next_back(dp: Dispatcher, bot:Bot, message_manager:MockMessageManager, client:BotClient) -> None:
+async def test_next_back(
+    dp: Dispatcher,
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await dp.feed_signal(BeforeStartup(), client.bot)
     await dp.feed_signal(AfterStartup(), client.bot)
 
@@ -131,7 +144,12 @@ async def test_next_back(dp: Dispatcher, bot:Bot, message_manager:MockMessageMan
 
 
 @pytest.mark.asyncio
-async def test_finish_last(dp: Dispatcher, bot:Bot, message_manager:MockMessageManager, client:BotClient) -> None:
+async def test_finish_last(
+    dp: Dispatcher,
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await dp.feed_signal(BeforeStartup(), client.bot)
     await dp.feed_signal(AfterStartup(), client.bot)
 
@@ -150,7 +168,12 @@ async def test_finish_last(dp: Dispatcher, bot:Bot, message_manager:MockMessageM
 
 
 @pytest.mark.asyncio
-async def test_reset_stack(dp: Dispatcher, bot:Bot, message_manager:MockMessageManager, client:BotClient) -> None:
+async def test_reset_stack(
+    dp: Dispatcher,
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await dp.feed_signal(BeforeStartup(), client.bot)
     await dp.feed_signal(AfterStartup(), client.bot)
 
@@ -174,7 +197,12 @@ async def test_reset_stack(dp: Dispatcher, bot:Bot, message_manager:MockMessageM
 
 
 @pytest.mark.asyncio
-async def test_subdialog(dp: Dispatcher, bot:Bot, message_manager:MockMessageManager, client:BotClient) -> None:
+async def test_subdialog(
+    dp: Dispatcher,
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await dp.feed_signal(BeforeStartup(), client.bot)
     await dp.feed_signal(AfterStartup(), client.bot)
 

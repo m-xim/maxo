@@ -19,9 +19,6 @@ from maxo.routing.ctx import Ctx
 from maxo.routing.filters.command import CommandStart
 from maxo.routing.interfaces import BaseMiddleware, NextMiddleware
 from maxo.routing.updates import MessageCreated
-from maxo.routing.updates.base import MaxUpdate
-from maxo.types.message import Message
-from maxo.utils.facades import MessageCreatedFacade
 
 
 class MainSG(StatesGroup):
@@ -79,7 +76,11 @@ def bot() -> Bot:
 
 
 @pytest.mark.asyncio
-async def test_middleware(bot:Bot, message_manager:MockMessageManager, client:BotClient) -> None:
+async def test_middleware(
+    bot: Bot,
+    message_manager: MockMessageManager,
+    client: BotClient,
+) -> None:
     await client.send("/start")
     first_message = message_manager.one_message()
     assert first_message.body.text == "my_value"
