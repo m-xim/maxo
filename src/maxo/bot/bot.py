@@ -214,8 +214,12 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         if isinstance(url, AttachmentPayload):
             url = url.url
 
-        response = await self.call_method_stream(
+        # The URL may point anywhere, so the token must not leave with it
+        response = await self.client.call_method_stream(
             Download(url=url, __chunk_size__=chunk_size),
+            middleware=[
+                m for m in self.middleware if not isinstance(m, AuthMiddleware)
+            ],
         )
         async with response.data as stream:
             yield stream
