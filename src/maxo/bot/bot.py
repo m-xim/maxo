@@ -302,9 +302,11 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
                     raise MaxBotApiError(
                         code="",
                         error=f"upload failed with status {response.status_code}",
-                        message=body.decode("utf-8", "replace")
-                        if isinstance(body, bytes)
-                        else str(body or ""),
+                        message=(
+                            body.decode("utf-8", "replace")
+                            if isinstance(body, bytes)
+                            else str(body or "")
+                        ),
                         raw_data=body,
                     )
 
