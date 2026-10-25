@@ -197,16 +197,13 @@ def create_retort() -> Retort:
             ),
             dumper(
                 for_marker(QueryMarker, P[bool]),
-                int,
+                lambda flag: "true" if flag else "false",
             ),
             dumper(
                 for_marker(QueryMarker, P[list[str]] | P[list[int]]),
                 lambda seq: ",".join(str(el) for el in seq),
             ),
-            dumper(
-                for_marker(QueryMarker, P[datetime]),  # Для GetComments
-                lambda time: int(time.timestamp() * 1000),
-            ),
+            dumper(P[datetime], lambda time: int(time.timestamp() * 1000)),
             dumper(
                 P[AttachmentsRequests | Attachments],
                 lambda x: x.to_request() if isinstance(x, Attachments) else x,
