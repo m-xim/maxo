@@ -10,7 +10,7 @@ from maxo.bot.methods import (
 )
 from maxo.enums import TextFormat
 from maxo.omit import Omittable, Omitted, is_defined, is_omitted
-from maxo.types import MaxoType, NewCommentBody
+from maxo.types import MaxoType
 
 
 class BotDefaults(MaxoType):
@@ -39,7 +39,7 @@ def _fill(obj: Any, defaults: BotDefaults) -> Any:
 def apply_defaults(method: _MethodT, defaults: BotDefaults) -> _MethodT:
     if isinstance(
         method,
-        (SendMessage, EditMessage, SendComment, EditComment, NewCommentBody),
+        (SendMessage, EditMessage, SendComment, EditComment),
     ):
         return _fill(method, defaults)  # type: ignore[no-any-return]
     if isinstance(method, AnswerOnCallback) and is_defined(method.message):

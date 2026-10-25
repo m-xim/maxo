@@ -20,6 +20,7 @@ SKIP_SCHEMAS: frozenset[str] = frozenset(
         "BotPatch",
         "CallbackAnswer",
         "ChatPatch",
+        "NewCommentBody",
         "PinMessageBody",
         "PhotoTokens",
         "SubscriptionRequestBody",

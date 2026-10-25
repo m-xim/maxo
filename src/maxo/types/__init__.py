@@ -82,7 +82,6 @@ from .message_removed import MessageRemoved
 from .message_stat import MessageStat
 from .modify_members_result import ModifyMembersResult
 from .monospaced_markup import MonospacedMarkup
-from .new_comment_body import NewCommentBody
 from .new_message_body import NewMessageBody
 from .new_message_link import NewMessageLink
 from .open_app_button import OpenAppButton
@@ -209,7 +208,6 @@ __all__ = (
     "MessageStat",
     "ModifyMembersResult",
     "MonospacedMarkup",
-    "NewCommentBody",
     "NewMessageBody",
     "NewMessageLink",
     "OpenAppButton",
