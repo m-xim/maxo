@@ -36,3 +36,11 @@ async def test_passes_response_through() -> None:
     next_handler = AsyncMock(return_value=response)
 
     assert await middleware.handle(MagicMock(), next_handler) is response
+
+
+async def test_other_errors_pass_as_is() -> None:
+    middleware = NetworkErrorMiddleware()
+    error = ValueError("not a network error")
+
+    with pytest.raises(ValueError, match="not a network error"):
+        await middleware.handle(MagicMock(), AsyncMock(side_effect=error))
