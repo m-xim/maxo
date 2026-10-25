@@ -63,6 +63,7 @@ from maxo.bot.middlewares import (
     ChunkUploadRetryMiddleware,
     NetworkErrorMiddleware,
 )
+from maxo.bot.middlewares.network_error import translate_network_errors
 from maxo.bot.upload import UploadConfig
 from maxo.bot.warming_up import warm_up
 from maxo.errors import MaxBotApiError, UnsubscribeError
@@ -226,8 +227,10 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
                 m for m in self.middleware if not isinstance(m, AuthMiddleware)
             ],
         )
+        # Chunks are read after the middleware chain returned
         async with response.data as stream:
-            yield stream
+            with translate_network_errors():
+                yield stream
 
     async def download(
         self,
