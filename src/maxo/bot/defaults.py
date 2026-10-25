@@ -36,15 +36,21 @@ def _fill(obj: Any, defaults: BotDefaults) -> Any:
     return obj
 
 
+# Methods with `format`/`disable_link_preview`
+# `AnswerOnCallback.message` (`NewMessageBody`) is filled separately below
+METHODS_WITH_DEFAULTS = (
+    AnswerOnCallback,
+    EditComment,
+    EditMessage,
+    SendComment,
+    SendMessage,
+)
+
+
 def apply_defaults(method: _MethodT, defaults: BotDefaults) -> _MethodT:
-    if isinstance(
-        method,
-        (SendMessage, EditMessage, SendComment, EditComment),
-    ):
-        return _fill(method, defaults)  # type: ignore[no-any-return]
-    if isinstance(method, AnswerOnCallback) and is_defined(method.message):
-        return dataclasses.replace(
-            method,
-            message=_fill(method.message, defaults),
-        )
-    return method
+    if not isinstance(method, METHODS_WITH_DEFAULTS):
+        return method
+    filled = _fill(method, defaults)
+    if isinstance(filled, AnswerOnCallback) and is_defined(filled.message):
+        filled = dataclasses.replace(filled, message=_fill(filled.message, defaults))
+    return filled  # type: ignore[no-any-return]
