@@ -215,8 +215,8 @@ def create_retort() -> Retort:
             loader(P[datetime], _load_datetime),
             name_mapping(UploadMediaResult, map={"file_id": "fileId"}),
             name_mapping(is_subclass(FacadeMaxoType), skip=["_bot"]),
-            loader(P[is_subclass(FacadeMaxoType)]._bot, lambda v: v),
-            dumper(P[is_subclass(FacadeMaxoType)]._bot, lambda v: v),
+            loader(P[is_subclass(FacadeMaxoType)]._bot, lambda v: v),  # noqa: SLF001
+            dumper(P[is_subclass(FacadeMaxoType)]._bot, lambda v: v),  # noqa: SLF001
         ],
     )
 
