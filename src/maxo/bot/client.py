@@ -5,7 +5,6 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from unihttp.middlewares import AsyncMiddleware
-from unihttp.serialize import RequestDumper, ResponseLoader
 
 from maxo.serialization import get_retort
 
@@ -15,6 +14,7 @@ if TYPE_CHECKING:
 
 CA_CERT_PATH = (pathlib.Path(__file__).parent / "russiantrustedca.pem").resolve()
 BASE_URL = "https://platform-api2.max.ru/"
+_DEFAULT_LIMIT = 100  # same as aiohttp `TCPConnector`
 
 
 def build_ssl_context() -> ssl.SSLContext:
@@ -25,46 +25,41 @@ def build_ssl_context() -> ssl.SSLContext:
 
 def default_client(
     *,
-    request_dumper: RequestDumper | None = None,
-    response_loader: ResponseLoader | None = None,
     base_url: str = BASE_URL,
     middleware: list[AsyncMiddleware] | None = None,
     ssl_context: ssl.SSLContext | None = None,
     json_dumps: Callable[[Any], str] = json.dumps,
     json_loads: Callable[[str | bytes | bytearray], Any] = json.loads,
-    limit: int | None = None,
+    limit: int = _DEFAULT_LIMIT,
     timeout: "ClientTimeout | None" = None,
     session: "ClientSession | None" = None,
 ) -> "AiohttpAsyncClient":
-    # Отложенный импорт: `aiohttp` нужен только тому, кто берет клиент по
-    # умолчанию. `Bot(client=...)` с другой реализацией `BaseAsyncClient`
-    # его не тянет, как и импорт самого `maxo`.
+    """
+    Aiohttp client trusting the Russian Ministry of Digital Development CA.
+
+    `ssl_context`, `limit` and `timeout` configure the session built here,
+    so passing them together with your own `session` raises `TypeError`.
+    """
+    # Lazy: importing aiohttp costs ~0.4s, keep it out of `import maxo`
     from aiohttp import ClientSession, TCPConnector  # noqa: PLC0415
     from unihttp.clients.aiohttp import AiohttpAsyncClient  # noqa: PLC0415
 
-    if request_dumper is None:
-        request_dumper = get_retort()
-    if response_loader is None:
-        response_loader = get_retort()
-
-    if session is None:
-        if ssl_context is None:
-            ssl_context = build_ssl_context()
-
-        connector = (
-            TCPConnector(ssl=ssl_context)
-            if limit is None
-            else TCPConnector(ssl=ssl_context, limit=limit)
-        )
-        session = (
-            ClientSession(connector=connector)
-            if timeout is None
-            else ClientSession(connector=connector, timeout=timeout)
+    if session is not None:
+        if ssl_context is not None or limit != _DEFAULT_LIMIT or timeout is not None:
+            msg = "`ssl_context`, `limit` and `timeout` can't be used with `session`"
+            raise TypeError(msg)
+    else:
+        session = ClientSession(
+            connector=TCPConnector(
+                ssl=ssl_context or build_ssl_context(),
+                limit=limit,
+            ),
+            timeout=timeout,  # None -> aiohttp default
         )
     return AiohttpAsyncClient(
         base_url=base_url,
-        request_dumper=request_dumper,
-        response_loader=response_loader,
+        request_dumper=get_retort(),
+        response_loader=get_retort(),
         middleware=middleware or [],
         session=session,
         json_dumps=json_dumps,
