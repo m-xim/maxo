@@ -74,13 +74,15 @@ async def test_download_unwraps_attachment_payload(bot: Bot) -> None:
     assert call.await_args.args[0].url == "https://example.test/file.bin"
 
 
-async def test_download_does_not_send_token(bot: Bot) -> None:
+async def test_download_skips_only_auth_middleware(bot: Bot) -> None:
+    """URL вложения может вести на чужой хост, поэтому токен туда не уходит.
+    Остальные middleware (ретраи, сетевые ошибки) остаются."""
     with _patch_stream(bot, b"payload") as client:
         await bot.download("https://example.test/file.bin")
 
-    middleware = client.call_method_stream.await_args.kwargs["middleware"]
-    assert not any(isinstance(m, AuthMiddleware) for m in middleware)
-    assert len(middleware) == len(bot.middleware) - 1
+    used = client.call_method_stream.await_args.kwargs["middleware"]
+    expected = [m for m in bot.middleware if not isinstance(m, AuthMiddleware)]
+    assert used == expected
 
 
 async def test_download_stream_closes_response_on_break(bot: Bot) -> None:

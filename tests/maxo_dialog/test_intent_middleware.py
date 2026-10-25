@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from maxo import Bot
 from maxo.dialogs.api.entities import (
     DEFAULT_STACK_ID,
     EVENT_CONTEXT_KEY,
@@ -61,6 +62,7 @@ from maxo.types import (
     UserRemovedFromChat,
 )
 from tests.constants import NOW
+from tests.mocks import MockBot
 
 from .conftest import make_message_created, make_user
 
@@ -71,7 +73,7 @@ class SG(StatesGroup):
 
 def make_ctx(bot: Any = None) -> dict[Any, Any]:
     return {
-        "bot": bot or MagicMock(),
+        "bot": bot or MockBot(),
         FSM_STORAGE_KEY: JsonMemoryStorage(),
         UPDATE_CONTEXT_KEY: UpdateContext(chat_id=10, user_id=1, type=ChatType.DIALOG),
         EVENT_FROM_USER_KEY: make_user(),
@@ -115,7 +117,7 @@ def make_aiogd_event(
     return DialogUpdateEvent(
         user=make_user(),
         recipient=Recipient(chat_type=ChatType.DIALOG, chat_id=10, user_id=1),
-        bot=MagicMock(),
+        bot=cast(Bot, MockBot()),
         action=DialogAction.UPDATE,
         data={},
         intent_id=intent_id,

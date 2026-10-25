@@ -159,12 +159,20 @@ async def test_get_my_info_retries_after_previous_failure(
     assert mock_bot.info.user_id == BOT_ID
 
 
-async def test_get_my_info_starts_lazily_and_caches_info(
+async def test_me_fetches_info_once_and_caches_it(
     mock_bot: Bot,
     mock_client: AsyncMock,
     bot_info: BotInfo,
 ) -> None:
+    """Без `context()` (вебхук, тесты) `me()` сам запрашивает информацию о боте."""
     mock_client.call_method.return_value = bot_info
+
+    first = await mock_bot.me()
+    second = await mock_bot.me()
+
+    assert first is second
+    assert first.user_id == BOT_ID
+    mock_client.call_method.assert_awaited_once()
 
 
 async def test_clear_subscriptions_reports_failed_urls(bot: Bot) -> None:

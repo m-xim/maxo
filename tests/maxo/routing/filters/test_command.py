@@ -24,6 +24,9 @@ class BotInfoStub:
 class BotStub:
     info = BotInfoStub()
 
+    async def me(self) -> BotInfoStub:
+        return self.info
+
 
 def make_bot() -> Bot:
     return cast(Bot, BotStub())
