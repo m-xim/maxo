@@ -159,6 +159,7 @@ class Method:
     doc_link: str
     field_groups: tuple[tuple[Field, ...], ...]
     imports: frozenset[Import]
+    deprecated: str | None
 
     @property
     def fields(self) -> tuple[Field, ...]:
@@ -193,8 +194,10 @@ class _Profile:
             for decl in document.declarations
             if isinstance(decl, IREnum)
         }
-        self._aliases: set[str] = {
-            decl.name for decl in document.declarations if isinstance(decl, IRAlias)
+        self._aliases: dict[str, IRAlias] = {
+            decl.name: decl
+            for decl in document.declarations
+            if isinstance(decl, IRAlias)
         }
         self._skipped: set[str] = set()
         self._class_names: dict[str, str] = {}
@@ -229,7 +232,7 @@ class _Profile:
 
     def _check_aliases(self) -> None:
         unsupported = sorted(
-            self._aliases - self._skipped - overrides.INLINE_ALIASES.keys(),
+            self._aliases.keys() - self._skipped - overrides.INLINE_ALIASES.keys(),
         )
         if unsupported:
             raise ProfileError(
@@ -342,8 +345,21 @@ class _Profile:
             return False
         return _has_timestamp_hint(ir_field.description)
 
+    def _describe(self, ir_type: IRType, description: str | None) -> str | None:
+        """Описание поля, а без него - описание встраиваемого алиаса его типа."""
+        if isinstance(ir_type, OptionalType):
+            ir_type = ir_type.inner
+        if description or not isinstance(ir_type, RefType):
+            return description
+        alias = self._aliases.get(ir_type.name)
+        return alias.description if alias is not None else None
+
     def _field_type(self, ir_field: IRField) -> IRType:
-        return DATETIME if self._is_timestamp(ir_field) else ir_field.type
+        if not self._is_timestamp(ir_field):
+            return ir_field.type
+        if isinstance(ir_field.type, OptionalType):
+            return OptionalType(DATETIME)
+        return DATETIME
 
     @staticmethod
     def _parameter_type(ir_type: IRType, description: str | None) -> IRType:
@@ -439,7 +455,11 @@ class _Profile:
         override = overrides.MODEL_FIELD_OVERRIDES.get((class_name, ir_field.name))
         field_type = self._field_type(ir_field)
         if override is not None and override.ref is not None:
-            field_type = RefType(override.ref)
+            ref_type = RefType(override.ref)
+            if isinstance(field_type, OptionalType):
+                field_type = OptionalType(ref_type)
+            else:
+                field_type = ref_type
         annotation = self._annotate(field_type, imports)
         # Дефолты свагера игнорируем: необязательное поле - это `Omitted()`.
         omittable = not ir_field.required
@@ -453,7 +473,7 @@ class _Profile:
         return Field(
             name=ir_field.name,
             annotation=annotation,
-            description=ir_field.description,
+            description=self._describe(ir_field.type, ir_field.description),
             omittable=omittable,
             comment=comment,
         )
@@ -572,6 +592,9 @@ class _Profile:
         self._add_field_helpers(fields, imports)
         for marker in {f.marker for f in fields if f.marker}:
             imports.add(Import(MARKERS_MODULE, marker))
+        deprecated = overrides.DEPRECATED_METHODS.get(operation.class_name)
+        if deprecated is not None:
+            imports.add(Import("typing_extensions", "deprecated"))
         return Method(
             name=operation.class_name,
             tag=operation.tag,
@@ -583,6 +606,7 @@ class _Profile:
             doc_link=_doc_link(operation),
             field_groups=_method_field_groups(fields),
             imports=frozenset(imports),
+            deprecated=deprecated,
         )
 
     def _method_field_type(
@@ -608,7 +632,7 @@ class _Profile:
         for parameter in operation.parameters:
             description = overrides.METHOD_FIELD_DESCRIPTIONS.get(
                 (operation.class_name, parameter.name),
-                parameter.description,
+                self._describe(parameter.type, parameter.description),
             )
             annotation = self._method_field_type(
                 operation.class_name,
@@ -641,7 +665,7 @@ class _Profile:
         for body_field in body.fields:
             description = overrides.METHOD_FIELD_DESCRIPTIONS.get(
                 (operation.class_name, body_field.name),
-                body_field.description,
+                self._describe(body_field.type, body_field.description),
             )
             annotation = self._method_field_type(
                 operation.class_name,

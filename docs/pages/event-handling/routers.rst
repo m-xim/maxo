@@ -37,16 +37,18 @@
 .. code-block:: python
 
     from maxo import Router
+    from maxo.routing.filters import Command
+    from maxo.types import MessageCreated
 
     admin_router = Router(name="admin")
     shop_router = Router(name="shop")
 
     # Регистрация обработчиков в роутерах
-    @admin_router.message_created(...)
-    async def admin_handler(...): ...
+    @admin_router.message_created(Command("ban"))
+    async def admin_handler(update: MessageCreated) -> None: ...
 
-    @shop_router.message_created(...)
-    async def shop_handler(...): ...
+    @shop_router.message_created(Command("buy"))
+    async def shop_handler(update: MessageCreated) -> None: ...
 
     # Подключение роутеров к диспетчеру
     dispatcher.include(admin_router)
@@ -67,6 +69,8 @@
 
     # Диспетчер включает роутер профиля
     dispatcher.include(profile_router)
+
+У роутера может быть только один родитель, он доступен через ``parent_router``. Повторный ``include`` уже подключенного роутера - в тот же родитель или в другой - вызывает ``RouterAlreadyIncludedError`` из ``maxo.errors``.
 
 Фильтры на уровне роутера
 --------------------------
@@ -209,6 +213,9 @@
    * - ``@router.bot_removed_from_chat``
      - :class:`~maxo.types.bot_removed_from_chat.BotRemovedFromChat`
      - Бот удален из группового чата.
+   * - ``@router.bot_admin_permissions_changed``
+     - :class:`~maxo.types.bot_admin_permissions_changed.BotAdminPermissionsChanged`
+     - Изменены права бота-администратора в групповом чате или канале.
    * - ``@router.chat_title_changed``
      - :class:`~maxo.types.chat_title_changed.ChatTitleChanged`
      - Название группового чата изменено.

@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from maxo.omit import Omittable, Omitted, is_not_omitted
+from maxo.omit import Omittable, Omitted, is_not_defined, is_omitted
 from maxo.types.facades.subscription import SubscriptionMethodsFacade
 
 if TYPE_CHECKING:
@@ -35,14 +35,20 @@ class CallbackMethodsFacade(SubscriptionMethodsFacade):
                           одноразовое уведомление пользователю.
             text: Алиас для notification, подражание aiogram.
                   Используется notification или он, преимущество у notification.
-            message: Заполните это, если хотите изменить текущее сообщение
+            message: Заполните это, если хотите изменить текущее сообщение.
+                     Без message и уведомления уходит notification="":
+                     MAX отклоняет ответ, в котором нет ни того, ни другого
             disable_link_preview: Если `true`, сервер не будет генерировать
                 превью для ссылок в тексте сообщения или поста
 
         """
+        if is_omitted(notification):
+            notification = text
+        if message is None and is_not_defined(notification):
+            notification = ""
         return await self.bot.answer_on_callback(
             callback_id=self.callback.callback_id,
-            notification=notification if is_not_omitted(notification) else text,
+            notification=notification,
             message=message,
             disable_link_preview=disable_link_preview,
         )

@@ -1,5 +1,6 @@
 from typing import Any
 
+from typing_extensions import deprecated
 from unihttp.http import HTTPResponse
 
 from maxo.bot.methods.base import MaxoMethod
@@ -7,6 +8,7 @@ from maxo.bot.methods.markers import Body, Path
 from maxo.types.modify_members_result import ModifyMembersResult
 
 
+@deprecated("MAX удалил POST /chats/{chatId}/members 30 сентября 2026", stacklevel=2)
 class AddMembers(MaxoMethod[ModifyMembersResult]):
     """
     Добавление участников в групповой чат
@@ -28,7 +30,7 @@ class AddMembers(MaxoMethod[ModifyMembersResult]):
     ```
 
     Args:
-        chat_id: ID группового чата
+        chat_id: ID группового чата. Как получить ID - [на странице «Получение ID чата или канала»](https://dev.max.ru/docs-api/use-cases/getting-chat-id)
         user_ids: Массив ID пользователей, которых вы хотите добавить в групповой чат. В одном запросе можно передать максимум 100 идентификаторов
 
     Источник: https://dev.max.ru/docs-api/methods/POST/chats/-chatId-/members
@@ -38,7 +40,7 @@ class AddMembers(MaxoMethod[ModifyMembersResult]):
     __method__ = "post"
 
     chat_id: Path[int]
-    """ID группового чата"""
+    """ID группового чата. Как получить ID - [на странице «Получение ID чата или канала»](https://dev.max.ru/docs-api/use-cases/getting-chat-id)"""
 
     user_ids: Body[list[int]]
     """Массив ID пользователей, которых вы хотите добавить в групповой чат. В одном запросе можно передать максимум 100 идентификаторов"""

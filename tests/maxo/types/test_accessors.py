@@ -14,9 +14,10 @@ from maxo.enums import (
     TextFormat,
 )
 from maxo.errors import AttributeIsEmptyError
-from maxo.omit import is_defined
+from maxo.omit import Omittable, Omitted, is_defined
 from maxo.types import (
     AudioAttachment,
+    BotAdminPermissionsChanged,
     BotCommand,
     BotInfo,
     BotStopped,
@@ -62,7 +63,6 @@ from maxo.types import (
     NewMessageLink,
     OpenAppButton,
     PhotoAttachment,
-    PhotoAttachmentPayload,
     PhotoAttachmentRequest,
     PhotoAttachmentRequestPayload,
     PhotoToken,
@@ -135,6 +135,10 @@ def test_user_unsafe_accessors_raise_for_omitted_fields() -> None:
     )
 
     assert not is_defined(user.last_activity_time)
+    with pytest.raises(AttributeIsEmptyError):
+        _ = user.unsafe_avatar_url
+    with pytest.raises(AttributeIsEmptyError):
+        _ = user.unsafe_full_avatar_url
     with pytest.raises(AttributeIsEmptyError):
         _ = user.unsafe_last_activity_time
     with pytest.raises(AttributeIsEmptyError):
@@ -676,11 +680,7 @@ def test_video_urls_and_details_accessors() -> None:
         height=2,
         token=TOKEN,
         width=3,
-        thumbnail=PhotoAttachment.factory(
-            photo_id=1,
-            token=TOKEN,
-            url="thumbnail",
-        ).payload,
+        thumbnail=VideoThumbnail(url="thumbnail"),
         urls=urls,
     )
 
@@ -1020,11 +1020,7 @@ def test_media_and_message_models() -> None:
         height=1080,
         token=DETAILS_ID,
         width=1920,
-        thumbnail=PhotoAttachmentPayload(
-            photo_id=1,
-            token=PHOTO_ATTACHMENT_ID,
-            url="https://example.com/video.png",
-        ),
+        thumbnail=VideoThumbnail(url="https://example.com/video.png"),
         urls=VideoUrls(mp4_720="https://example.com/720.mp4"),
     )
     video_urls = VideoUrls(mp4_720="https://example.com/720.mp4")
@@ -1449,6 +1445,7 @@ def test_comment_accessors() -> None:
         timestamp=NOW,
         link=link,
         sender=sender,
+        stat=MessageStat(views=5),
     )
     new_body = NewCommentBody(format=TextFormat.HTML)
 
@@ -1461,6 +1458,7 @@ def test_comment_accessors() -> None:
     assert comment_removed.unsafe_post_id == "post"
     assert comment.unsafe_link is link
     assert comment.unsafe_sender is sender
+    assert comment.unsafe_stat == MessageStat(views=5)
     assert new_body.unsafe_format is TextFormat.HTML
 
     with pytest.raises(AttributeIsEmptyError):
@@ -1496,6 +1494,12 @@ def test_comment_accessors() -> None:
             timestamp=NOW,
         ).unsafe_sender
     with pytest.raises(AttributeIsEmptyError):
+        _ = CommentMessage(
+            body=body,
+            recipient=recipient,
+            timestamp=NOW,
+        ).unsafe_stat
+    with pytest.raises(AttributeIsEmptyError):
         _ = MessageRemoved(
             chat_id=10,
             message_id="comment",
@@ -1511,3 +1515,35 @@ def test_comment_accessors() -> None:
             timestamp=NOW,
             user_id=20,
         ).unsafe_post_id
+
+
+def test_bot_admin_permissions_changed_unsafe_permissions() -> None:
+    def make(
+        permissions: Omittable[list[ChatAdminPermission] | None] = Omitted(),
+    ) -> BotAdminPermissionsChanged:
+        return BotAdminPermissionsChanged(
+            bot_id=1,
+            chat_id=10,
+            is_admin=True,
+            is_channel=False,
+            user_id=20,
+            timestamp=NOW,
+            permissions=permissions,
+        )
+
+    permissions = [ChatAdminPermission.READ_ALL_MESSAGES]
+    assert make(permissions=permissions).unsafe_permissions == permissions
+
+    for missing in (make(), make(permissions=None)):
+        with pytest.raises(AttributeIsEmptyError):
+            _ = missing.unsafe_permissions
+
+
+def test_linked_message_generated_url_is_none_for_inaccessible_chat() -> None:
+    linked = LinkedMessage(
+        type=MessageLinkType.FORWARD,
+        message=MessageBody(mid="mid", seq=5, text="forwarded"),
+        chat_id=0,
+    )
+
+    assert linked.generated_url is None

@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from functools import cache
 from typing import Any
 
-from adaptix import Chain, P, Retort, dumper, loader
+from adaptix import Chain, P, Retort, dumper, loader, name_mapping
 from adaptix.type_tools import exec_type_checking
 from unihttp.serializers.adaptix.marker_tools import for_marker
 from unihttp.serializers.adaptix.serialize import DEFAULT_RETORT
@@ -27,6 +27,7 @@ from maxo.types import (
     AudioAttachment,
     AudioAttachmentRequest,
     BotAddedToChat,
+    BotAdminPermissionsChanged,
     BotRemovedFromChat,
     BotStarted,
     BotStopped,
@@ -75,6 +76,7 @@ from maxo.types import (
     StrongMarkup,
     UnderlineMarkup,
     Updates,
+    UploadMediaResult,
     UserAddedToChat,
     UserMentionMarkup,
     UserRemovedFromChat,
@@ -86,6 +88,7 @@ from maxo.types.facades import comment, message
 
 _UPDATE_TAGS: Mapping[type, UpdateType] = {
     BotAddedToChat: UpdateType.BOT_ADDED,
+    BotAdminPermissionsChanged: UpdateType.BOT_ADMIN_PERMISSIONS_CHANGED,
     BotRemovedFromChat: UpdateType.BOT_REMOVED,
     BotStarted: UpdateType.BOT_STARTED,
     BotStopped: UpdateType.BOT_STOPPED,
@@ -209,6 +212,7 @@ def create_retort() -> Retort:
                 chain=Chain.FIRST,
             ),
             loader(P[datetime], _load_datetime),
+            name_mapping(UploadMediaResult, map={"file_id": "fileId"}),
         ],
     )
 

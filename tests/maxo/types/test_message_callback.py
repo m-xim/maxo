@@ -9,6 +9,7 @@ from maxo.types import (
     Message,
     MessageBody,
     MessageCallback,
+    NewMessageBody,
     Recipient,
     SendMessageResult,
     SimpleQueryResult,
@@ -87,6 +88,33 @@ class TestMessageCallbackWithoutMessage:
             callback_id="cb",
             notification="ok",
             message=None,
+            disable_link_preview=Omitted(),
+        )
+
+    @pytest.mark.parametrize("notification", [Omitted(), None])
+    async def test_callback_answer_sends_empty_notification_without_message(
+        self,
+        callback_without_message: MessageCallback,
+        bot: MagicMock,
+        notification: str | None | Omitted,
+    ) -> None:
+        await callback_without_message.callback_answer(notification=notification)
+
+        assert bot.answer_on_callback.await_args.kwargs["notification"] == ""
+
+    async def test_callback_answer_with_message_keeps_notification_omitted(
+        self,
+        callback_without_message: MessageCallback,
+        bot: MagicMock,
+    ) -> None:
+        message = NewMessageBody(text="edited")
+
+        await callback_without_message.callback_answer(message=message)
+
+        bot.answer_on_callback.assert_awaited_once_with(
+            callback_id="cb",
+            notification=Omitted(),
+            message=message,
             disable_link_preview=Omitted(),
         )
 

@@ -17,6 +17,8 @@ class PostAdmins(MaxoMethod[SimpleQueryResult]):
 
      Список прав передаётся в теле запроса в массиве `admins.permissions`. Если вы хотите изменить назначенные права, вызовите повторно текущий метод: в теле запроса передайте обновлённый список прав. При повторном вызове логика работы метода соответствует `PUT`: права администратора будут обновлены полностью в соответствии с переданными в запросе
 
+     Чтобы узнавать об изменении прав бота-администратора канала или группового чата, вы можете подписаться на событие `bot_admin_permissions_changed`. Для этого обновите подписку через Webhook с помощью [`POST /subscriptions`](https://dev.max.ru/docs-api/methods/POST/subscriptions). Получение события через Long Polling пока недоступно. Подробнее о других событиях - [в описании объекта `Update`](https://dev.max.ru/docs-api/objects/Update)
+
     Пример запроса:
     ```bash
     curl -X POST "https://platform-api2.max.ru/chats/{chatId}/members/admins" \
@@ -55,7 +57,7 @@ class PostAdmins(MaxoMethod[SimpleQueryResult]):
 
     Args:
         admins: Список пользователей и ботов, которые получат права администратора группового чата или канала
-        chat_id: ID группового чата или канала
+        chat_id: ID группового чата или канала. Как получить ID - [на странице «Получение ID чата или канала»](https://dev.max.ru/docs-api/use-cases/getting-chat-id)
         marker: Указатель на следующую страницу данных
 
     Источник: https://dev.max.ru/docs-api/methods/POST/chats/-chatId-/members/admins
@@ -65,7 +67,7 @@ class PostAdmins(MaxoMethod[SimpleQueryResult]):
     __method__ = "post"
 
     chat_id: Path[int]
-    """ID группового чата или канала"""
+    """ID группового чата или канала. Как получить ID - [на странице «Получение ID чата или канала»](https://dev.max.ru/docs-api/use-cases/getting-chat-id)"""
 
     admins: Body[list[ChatAdmin]]
     """Список пользователей и ботов, которые получат права администратора группового чата или канала"""

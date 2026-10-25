@@ -15,7 +15,7 @@ from unihttp.middlewares import AsyncMiddleware
 
 from maxo.bot.client import default_client
 from maxo.bot.defaults import BotDefaults, apply_defaults
-from maxo.bot.methods import (
+from maxo.bot.methods import (  # type: ignore[deprecated]
     AddMembers,
     AnswerOnCallback,
     DeleteAdmins,

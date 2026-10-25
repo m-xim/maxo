@@ -6,7 +6,7 @@ import pytest
 from multidict import CIMultiDict
 from unihttp.http import HTTPResponse
 
-from maxo.bot.methods import AddMembers
+from maxo.bot.methods import AddMembers  # type: ignore[deprecated]
 from maxo.bot.methods.base import MaxoMethod
 from maxo.errors import (
     MaxBotApiError,

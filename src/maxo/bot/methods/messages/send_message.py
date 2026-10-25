@@ -16,7 +16,7 @@ class SendMessage(MaxoMethod[SendMessageResult]):
     Кроме текста сообщения или посты могут содержать следующие типы вложений:
     - `image` - изображение (JPG, JPEG, PNG, GIF, TIFF, BMP, HEIC)
     - `video` - видео (MP4, MOV, MKV, WEBM, MATROSKA)
-    - `audio` - аудио (MP3, WAV, M4A и другие)
+    - `audio` - аудио (MP3, M4A и другие)
     - `file` - файл для загрузки в (TXT, DOC и другие)
     - `sticker` - стикер
     - `contact` - контакт (данные контакта из телефонного справочника)
@@ -30,7 +30,7 @@ class SendMessage(MaxoMethod[SendMessageResult]):
 
     #### Пример запроса с одной кнопкой-ссылкой
 
-    Больше примеров запросов с кнопками - [в разделе «Клавиатура»](https://dev.max.ru/docs-api#Как%20добавить%20кнопки)
+    Больше примеров запросов с кнопками - [в разделе «Клавиатура»](https://dev.max.ru/docs-api/use-cases/sending-messages/keyboard#Как%20добавить%20кнопки)
     ```bash
     curl -X POST "https://platform-api2.max.ru/messages?user_id={user_id}" \
       -H "Authorization: {access_token}" \
@@ -58,12 +58,12 @@ class SendMessage(MaxoMethod[SendMessageResult]):
 
     Args:
         attachments: Вложения отправляемого сообщения. Пустое значение означает, что вложений нет
-        chat_id: Если сообщение отправляется в чат или канал, укажите ID этого чата или канала. Как получить ID - в [разделе «Получение chat_id»](https://dev.max.ru/docs-api#Получение%20chat_id)
+        chat_id: Если сообщение отправляется в чат или канал, укажите ID этого чата или канала. Как получить ID - [на странице «Получение ID чата или канала»](https://dev.max.ru/docs-api/use-cases/getting-chat-id)
         disable_link_preview: Если `true`, сервер не будет генерировать превью для ссылок в тексте сообщения или поста
-        format: Разметка текста сообщения. Подробнее - в разделе [Форматирование](https://dev.max.ru/docs-api#Форматирование%20текста%20в%20сообщениях)
+        format: Разметка текста сообщения. Подробнее - в разделе [Форматирование](https://dev.max.ru/docs-api/use-cases/sending-messages/text-formatting)
         link: Ссылка на сообщение в чате или пост в канале. Ссылки на комментарии к постам в каналах не поддержаны
         notify: Если `false`, участники чата не получат push-уведомления. Для каналов необходимо отправлять запрос с `notify = true` или без этого поля, т.к. каналы не подразумевают отправку постов без push-уведомлений
-        text:
+        text: Текст сообщения, до 4000 символов
         user_id: Если вы хотите отправить сообщение пользователю, укажите ID этого пользователя
 
     Источник: https://dev.max.ru/docs-api/methods/POST/messages
@@ -73,7 +73,7 @@ class SendMessage(MaxoMethod[SendMessageResult]):
     __method__ = "post"
 
     chat_id: Query[Omittable[int]] = Omitted()
-    """Если сообщение отправляется в чат или канал, укажите ID этого чата или канала. Как получить ID - в [разделе «Получение chat_id»](https://dev.max.ru/docs-api#Получение%20chat_id)"""
+    """Если сообщение отправляется в чат или канал, укажите ID этого чата или канала. Как получить ID - [на странице «Получение ID чата или канала»](https://dev.max.ru/docs-api/use-cases/getting-chat-id)"""
     disable_link_preview: Query[Omittable[bool]] = Omitted()
     """Если `true`, сервер не будет генерировать превью для ссылок в тексте сообщения или поста"""
     user_id: Query[Omittable[int]] = Omitted()
@@ -84,7 +84,8 @@ class SendMessage(MaxoMethod[SendMessageResult]):
     link: Body[NewMessageLink | None] = None
     """Ссылка на сообщение в чате или пост в канале. Ссылки на комментарии к постам в каналах не поддержаны"""
     text: Body[str | None] = None
+    """Текст сообщения, до 4000 символов"""
     format: Body[Omittable[TextFormat | None]] = Omitted()
-    """Разметка текста сообщения. Подробнее - в разделе [Форматирование](https://dev.max.ru/docs-api#Форматирование%20текста%20в%20сообщениях)"""
+    """Разметка текста сообщения. Подробнее - в разделе [Форматирование](https://dev.max.ru/docs-api/use-cases/sending-messages/text-formatting)"""
     notify: Body[Omittable[bool]] = Omitted()
     """Если `false`, участники чата не получат push-уведомления. Для каналов необходимо отправлять запрос с `notify = true` или без этого поля, т.к. каналы не подразумевают отправку постов без push-уведомлений"""

@@ -12,11 +12,6 @@ from dataclasses import dataclass, field
 
 SKIP_SCHEMAS: frozenset[str] = frozenset(
     {
-        # Reply-клавиатуры: клиенты MAX их не поддерживают. Пропуск `ReplyButton`
-        # каскадом убирает его подтипы и enum `ReplyButtonType`.
-        "ReplyButton",
-        "ReplyKeyboardAttachment",
-        "ReplyKeyboardAttachmentRequest",
         # Тела запросов: генератор размазывает их по `Body`-полям методов,
         # отдельный тип не нужен. Список явный - `NewMessageBody` тоже тело
         # запроса, но в maxo он нужен как публичный тип.
@@ -31,12 +26,8 @@ SKIP_SCHEMAS: frozenset[str] = frozenset(
         "UserIdsList",
         # Нерабочая кнопка: нет `ButtonType.CHAT`, в свагере сирота.
         "ChatButton",
-        # Вложение из reply-кнопки, в mapping'ах не участвует.
-        "DataAttachment",
         # Ошибки API описаны вручную в `maxo.errors`.
         "Error",
-        # Апдейт вне `Update.discriminator.mapping`, в maxo его нет.
-        "MessageChatCreatedUpdate",
     },
 )
 
@@ -57,8 +48,15 @@ SKIP_OPERATIONS: frozenset[str] = frozenset(
 
 # --- типы --------------------------------------------------------------------
 
-#: Схема `bigint` - это просто int64.
-INLINE_ALIASES: dict[str, str] = {"Bigint": "int", "MessageId": "str"}
+#: Схемы-скаляры, которые подставляются в аннотации как встроенный тип.
+INLINE_ALIASES: dict[str, str] = {
+    "Bigint": "int",
+    "ChatId": "int",
+    "MessageId": "str",
+    "SubscriptionUrl": "str",
+    "Url": "str",
+    "UserId": "int",
+}
 
 #: Схемы, чей файл не генерируется, но подтипы остаются: их предком становится
 #: указанный класс. В отличие от `SKIP_SCHEMAS`, каскада на наследников нет.
@@ -105,6 +103,14 @@ METHOD_FIELD_DESCRIPTIONS: dict[tuple[str, str], str] = {
         "SendMessage",
         "attachments",
     ): "Вложения отправляемого сообщения. Пустое значение означает, что вложений нет",
+    ("EditMessage", "text"): (
+        "Новый текст сообщения, до 4000 символов. `null` оставляет текст без "
+        "изменений, пустая строка удаляет его"
+    ),
+}
+
+DEPRECATED_METHODS: dict[str, str] = {
+    "AddMembers": "MAX удалил POST /chats/{chatId}/members 30 сентября 2026",
 }
 
 
@@ -139,10 +145,6 @@ MODEL_FIELD_OVERRIDES: dict[tuple[str, str], FieldOverride] = {
     ("CommentMessage", "link"): FieldOverride(
         comment="type: ignore[mutable-override]",
     ),
-    # Описание допускает `null`, но в Swagger нет `nullable: true`
-    ("CommentMessage", "sender"): FieldOverride(annotation="User | None"),
-    # CommentMessage является Message, поэтому общий контракт допускает `null`.
-    ("Message", "sender"): FieldOverride(annotation="User | None"),
     # `Button.text` обязателен, но принятая кнопка может прийти без него.
     ("MessageButton", "text"): FieldOverride(
         omittable=True,
@@ -160,6 +162,7 @@ MODEL_FIELD_OVERRIDES: dict[tuple[str, str], FieldOverride] = {
     # required. Сужение жило в src ручной правкой - переносим в оверрайды,
     # иначе следующая генерация снесёт его вместе с `unsafe_name`.
     ("User", "name"): FieldOverride(omittable=True),
+    ("VideoAttachmentDetails", "thumbnail"): FieldOverride(ref="VideoThumbnail"),
 }
 
 
@@ -286,15 +289,6 @@ ENUM_EXTRAS: dict[str, EnumExtras] = {
         aliases_comment=_AIOGRAM,
         type_aliases=(("ContentType", _AIOGRAM),),
     ),
-    "ChatAdminPermission": EnumExtras(
-        trailing=(
-            EnumMember(
-                name="VIEW_STATS",
-                value="view_stats",
-                comment="Нет в доке, приходит",
-            ),
-        ),
-    ),
     "ChatType": EnumExtras(
         aliases=(
             EnumMember(name="PRIVATE", value="dialog", alias_of="DIALOG"),
@@ -302,15 +296,6 @@ ENUM_EXTRAS: dict[str, EnumExtras] = {
             EnumMember(name="SUPERGROUP", value="chat", alias_of="CHAT"),
         ),
         aliases_comment=_AIOGRAM,
-    ),
-    "SenderAction": EnumExtras(
-        trailing=(
-            EnumMember(
-                name="MARK_SEEN",
-                value="mark_seen",
-                comment="Удалён из доки, работает",
-            ),
-        ),
     ),
     "TextFormat": EnumExtras(type_aliases=(("ParseMode", _AIOGRAM),)),
 }
@@ -321,6 +306,7 @@ ENUM_EXTRAS: dict[str, EnumExtras] = {
 #: Миксины, которые подмешиваются в базы класса после основного предка.
 CLASS_MIXINS: dict[str, tuple[str, ...]] = {
     "BotAddedToChat": ("ChatMethodsFacade",),
+    "BotAdminPermissionsChanged": ("ChatMethodsFacade",),
     "BotRemovedFromChat": ("ChatMethodsFacade",),
     "BotStarted": ("ChatMethodsFacade",),
     "BotStopped": ("ChatMethodsFacade",),
@@ -365,6 +351,7 @@ FACADE_MODULES: dict[str, str] = {
 class ExtraExport:
     module: str
     names: tuple[str, ...] = field(default_factory=tuple)
+    deprecated: bool = False
 
 
 #: Алиасы уровня модуля внутри сгенерированного типа: ``Имя: TypeAlias = <Класс>``.
@@ -394,11 +381,15 @@ TYPES_EXTRA_EXPORTS: tuple[ExtraExport, ...] = (
 
 #: Что дописать в `maxo/bot/methods/__init__.py` - ручные методы и алиасы.
 METHODS_EXTRA_EXPORTS: tuple[ExtraExport, ...] = (
-    ExtraExport(module="bots.edit_bot_info", names=("EditBotInfo",)),
+    ExtraExport(module="bots.edit_bot_info", names=("EditBotInfo",), deprecated=True),
     ExtraExport(module="chats.delete_admin", names=("DeleteAdmin",)),
-    ExtraExport(module="chats.delete_chat", names=("DeleteChat",)),
-    ExtraExport(module="chats.get_chat_by_link", names=("GetChatByLink",)),
-    ExtraExport(module="chats.get_chats", names=("GetChats",)),
+    ExtraExport(module="chats.delete_chat", names=("DeleteChat",), deprecated=True),
+    ExtraExport(
+        module="chats.get_chat_by_link",
+        names=("GetChatByLink",),
+        deprecated=True,
+    ),
+    ExtraExport(module="chats.get_chats", names=("GetChats",), deprecated=True),
     ExtraExport(module="chats.set_admins", names=("SetAdmins",)),
     ExtraExport(module="upload.upload_media", names=("UploadMedia",)),
 )
