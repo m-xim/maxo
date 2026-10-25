@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, is_dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, ClassVar, Self, dataclass_transform
 
@@ -22,17 +22,32 @@ class _MaxoTypeMetaClass(type):
         slots: bool = True,
         **kwargs: Any,
     ) -> Any:
-        class_ = super().__new__(cls, name, bases, namespace, **kwargs)
+        class_: type = super().__new__(cls, name, bases, namespace, **kwargs)
         # `dataclass(slots=True)` re-creates the class through this metaclass
         # with `__slots__` set: don't wrap it twice.
         if "__slots__" in namespace:
             return class_
 
-        return dataclass(
+        data_class: type = dataclass(
             slots=slots,
             frozen=False,
             kw_only=True,
         )(class_)
+
+        # `dataclass` takes field defaults via `getattr`,
+        # so an attribute of a plain base would silently become one
+        plain_bases = [base for base in class_.__mro__ if not is_dataclass(base)]
+        for field_ in fields(class_):
+            for base in plain_bases:
+                if field_.name in vars(base):
+                    msg = (
+                        f"{class_.__name__}.{field_.name} gets its default from "
+                        f"{base.__name__}.{field_.name}; declare it there "
+                        "under `if TYPE_CHECKING:` only"
+                    )
+                    raise TypeError(msg)
+
+        return data_class
 
 
 class MaxoType(metaclass=_MaxoTypeMetaClass):
