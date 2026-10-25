@@ -68,19 +68,25 @@ uv run pytest tests/path/test_file.py::test_name -v
 ### Типы
 
 - `_MaxoTypeMetaClass` (`types/base.py`) сам оборачивает каждого наследника
-  `MaxoType` в `@dataclass(slots=True, kw_only=True)`. Явный `__slots__` в
-  классе отключает это.
-- `MaxoType` наследует `BaseMethodsFacade` (`types/facades/base.py`), и
-  метакласс конфликтует с `ABCMeta`: ни `MaxoType`, ни фасады не могут быть
-  `ABC`/`Protocol`. Поэтому `@abstractmethod` на фасадах декоративный, а поля
-  вроде `message` объявлены раздвоённо через `if TYPE_CHECKING`. Это
-  технический долг до отвязки `MaxoType` от фасада.
-- `maxo/types/facades/__init__.py` пуст намеренно: реэкспорт фасадов
-  зацикливает импорт через `types/base.py`. Фасад импортируй из конкретного
-  модуля: `from maxo.types.facades.chat import ChatMethodsFacade`.
-- Loader из `serialization.py` привязывает `Bot` ко всем загруженным типам,
-  поэтому update умеет отвечать сам: `await message.send_message(...)`. Вручную
-  бот привязывается через `as_(bot)`.
+  `MaxoType` в `@dataclass(slots=True, kw_only=True)`; слоты отключает
+  `class X(MaxoType, slots=False)`. Класс с `__slots__` в теле метакласс не
+  трогает: так `dataclass(slots=True)` пересоздаёт класс, и обернуть его
+  второй раз нельзя.
+- `MaxoType` - датакласс без бота. Бота держит только `FacadeMaxoType`
+  (`MaxUpdate`, `Message`) в поле `_bot`: его сохраняют `dataclasses.replace`
+  и `copy`, а реторта пропускает (`name_mapping(..., skip=["_bot"])` в
+  `serialization.py`).
+- Фасады (`types/facades/`) - миксины без состояния. Чего им не хватает
+  (`bot`, `chat_id`, `message`, `callback`), они объявляют свойством только под
+  `if TYPE_CHECKING`, без рантайм-ветки. Рантайм-атрибут с именем поля
+  `dataclass` взял бы дефолтом этого поля, и обязательное поле стало бы
+  необязательным.
+- Фасады реэкспортирует `maxo.types.facades`: `from maxo.types.facades
+  import ChatMethodsFacade`. Цикла импортов нет, потому что `types/base.py`
+  фасады не импортирует.
+- Бота привязывает `bind_bot` (`types/binding.py`): `Bot.call_method` - к
+  ответу API, `Dispatcher.feed_update` - к апдейту. Поэтому update умеет
+  отвечать сам: `await message.send_message(...)`. Вручную - `as_(bot)`.
 - `Omitted()` - поле не отправляется, `None` в теле - уходит `null`, `None` в
   `Query[...]` превращается в `Omitted()` (`_omit_none_query_values`). Optional
   wire-поле - `Omittable[T] = Omitted()`, поле, которое приходит `null`, -

@@ -137,8 +137,10 @@ Docstring'и (`render/docs.py`) печатаются как в спеке, кр�
   (`AttachmentType.TEXT`, `ChatType.PRIVATE`, `ParseMode`, `ContentType`).
   Член, который есть хотя бы в одной публикации, сюда не пиши: будет дубль.
 - `TYPE_ALIASES` - алиасы уровня модуля (`CallbackQuery = MessageCallback`).
-- `CLASS_MIXINS` - фасады в базах классов; `FACADE_MODULES` - модуль каждого
-  фасада, из которого butcher генерирует импорт.
+- `CLASS_MIXINS` - фасады в базах классов; импорт butcher генерирует из пакета
+  `maxo.types.facades` (`FACADES_MODULE`). Плоская схема с фасадом
+  получает корень `FACADE_ROOT_BASE_CLASS` (`FacadeMaxoType`, держит бота)
+  вместо `ROOT_BASE_CLASS`.
 - `TYPES_EXTRA_EXPORTS` / `METHODS_EXTRA_EXPORTS` - ручные символы в
   сгенерированных `__init__.py`.
 - `INLINE_ALIASES`, `TIMESTAMP_HINTS` - скаляры, встраиваемые как тип, и слова,
