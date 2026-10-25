@@ -119,6 +119,76 @@ class TestMessageCallbackWithoutMessage:
         )
 
 
+class TestCallbackAnswer:
+    """Ported from upstream `tests/maxo/types/facades/test_callback.py`."""
+
+    async def test_forwards_all_params(
+        self,
+        callback_without_message: MessageCallback,
+        bot: MagicMock,
+    ) -> None:
+        message = NewMessageBody(text="edited")
+
+        await callback_without_message.callback_answer(
+            notification="Готово",
+            message=message,
+            disable_link_preview=True,
+        )
+
+        bot.answer_on_callback.assert_awaited_once_with(
+            callback_id="cb",
+            notification="Готово",
+            message=message,
+            disable_link_preview=True,
+        )
+
+    async def test_uses_text_alias(
+        self,
+        callback_without_message: MessageCallback,
+        bot: MagicMock,
+    ) -> None:
+        await callback_without_message.callback_answer(
+            text="Готово",
+            disable_link_preview=False,
+        )
+
+        bot.answer_on_callback.assert_awaited_once_with(
+            callback_id="cb",
+            notification="Готово",
+            message=None,
+            disable_link_preview=False,
+        )
+
+    async def test_prefers_notification_over_text(
+        self,
+        callback_without_message: MessageCallback,
+        bot: MagicMock,
+    ) -> None:
+        await callback_without_message.callback_answer(
+            notification="Первое",
+            text="Второе",
+        )
+
+        assert bot.answer_on_callback.await_args.kwargs["notification"] == "Первое"
+
+    async def test_answer_alias_forwards_disable_link_preview(
+        self,
+        callback_without_message: MessageCallback,
+        bot: MagicMock,
+    ) -> None:
+        await callback_without_message.answer(
+            notification="Готово",
+            disable_link_preview=True,
+        )
+
+        bot.answer_on_callback.assert_awaited_once_with(
+            callback_id="cb",
+            notification="Готово",
+            message=None,
+            disable_link_preview=True,
+        )
+
+
 class TestMessageCallbackWithMessage:
     @pytest.fixture
     def callback_with_message(self, bot: MagicMock) -> MessageCallback:

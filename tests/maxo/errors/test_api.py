@@ -42,3 +42,13 @@ def test_raise_api_error_falls_back_to_status_group(
 ) -> None:
     with pytest.raises(error_class):
         raise_api_error(status_code, {})
+
+
+def test_api_error_str_uses_fields_and_raw_data() -> None:
+    error = MaxBotApiError("code", "error", "message")
+    raw_error = MaxBotApiError("", "", "", {"raw": "data"})
+
+    assert str(error) == (
+        "MaxBotApiError(code='code', error='error', message='message')"
+    )
+    assert str(raw_error) == "MaxBotApiError(raw_data={'raw': 'data'})"

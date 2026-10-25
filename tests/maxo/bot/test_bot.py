@@ -1,3 +1,4 @@
+import asyncio
 from asyncio import CancelledError
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -41,8 +42,6 @@ def bot_info() -> BotInfo:
 
 async def test_bot_init(bot: Bot) -> None:
     assert bot.token == TOKEN
-    assert bot.started is False
-    assert bot.closed is False
     with pytest.raises(StateError, match="Bot info is not resolved yet"):
         _ = bot.info
 
@@ -67,9 +66,34 @@ def test_explicit_upload_config_is_preserved() -> None:
 async def test_bot_close(mock_bot: Bot, mock_client: AsyncMock) -> None:
     await mock_bot.close()
 
-    assert mock_bot.closed is True
     # Клиент передали снаружи - закрывать его боту нельзя.
     mock_client.close.assert_not_awaited()
+    assert mock_bot.client is mock_client
+
+
+async def test_closed_own_client_is_recreated(mock_bot: Bot) -> None:
+    """Как в aiogram: после `close()` бот снова рабочий."""
+    mock_bot._owns_client = True
+    first = mock_bot.client
+
+    await mock_bot.close()
+
+    first.close.assert_awaited_once()  # type: ignore[attr-defined]
+    with patch("maxo.bot.bot.default_client", return_value=AsyncMock()) as factory:
+        assert mock_bot.client is factory.return_value
+
+
+async def test_async_with_closes_without_network(
+    mock_bot: Bot,
+    mock_client: AsyncMock,
+) -> None:
+    mock_bot._owns_client = True
+
+    async with mock_bot:
+        pass
+
+    mock_client.call_method.assert_not_awaited()
+    mock_client.close.assert_awaited_once()
 
 
 async def test_bot_context(bot: Bot) -> None:
@@ -104,10 +128,10 @@ async def test_bot_call_method(mock_bot: Bot, mock_client: AsyncMock) -> None:
         _ = mock_bot.info
 
 
-async def test_close_on_empty_state_is_noop(bot: Bot) -> None:
+async def test_close_before_first_request_is_noop(bot: Bot) -> None:
     await bot.close()
 
-    assert bot.closed is False
+    assert bot._client is None  # nothing was created, nothing to close
 
 
 async def test_close_twice_is_noop(mock_bot: Bot, mock_client: AsyncMock) -> None:
@@ -148,7 +172,6 @@ async def test_get_my_info_retries_after_previous_failure(
     with pytest.raises(MaxBotApiError):
         await mock_bot.get_my_info()
 
-    assert mock_bot.started is False
     with pytest.raises(StateError, match="Bot info is not resolved yet"):
         _ = mock_bot.info
 
@@ -172,6 +195,23 @@ async def test_me_fetches_info_once_and_caches_it(
 
     assert first is second
     assert first.user_id == BOT_ID
+    mock_client.call_method.assert_awaited_once()
+
+
+async def test_concurrent_me_calls_api_once(
+    mock_bot: Bot,
+    mock_client: AsyncMock,
+    bot_info: BotInfo,
+) -> None:
+    async def slow_info(*_: object, **__: object) -> BotInfo:
+        await asyncio.sleep(0)  # let the other tasks reach the lock
+        return bot_info
+
+    mock_client.call_method.side_effect = slow_info
+
+    results = await asyncio.gather(*(mock_bot.me() for _ in range(5)))
+
+    assert all(result is bot_info for result in results)
     mock_client.call_method.assert_awaited_once()
 
 
@@ -299,9 +339,15 @@ async def test_clear_subscriptions_keeps_errors_next_to_cancellation(bot: Bot) -
             "unsubscribe",
             new=AsyncMock(side_effect=unsubscribe_side_effect),
         ),
-        pytest.raises(BaseExceptionGroup),
+        pytest.raises(BaseExceptionGroup) as exc_info,
     ):
         await bot.clear_subscriptions()
+
+    cancelled, unsubscribe_error = exc_info.value.exceptions
+    assert isinstance(cancelled, CancelledError)
+    assert isinstance(unsubscribe_error, UnsubscribeError)
+    assert unsubscribe_error.url == "https://two.example/webhook"
+    assert unsubscribe_error.error is failure
 
 
 async def test_get_my_info_always_hits_network(
@@ -358,3 +404,75 @@ async def test_deprecated_method_warns_at_caller(
         await getattr(bot, method_name)(**kwargs)
 
     assert record[0].filename == __file__
+
+
+@pytest.mark.parametrize(
+    ("active_urls", "removed_urls"),
+    [
+        (None, ["https://one.example/webhook", "https://two.example/webhook"]),
+        ("https://one.example/webhook", ["https://two.example/webhook"]),
+        (
+            "https://missing.example/webhook",
+            [
+                "https://one.example/webhook",
+                "https://two.example/webhook",
+            ],
+        ),
+        (["https://one.example/webhook"], ["https://two.example/webhook"]),
+        (
+            [
+                "https://one.example/webhook",
+                "https://two.example/webhook",
+            ],
+            [],
+        ),
+    ],
+)
+async def test_clear_subscriptions(
+    bot: Bot,
+    active_urls: str | list[str] | None,
+    removed_urls: list[str],
+) -> None:
+    subscriptions = GetSubscriptionsResult(
+        subscriptions=[
+            Subscription(time=NOW, url="https://one.example/webhook"),
+            Subscription(time=NOW, url="https://two.example/webhook"),
+        ],
+    )
+
+    with (
+        patch.object(
+            Bot,
+            "get_subscriptions",
+            new=AsyncMock(return_value=subscriptions),
+        ) as get_subscriptions,
+        patch.object(Bot, "unsubscribe", new=AsyncMock()) as unsubscribe,
+    ):
+        result = await bot.clear_subscriptions(active_urls=active_urls)
+
+    get_subscriptions.assert_awaited_once_with()
+    assert [call.kwargs["url"] for call in unsubscribe.await_args_list] == removed_urls
+    assert [subscription.url for subscription in result.removed] == removed_urls
+    assert [subscription.url for subscription in result.kept] == [
+        subscription.url
+        for subscription in subscriptions.subscriptions
+        if subscription.url not in removed_urls
+    ]
+
+
+async def test_clear_subscriptions_handles_an_empty_list(bot: Bot) -> None:
+    subscriptions = GetSubscriptionsResult(subscriptions=[])
+
+    with (
+        patch.object(
+            Bot,
+            "get_subscriptions",
+            new=AsyncMock(return_value=subscriptions),
+        ),
+        patch.object(Bot, "unsubscribe", new=AsyncMock()) as unsubscribe,
+    ):
+        result = await bot.clear_subscriptions()
+
+    unsubscribe.assert_not_awaited()
+    assert result.removed == []
+    assert result.kept == []

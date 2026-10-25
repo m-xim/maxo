@@ -1,15 +1,20 @@
+import dataclasses
+
 import pytest
 from adaptix.load_error import LoadError
 
-from maxo.bot.defaults import BotDefaults, apply_defaults
+from maxo import methods, types
+from maxo.bot.defaults import METHODS_WITH_DEFAULTS, BotDefaults, apply_defaults
 from maxo.bot.methods import (
     AnswerOnCallback,
     EditMessage,
     GetMembers,
     GetMessages,
     GetUpdates,
+    RemoveMember,
     SendMessage,
 )
+from maxo.bot.methods.base import MaxoMethod
 from maxo.enums import ChatAdminPermission, TextFormat
 from maxo.errors import AttributeIsEmptyError
 from maxo.omit import Omittable, Omitted, is_omitted
@@ -31,7 +36,7 @@ from maxo.types import (
     VideoAttachmentDetails,
     VideoThumbnail,
 )
-from maxo.types.base import FacadeMaxoType
+from maxo.types.base import FacadeMaxoType, MaxoType
 from maxo.types.binding import bind_bot
 from tests.factories import make_bot
 
@@ -86,12 +91,15 @@ def test_bot_default_text_format(default: Omittable[TextFormat | None]) -> None:
 def test_bot_default_disable_link_preview(default: Omittable[bool]) -> None:
     defaults = BotDefaults(disable_link_preview=default)
     retort = get_retort()
+    # Not `== default`: 1/0 would pass it too
+    expected = "true" if default else "false"
 
-    data = retort.dump(apply_defaults(SendMessage(), defaults))
-    if is_omitted(default):
-        assert "disable_link_preview" not in data["query"]
-    else:
-        assert data["query"]["disable_link_preview"] == default
+    for method in (SendMessage(), AnswerOnCallback(callback_id="callback")):
+        data = retort.dump(apply_defaults(method, defaults))
+        if is_omitted(default):
+            assert "disable_link_preview" not in data["query"]
+        else:
+            assert data["query"]["disable_link_preview"] == expected
 
 
 @pytest.mark.parametrize(
@@ -399,3 +407,83 @@ def test_retort_loads_open_app_button_without_web_app() -> None:
     assert isinstance(button, OpenAppButton)
     assert button.contact_id == 5
     assert is_omitted(button.web_app)
+
+
+def test_update_survives_dump_load_roundtrip() -> None:
+    retort = get_retort()
+    data = {
+        "update_type": "message_created",
+        "timestamp": 1234567890123,
+        "message": {
+            "body": {"seq": 1, "mid": "m", "text": "hi"},
+            "recipient": {"chat_id": 1, "chat_type": "dialog"},
+            "timestamp": 1234567890123,
+        },
+    }
+
+    update = retort.load(data, MessageCreated)
+    dumped = retort.dump(update, MessageCreated)
+
+    assert dumped["timestamp"] == 1234567890123
+    assert retort.load(dumped, MessageCreated) == update
+
+
+@pytest.mark.parametrize(("block", "expected"), [(True, "true"), (False, "false")])
+def test_query_bool_is_dumped_as_json_literal(block: bool, expected: str) -> None:
+    # The query bool dumper is shared, so check a non-`disable_link_preview` field
+    data = get_retort().dump(RemoveMember(chat_id=1, user_id=2, block=block))
+
+    assert data["query"]["block"] == expected
+
+
+def test_bot_default_disable_link_preview_does_not_override_explicit() -> None:
+    defaults = BotDefaults(disable_link_preview=True)
+    retort = get_retort()
+
+    data = retort.dump(
+        apply_defaults(
+            AnswerOnCallback(callback_id="callback", disable_link_preview=False),
+            defaults,
+        ),
+    )
+    assert data["query"]["disable_link_preview"] == "false"
+
+    data = retort.dump(
+        apply_defaults(SendMessage(disable_link_preview=False), defaults),
+    )
+    assert data["query"]["disable_link_preview"] == "false"
+
+
+def test_types_with_defaults_match_declared_fields() -> None:
+    # Guard: butcher may add `format`/`disable_link_preview` to a new method,
+    # and `METHODS_WITH_DEFAULTS` won't be updated by hand. Scan, don't list
+    candidates = {
+        obj
+        for obj in (*vars(methods).values(), *vars(types).values())
+        if isinstance(obj, type)
+        and issubclass(obj, MaxoMethod | MaxoType)
+        and dataclasses.is_dataclass(obj)
+    }
+
+    def owners(field_name: str) -> set[type]:
+        return {
+            candidate
+            for candidate in candidates
+            if any(field.name == field_name for field in dataclasses.fields(candidate))
+        }
+
+    owning = owners("format") | owners("disable_link_preview")
+    # `NewMessageBody` is reached through `AnswerOnCallback.message`
+    assert owning == {*METHODS_WITH_DEFAULTS, NewMessageBody}
+
+
+def test_retort_loads_user_without_last_activity_time() -> None:
+    # MAX omits the field when the user hides the online status
+    user = get_retort().load(
+        {"user_id": 1, "first_name": "Alice", "is_bot": False},
+        User,
+    )
+
+    assert is_omitted(user.last_activity_time)
+    with pytest.raises(AttributeIsEmptyError):
+        _ = user.unsafe_last_activity_time

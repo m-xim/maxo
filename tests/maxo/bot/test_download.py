@@ -5,8 +5,12 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
+import pytest
+from unihttp.exceptions import NetworkError
+
 from maxo.bot.bot import Bot
 from maxo.bot.middlewares import AuthMiddleware
+from maxo.errors import MaxBotNetworkError
 from maxo.types import AttachmentPayload
 
 
@@ -96,3 +100,28 @@ async def test_download_stream_closes_response_on_break(bot: Bot) -> None:
                 break
 
     assert closed == [True]
+
+
+async def test_download_wraps_network_error_raised_mid_body(bot: Bot) -> None:
+    @asynccontextmanager
+    async def body_breaking_after_first_chunk() -> AsyncIterator[AsyncIterator[bytes]]:
+        async def chunks() -> AsyncIterator[bytes]:
+            yield b"pay"
+            raise NetworkError("connection reset")
+
+        yield chunks()
+
+    call_method_stream = AsyncMock(
+        return_value=SimpleNamespace(data=body_breaking_after_first_chunk()),
+    )
+    with (
+        patch.object(
+            bot,
+            "_client",
+            SimpleNamespace(call_method_stream=call_method_stream),
+        ),
+        pytest.raises(MaxBotNetworkError) as exc_info,
+    ):
+        await bot.download("https://example.test/file.bin")
+
+    assert isinstance(exc_info.value.__cause__, NetworkError)

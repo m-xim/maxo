@@ -129,7 +129,7 @@ def test_defaults_land_in_dumped_request() -> None:
 
     body = retort.dump(apply_defaults(SendMessage(chat_id=1, text="hi"), defaults))
     assert body["body"]["format"] == "html"
-    assert body["query"]["disable_link_preview"] == 1
+    assert body["query"]["disable_link_preview"] == "true"
 
     edit = retort.dump(apply_defaults(EditMessage(message_id="m", text="hi"), defaults))
     assert edit["body"]["format"] == "html"
