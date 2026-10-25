@@ -167,8 +167,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         return self._info
 
     async def get_my_info(self) -> BotInfo:
-        info = await self.client.call_method(GetMyInfo(), middleware=self.middleware)
-        self._info = bind_bot(info, self)
+        self._info = await self.call_method(GetMyInfo())
         return self._info
 
     async def close(self) -> None:
