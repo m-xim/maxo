@@ -66,7 +66,7 @@
 
     @dispatcher.after_startup()
     async def on_startup(bot: Bot) -> None:
-        info = bot.state.info
+        info = bot.info
         print(f"Бот @{info.username} запущен!")
 
     @dispatcher.before_shutdown()
@@ -85,7 +85,7 @@
     from maxo import Bot, Dispatcher
 
     async def on_startup(bot: Bot) -> None:
-        print(f"Бот @{bot.state.info.username} запущен!")
+        print(f"Бот @{bot.info.username} запущен!")
 
     dispatcher = Dispatcher()
     dispatcher.after_startup.handler(on_startup)
@@ -198,7 +198,7 @@
 дочерних роутерах всё равно вызываются.
 
 Любое другое исключение из обработчика сигнала не попадает в обработчики
-``@router.error()``: :class:`~maxo.types.error_event.ErrorEvent` описывает
+``@router.error()``: :class:`~maxo.routing.events.ErrorEvent` описывает
 ошибку при обработке обновления, а сигнал обновлением не является. Исключение
 прерывает обход обработчиков и доходит до вызывающего кода: ``run_polling`` и
 ``start_polling`` завершаются с ним, а в вебхуках его получает веб-фреймворк

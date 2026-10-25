@@ -12,11 +12,9 @@
 Лежат в тех же каталогах и от генерации не страдают, но про них легко забыть
 при чистке:
 
-- `src/maxo/types/base.py` - `MaxoType`, `BaseMaxoType`, `MaxUpdate`,
+- `src/maxo/types/base.py` - `MaxoType`, `FacadeMaxoType`, `MaxUpdate`,
   `BaseUpdate`.
-- `src/maxo/types/facades/base.py` - `BaseMethodsFacade`.
-- `src/maxo/types/error_event.py`, `update_context.py`, `upload_media_result.py`,
-  `clear_subscriptions_result.py`.
+- `src/maxo/types/upload_media_result.py`, `clear_subscriptions_result.py`.
 - `src/maxo/bot/methods/base.py`, `markers.py`.
 - Методы вне свагера: `bots/edit_bot_info.py`, `chats/delete_chat.py`,
   `chats/get_chat_by_link.py`, `chats/get_chats.py`, `chats/set_admins.py`,
