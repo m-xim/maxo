@@ -106,14 +106,13 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
             NetworkErrorMiddleware(),
         ]
         self._client = client
-
         self._owns_client = client is None
-        self._closed = False
 
         if warming_up:
             warm_up()
 
         self._info: BotInfo | None = None
+        self._me_lock = asyncio.Lock()
 
     @property
     def client(self) -> BaseAsyncClient:
@@ -126,14 +125,6 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         if self._info is None:
             raise StateError("Bot info is not resolved yet")
         return self._info
-
-    @property
-    def started(self) -> bool:
-        return self._info is not None
-
-    @property
-    def closed(self) -> bool:
-        return self._closed
 
     @property
     def defaults(self) -> BotDefaults:
@@ -164,20 +155,19 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
     async def me(self) -> BotInfo:
         """Lazy `get_my_info`: hits the API only on the first call."""
         if self._info is None:
-            return await self.get_my_info()
-        return self._info
+            async with self._me_lock:
+                if self._info is None:
+                    return await self.get_my_info()
+        return self.info
 
     async def get_my_info(self) -> BotInfo:
         self._info = await self.call_method(GetMyInfo())
         return self._info
 
     async def close(self) -> None:
-        if self._closed or self._client is None:
-            return
-        self._closed = True
-
-        if self._owns_client:
-            await self._client.close()
+        if self._owns_client and self._client is not None:
+            client, self._client = self._client, None
+            await client.close()
 
     async def call_method(  # for unihttp bind_method
         self,
