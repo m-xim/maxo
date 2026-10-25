@@ -44,6 +44,7 @@ from maxo.routing.middlewares.fsm_context import FSM_STORAGE_KEY
 from maxo.routing.middlewares.update_context import (
     EVENT_FROM_USER_KEY,
     UPDATE_CONTEXT_KEY,
+    UpdateContext,
 )
 from maxo.types import (
     BotAddedToChat,
@@ -56,7 +57,6 @@ from maxo.types import (
     MessageBody,
     MessageCallback,
     Recipient,
-    UpdateContext,
     UserAddedToChat,
     UserRemovedFromChat,
 )

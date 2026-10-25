@@ -13,7 +13,7 @@ from maxo.bot.bot import Bot
 from maxo.bot.methods import GetUpdates
 from maxo.omit import Omitted
 from maxo.routing.dispatcher import Dispatcher
-from maxo.routing.signals.update import MaxoUpdate
+from maxo.routing.events import MaxoUpdate
 from maxo.transport.long_polling import LongPolling
 from maxo.types import MaxoType, UpdateList
 from maxo.types.updates import Updates

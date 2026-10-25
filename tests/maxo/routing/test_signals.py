@@ -4,9 +4,9 @@ import pytest
 
 from maxo import Bot, Router
 from maxo.enums import ChatType
-from maxo.errors import AttributeIsEmptyError
 from maxo.routing.ctx import Ctx
 from maxo.routing.dispatcher import Dispatcher
+from maxo.routing.events import ErrorEvent, MaxoUpdate
 from maxo.routing.filters import BaseFilter
 from maxo.routing.middlewares.state import (
     EmptyMiddlewareManagerState,
@@ -19,10 +19,8 @@ from maxo.routing.signals import (
     AfterStartup,
     BeforeShutdown,
     BeforeStartup,
-    MaxoUpdate,
 )
 from maxo.types import Message, MessageBody, Recipient, User
-from maxo.types.error_event import ErrorEvent
 from maxo.types.message_created import MessageCreated
 from tests.constants import NOW
 
@@ -331,9 +329,8 @@ async def test_feed_update_binds_bot_to_inner_update(
     await dp.feed_update(maxo_update, bot)
 
     assert handled == [update]
-    # Бота держит апдейт, а не обёртка роутинга `MaxoUpdate`.
-    with pytest.raises(AttributeIsEmptyError):
-        _ = maxo_update.bot
+    # The update holds the bot, not the `MaxoUpdate` wrapper.
+    assert not hasattr(maxo_update, "bot")
     assert update.bot is bot
 
 

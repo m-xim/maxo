@@ -1,3 +1,6 @@
+import dataclasses
+
+from maxo import types
 from maxo.bot.defaults import BotDefaults, apply_defaults
 from maxo.bot.methods import AnswerOnCallback, EditMessage, GetMyInfo, SendMessage
 from maxo.bot.warming_up import _LOADED_ROOTS, _METHOD_ROOTS
@@ -12,7 +15,9 @@ from maxo.types import (
     Updates,
     bind_bot,
 )
+from maxo.types.base import FacadeMaxoType
 from maxo.types.binding import _field_classes
+from maxo.types.facades.bot import BotMethodsFacade
 from tests.factories import make_bot
 
 UPDATE = {
@@ -131,15 +136,47 @@ def test_defaults_land_in_dumped_request() -> None:
 
 
 def test_bind_reaches_whole_tree_from_root() -> None:
-    """`as_` и сеттер `bot` тоже идут по дереву, а не только по корню."""
+    """`as_` walks the whole tree, not just the root."""
     bot = make_bot()
     update = get_retort().load(UPDATE, Updates)
 
     update.as_(bot)
     assert update.message.bot is bot
 
-    update.bot = None
+    update.as_(None)
     assert update.message._bot is None
+
+
+def test_replace_keeps_bot() -> None:
+    # The bot is a field, so `dataclasses.replace` keeps it.
+    bot = make_bot()
+    update = get_retort().load(UPDATE, Updates).as_(bot)
+
+    copied = dataclasses.replace(update, user_locale="ru")
+
+    assert copied.bot is bot
+    assert copied.message.bot is bot
+
+
+def test_retort_does_not_read_or_write_bot() -> None:
+    retort = get_retort()
+
+    update = retort.load({**UPDATE, "_bot": "evil"}, Updates)
+    assert update._bot is None
+
+    assert "_bot" not in retort.dump(update.as_(make_bot()), Updates)
+
+
+def test_facade_types_hold_bot() -> None:
+    # A facade without `FacadeMaxoType` would fail on `self.bot` only at runtime.
+    facade_types = [
+        obj
+        for obj in vars(types).values()
+        if isinstance(obj, type) and issubclass(obj, BotMethodsFacade)
+    ]
+
+    assert facade_types
+    assert [t for t in facade_types if not issubclass(t, FacadeMaxoType)] == []
 
 
 def test_type_graph_is_acyclic() -> None:

@@ -6,13 +6,14 @@ import pytest
 from maxo.enums import ChatType
 from maxo.routing.ctx import Ctx
 from maxo.routing.dispatcher import Dispatcher
+from maxo.routing.events import ErrorEvent, MaxoUpdate
 from maxo.routing.filters import AlwaysFalseFilter, AlwaysTrueFilter, BaseFilter
 from maxo.routing.interfaces import NextMiddleware
 from maxo.routing.middlewares.fsm_context import FSMContextMiddleware
 from maxo.routing.routers.simple import Router
 from maxo.routing.sentinels import UNHANDLED
-from maxo.routing.signals import BeforeStartup, MaxoUpdate
-from maxo.types import ErrorEvent, Message, MessageBody, MessageEdited, Recipient, User
+from maxo.routing.signals import BeforeStartup
+from maxo.types import Message, MessageBody, MessageEdited, Recipient, User
 from maxo.types.message_created import MessageCreated
 from tests.constants import NOW
 

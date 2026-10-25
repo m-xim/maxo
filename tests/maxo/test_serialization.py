@@ -31,16 +31,16 @@ from maxo.types import (
     VideoAttachmentDetails,
     VideoThumbnail,
 )
-from maxo.types.base import MaxoType
+from maxo.types.base import FacadeMaxoType
 from maxo.types.binding import bind_bot
 from tests.factories import make_bot
 
 
-class Sub(MaxoType):
+class Sub(FacadeMaxoType):
     b: int
 
 
-class MyType(MaxoType):
+class MyType(FacadeMaxoType):
     a: str
     sub: Sub
 

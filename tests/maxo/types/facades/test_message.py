@@ -3,7 +3,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from maxo import Bot
 from maxo.enums import ChatType, MessageLinkType
 from maxo.omit import Omitted
 from maxo.types import (
@@ -15,18 +14,13 @@ from maxo.types import (
     SimpleQueryResult,
     User,
 )
+from maxo.types.base import FacadeMaxoType
 from maxo.types.facades.message import MessageMethodsFacade
 from tests.constants import NOW
 
 
-class MockMessageFacade(MessageMethodsFacade):
-    def __init__(self, bot: Bot, message: Message) -> None:
-        self._bot = bot
-        self._message = message
-
-    @property
-    def message(self) -> Message:
-        return self._message
+class MockMessageFacade(FacadeMaxoType, MessageMethodsFacade, slots=False):
+    message: Message
 
 
 def make_message(
@@ -67,7 +61,7 @@ def bot() -> MagicMock:
 
 @pytest.fixture
 def facade(bot: MagicMock) -> MockMessageFacade:
-    return MockMessageFacade(bot, make_message())
+    return MockMessageFacade(_bot=bot, message=make_message())
 
 
 def test_chat_id_comes_from_recipient(facade: MockMessageFacade) -> None:
@@ -100,14 +94,17 @@ class TestSendMessage:
         assert result.body.text == "sent"
 
     async def test_chat_omits_user_id(self, bot: MagicMock) -> None:
-        facade = MockMessageFacade(bot, make_message(chat_type=ChatType.CHAT))
+        facade = MockMessageFacade(
+            _bot=bot,
+            message=make_message(chat_type=ChatType.CHAT),
+        )
 
         await facade.send_message("hello")
 
         assert bot.send_message.await_args.kwargs["user_id"] == Omitted()
 
     async def test_without_sender(self, bot: MagicMock) -> None:
-        facade = MockMessageFacade(bot, make_message(with_sender=False))
+        facade = MockMessageFacade(_bot=bot, message=make_message(with_sender=False))
 
         await facade.send_message("hello")
 

@@ -6,7 +6,7 @@ import pytest
 from adaptix.load_error import LoadError
 
 from maxo import Bot, Dispatcher
-from maxo.routing.signals import MaxoUpdate
+from maxo.routing.events import MaxoUpdate
 from maxo.transport.webhook.adapters.base_adapter import BoundRequest, WebAdapter
 from maxo.transport.webhook.engines import base as engine_base
 from maxo.transport.webhook.engines.base import WebhookEngine
