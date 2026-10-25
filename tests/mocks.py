@@ -10,3 +10,6 @@ class MockBotInfo:
 class MockBot:
     def __init__(self, user_id: int = BOT_ID, username: str = "testbot") -> None:
         self.info = MockBotInfo(user_id, username)
+
+    async def me(self) -> MockBotInfo:
+        return self.info

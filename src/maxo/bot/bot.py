@@ -160,6 +160,12 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
             if auto_close:
                 await self.close()
 
+    async def me(self) -> BotInfo:
+        """Lazy `get_my_info`: hits the API only on the first call."""
+        if self._info is None:
+            return await self.get_my_info()
+        return self._info
+
     async def get_my_info(self) -> BotInfo:
         info = await self.client.call_method(GetMyInfo(), middleware=self.middleware)
         self._info = bind_bot(info, self)

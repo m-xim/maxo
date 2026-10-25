@@ -41,7 +41,7 @@ class StorageProxy:
 
     async def load_context(self, intent_id: str) -> Context:
         data = await self.storage.get_data(
-            key=self._context_key(intent_id),
+            key=await self._context_key(intent_id),
         )
         if not data:
             raise UnknownIntent(
@@ -60,7 +60,7 @@ class StorageProxy:
 
     async def load_stack(self, stack_id: str = DEFAULT_STACK_ID) -> Stack:
         fixed_stack_id = self._fixed_stack_id(stack_id)
-        key = self._stack_key(fixed_stack_id)
+        key = await self._stack_key(fixed_stack_id)
         await self.lock(key)
         data = await self.storage.get_data(key)
         if not data:
@@ -89,19 +89,19 @@ class StorageProxy:
             context.access_settings,
         )
         await self.storage.set_data(
-            key=self._context_key(context.id),
+            key=await self._context_key(context.id),
             data=data,
         )
 
     async def remove_context(self, intent_id: str) -> None:
         await self.storage.set_data(
-            key=self._context_key(intent_id),
+            key=await self._context_key(intent_id),
             data={},
         )
 
     async def remove_stack(self, stack_id: str) -> None:
         await self.storage.set_data(
-            key=self._stack_key(stack_id),
+            key=await self._stack_key(stack_id),
             data={},
         )
 
@@ -110,7 +110,7 @@ class StorageProxy:
             return
         if stack.empty() and not stack.last_message_id:
             await self.storage.set_data(
-                key=self._stack_key(stack.id),
+                key=await self._stack_key(stack.id),
                 data={},
             )
         else:
@@ -128,13 +128,13 @@ class StorageProxy:
                 ),
             }
             await self.storage.set_data(
-                key=self._stack_key(stack.id),
+                key=await self._stack_key(stack.id),
                 data=data,
             )
 
-    def _context_key(self, intent_id: str) -> StorageKey:
+    async def _context_key(self, intent_id: str) -> StorageKey:
         return StorageKey(
-            bot_id=self.bot.info.user_id,
+            bot_id=(await self.bot.me()).user_id,
             chat_id=self.chat_id,
             user_id=self.chat_id,  # Неожиданно, но это нужно для работы в группах
             destiny=f"aiogd:context:{intent_id}",
@@ -147,10 +147,10 @@ class StorageProxy:
             return stack_id
         return f"<{self.user_id}>"
 
-    def _stack_key(self, stack_id: str) -> StorageKey:
+    async def _stack_key(self, stack_id: str) -> StorageKey:
         stack_id = self._fixed_stack_id(stack_id)
         return StorageKey(
-            bot_id=self.bot.info.user_id,
+            bot_id=(await self.bot.me()).user_id,
             chat_id=self.chat_id,
             user_id=self.chat_id,  # Неожиданно, но это нужно для работы в группах
             destiny=f"aiogd:stack:{stack_id}",
