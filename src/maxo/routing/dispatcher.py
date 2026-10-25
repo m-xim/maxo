@@ -170,10 +170,7 @@ class Dispatcher(Router):
         if bot is not None:
             ctx["bot"] = bot
             ctx["bots"] = [bot]
-            # Единственное место, где апдейт и бот встречаются на всех путях:
-            # лонг-поллинг, вебхук, диалоги, ручной вызов из тестов.
-            # `MaxoUpdate` - обёртка роутинга, бота держит апдейт внутри неё,
-            # а по хинту (тайпвар) `bind_bot` туда не спустится.
+            # A single meeting point for bot and update (poolling, webhook, dialogs, tests)
             bind_bot(update.update if isinstance(update, MaxoUpdate) else update, bot)
 
         return await self.trigger(ctx)
