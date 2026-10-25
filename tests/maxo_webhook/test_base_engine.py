@@ -84,7 +84,7 @@ class DummyEngine(WebhookEngine):
 
 def make_bot() -> MagicMock:
     bot = MagicMock(spec=Bot)
-    bot.silent_call_method = AsyncMock()
+    bot.call_method = AsyncMock()
     return bot
 
 
