@@ -12,7 +12,7 @@ from maxo.routing.events import MaxoUpdate
 from maxo.transport.webhook.adapters.base_adapter import BoundRequest, WebAdapter
 from maxo.transport.webhook.routing.base import BaseRouting
 from maxo.transport.webhook.security.security import Security
-from maxo.types import Updates, bind_bot
+from maxo.types import Updates
 
 
 class WebhookEngine(ABC):
@@ -91,10 +91,7 @@ class WebhookEngine(ABC):
             )
 
         try:
-            update = bind_bot(
-                MaxoUpdate(update=get_retort().load(raw_update, Updates)),
-                bot=bot,
-            )
+            update = MaxoUpdate(update=get_retort().load(raw_update, Updates))
         except LoadError:
             return self.web_adapter.create_json_response(
                 status=400,
