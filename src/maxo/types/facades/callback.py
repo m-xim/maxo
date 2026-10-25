@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 from maxo.omit import Omittable, Omitted, is_not_defined, is_omitted
@@ -15,10 +14,10 @@ if TYPE_CHECKING:
 class CallbackMethodsFacade(SubscriptionMethodsFacade):
     __slots__ = ()
 
-    @property
-    @abstractmethod
-    def callback(self) -> Callback:
-        raise NotImplementedError
+    if TYPE_CHECKING:
+        # Type-only, see `BotMethodsFacade`.
+        @property
+        def callback(self) -> Callback: ...
 
     async def callback_answer(
         self,

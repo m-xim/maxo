@@ -11,9 +11,9 @@ from maxo.backoff import Backoff, BackoffConfig
 from maxo.bot.bot import Bot
 from maxo.omit import Omittable, Omitted, is_defined
 from maxo.routing.dispatcher import Dispatcher
+from maxo.routing.events import MaxoUpdate
 from maxo.routing.signals.shutdown import AfterShutdown, BeforeShutdown
 from maxo.routing.signals.startup import AfterStartup, BeforeStartup
-from maxo.routing.signals.update import MaxoUpdate
 from maxo.routing.utils import collect_used_updates
 
 _DEFAULT_BACKOFF_CONFIG = BackoffConfig(

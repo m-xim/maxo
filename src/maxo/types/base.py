@@ -1,9 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, ClassVar, dataclass_transform
+from typing import TYPE_CHECKING, Any, ClassVar, Self, dataclass_transform
 
 from maxo.enums.update_type import UpdateType
-from maxo.types.facades.base import BaseMethodsFacade
+from maxo.errors import AttributeIsEmptyError
+
+if TYPE_CHECKING:
+    from maxo.bot.bot import Bot
 
 
 @dataclass_transform(
@@ -20,6 +23,8 @@ class _MaxoTypeMetaClass(type):
         **kwargs: Any,
     ) -> Any:
         class_ = super().__new__(cls, name, bases, namespace, **kwargs)
+        # `dataclass(slots=True)` re-creates the class through this metaclass
+        # with `__slots__` set: don't wrap it twice.
         if "__slots__" in namespace:
             return class_
 
@@ -30,30 +35,46 @@ class _MaxoTypeMetaClass(type):
         )(class_)
 
 
-class BaseMaxoType(metaclass=_MaxoTypeMetaClass):
-    pass
+class MaxoType(metaclass=_MaxoTypeMetaClass):
+    """
+    Base of all maxo dataclasses. Holds no bot.
+
+    Subclasses become `@dataclass(slots=True, kw_only=True)` automatically;
+    `class X(MaxoType, slots=False)` disables slots.
+    """
 
 
-# КОСТЫЛЬ: единственный держатель бота - `BaseMethodsFacade`. `MaxoType` тащит
-# его слот `_bot` + `bot`/`as_` во все DTO (большинству, вроде `User`, он не
-# нужен - это отдельная уборка). `__post_init__` для инициализации `_bot`
-# наследуется от `BaseMethodsFacade`, свой не нужен.
-#
-# Отдельная, большая проблема: `*MethodsFacade` подмешаны прямо в типы апдейтов
-# (`class BotStarted(MaxUpdate, ChatMethodsFacade)`), а те под метаклассом,
-# который конфликтует с `ABCMeta`. Поэтому фасады не могут быть ABC - отсюда
-# декоративные `@abstractmethod`, раздвоённые `if TYPE_CHECKING`-объявления полей
-# и `type: ignore[misc]` на апдейтах. Это лечится только выносом фасада из базы
-# типа (отдельный объект `update.facade` или `Protocol`).
-class MaxoType(BaseMaxoType, BaseMethodsFacade):
-    pass
+class FacadeMaxoType(MaxoType):
+    """
+    Type that holds the bot: updates and messages.
+
+    `_bot` is a field, so `dataclasses.replace` and `copy` keep it
+    """
+
+    _bot: "Bot | None" = field(default=None, repr=False, compare=False)
+
+    @property
+    def bot(self) -> "Bot":
+        if self._bot is not None:
+            return self._bot
+
+        raise AttributeIsEmptyError(
+            obj=self,
+            attr="bot",
+        )
+
+    def as_(self, bot: "Bot | None") -> Self:
+        """Bind the bot to self and every nested `FacadeMaxoType`."""
+        from maxo.types.binding import bind_bot  # noqa: PLC0415
+
+        return bind_bot(self, bot)
 
 
 class BaseUpdate(MaxoType):
-    pass
+    """Routing event: MAX update, signal or error."""
 
 
-class MaxUpdate(BaseUpdate):
+class MaxUpdate(BaseUpdate, FacadeMaxoType):
     """
     Базовый класс для всех апдейтов из Макса.
 

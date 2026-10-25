@@ -1,10 +1,10 @@
 from typing import Any
 
 from maxo.routing.ctx import Ctx
+from maxo.routing.events import ErrorEvent
 from maxo.routing.interfaces.middleware import BaseMiddleware, NextMiddleware
 from maxo.routing.interfaces.router import BaseRouter
 from maxo.routing.sentinels import UNHANDLED, CancelHandler, SkipHandler
-from maxo.types.error_event import ErrorEvent
 
 
 class ErrorMiddleware(BaseMiddleware[Any]):

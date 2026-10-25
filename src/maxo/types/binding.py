@@ -1,9 +1,9 @@
 import dataclasses
 import typing
 from functools import cache
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
-from maxo.types.facades.base import BaseMethodsFacade
+from maxo.types.base import FacadeMaxoType
 
 if TYPE_CHECKING:
     from maxo.bot.bot import Bot
@@ -12,19 +12,21 @@ if TYPE_CHECKING:
 @cache
 def _field_classes(class_: Any) -> dict[str, tuple[Any, ...]]:
     """
-    Для каждого поля - модели BaseMaxoType, спрятанные в хинте на любой глубине.
+    Classes found at any depth of each field's type hint, `_bot` excluded.
 
-    Хинт разворачивается по аргументам: `list[Message] | None` -> `(Message,)`.
+    `list[Message] | None` -> `(Message,)`.
     """
     if not dataclasses.is_dataclass(class_):
         return {}
 
-    fields = dataclasses.fields(class_)
-    hints = (
-        typing.get_type_hints(class_)
-        if any(isinstance(field.type, str) for field in fields)
-        else {}
-    )
+    fields = [field for field in dataclasses.fields(class_) if field.name != "_bot"]
+    hints: dict[str, Any] = {}
+    if any(isinstance(field.type, str) for field in dataclasses.fields(class_)):
+        # `_bot` is hinted as the string "Bot | None"; `types/base.py` imports
+        # `Bot` only under `TYPE_CHECKING`.
+        from maxo.bot.bot import Bot  # noqa: PLC0415
+
+        hints = typing.get_type_hints(class_, localns={"Bot": Bot})
 
     classes: dict[str, tuple[Any, ...]] = {}
     for field in fields:
@@ -44,17 +46,14 @@ def _field_classes(class_: Any) -> dict[str, tuple[Any, ...]]:
 @cache
 def _bot_fields(class_: Any) -> tuple[str, ...]:
     """
-    Поля класса, внутри которых на любой глубине есть `BaseMethodsFacade`.
+    Fields leading to a `FacadeMaxoType` at any depth.
 
-    По ним `bind_bot` решает, спускаться ли в поле. Поле ведёт к боту, если его
-    класс держит бота сам или содержит такое же поле глубже. Рекурсия конечна:
-    любой `MaxoType` - `BaseMethodsFacade`, так что `issubclass` замыкает её на
-    первом же вложенном типе.
+    Terminates because the type graph is acyclic (`test_type_graph_is_acyclic`).
     """
     fields = []
     for name, classes in _field_classes(class_).items():
         leads_to_bot = any(
-            issubclass(field_class, BaseMethodsFacade) or _bot_fields(field_class)
+            issubclass(field_class, FacadeMaxoType) or _bot_fields(field_class)
             for field_class in classes
         )
         if leads_to_bot:
@@ -63,11 +62,11 @@ def _bot_fields(class_: Any) -> tuple[str, ...]:
     return tuple(fields)
 
 
-def bind_bot[T](obj: T, bot: Optional["Bot"]) -> T:
+def bind_bot[T](obj: T, bot: "Bot | None") -> T:
     """
-    Проставить бота всем `BaseMethodsFacade` в дереве от `obj` вниз.
+    Bind the bot to every `FacadeMaxoType` in the tree under `obj`.
 
-    DFS + стек, без `seen`: загрузчик строит дерево, общих узлов не бывает.
+    Iterative DFS without `seen`: loaded data is a tree, nodes aren't shared.
     """
     stack: list[Any] = [obj]
 
@@ -80,7 +79,7 @@ def bind_bot[T](obj: T, bot: Optional["Bot"]) -> T:
         if isinstance(node, dict):  # UploadMediaResult.photos
             stack.extend(node.values())
             continue
-        if isinstance(node, BaseMethodsFacade):
+        if isinstance(node, FacadeMaxoType):
             node._bot = bot  # noqa: SLF001
 
         for name in _bot_fields(node.__class__):

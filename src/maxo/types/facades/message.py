@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
 
@@ -23,14 +22,9 @@ class MessageMethodsFacade(ChatMethodsFacade):
     __slots__ = ()
 
     if TYPE_CHECKING:
-
+        # Type-only, see `BotMethodsFacade`.
         @property
-        @abstractmethod
-        def message(self) -> Message | None:
-            raise NotImplementedError
-
-    else:
-        message: Message | None
+        def message(self) -> Message | None: ...
 
     @property
     def unsafe_message(self) -> Message:

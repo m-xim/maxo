@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from maxo.backoff import BackoffConfig
 from maxo.enums import UploadType
-from maxo.types import BaseMaxoType
+from maxo.types import MaxoType
 
 _MIB = 1024 * 1024
 
@@ -30,7 +30,7 @@ class UploadMethod(StrEnum):
     RESUMABLE = "resumable"
 
 
-class UploadConfig(BaseMaxoType):
+class UploadConfig(MaxoType):
     """Настройки загрузки медиа для `Bot(upload_config=...)`."""
 
     method: UploadMethod = UploadMethod.AUTO

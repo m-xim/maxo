@@ -7,7 +7,7 @@ from adaptix.load_error import LoadError
 
 from maxo import Bot, Dispatcher, get_retort
 from maxo.bot.methods.base import MaxoMethod
-from maxo.routing.signals import MaxoUpdate
+from maxo.routing.events import MaxoUpdate
 from maxo.transport.webhook.adapters.base_adapter import BoundRequest, WebAdapter
 from maxo.transport.webhook.routing.base import BaseRouting
 from maxo.transport.webhook.security.security import Security

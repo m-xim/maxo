@@ -9,6 +9,7 @@ from maxo.fsm.storages.base import BaseEventIsolation, BaseStorage
 from maxo.fsm.storages.memory import MemoryStorage, SimpleEventIsolation
 from maxo.omit import Omittable, Omitted
 from maxo.routing.ctx import Ctx
+from maxo.routing.events import MaxoUpdate
 from maxo.routing.flags import HANDLER_KEY
 from maxo.routing.middlewares.error import ErrorMiddleware
 from maxo.routing.middlewares.fsm_context import FSMContextMiddleware
@@ -17,7 +18,6 @@ from maxo.routing.observers import UpdateObserver
 from maxo.routing.routers.simple import Router
 from maxo.routing.sentinels import UNHANDLED, SkipHandler
 from maxo.routing.signals.base import BaseSignal
-from maxo.routing.signals.update import MaxoUpdate
 from maxo.routing.utils._resolving_inner_middlewares import resolve_middlewares
 from maxo.routing.utils.validate_router_graph import validate_router_graph
 from maxo.types.base import BaseUpdate

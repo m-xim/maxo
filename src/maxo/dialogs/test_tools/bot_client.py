@@ -8,7 +8,7 @@ from unihttp.clients.base import BaseAsyncClient
 from maxo import Bot, Dispatcher
 from maxo.enums import ChatAdminPermission, ChatStatus, ChatType, MessageLinkType
 from maxo.omit import Omittable, Omitted, is_defined
-from maxo.routing.signals import MaxoUpdate
+from maxo.routing.events import MaxoUpdate
 from maxo.types import (
     BotAddedToChat,
     BotAdminPermissionsChanged,

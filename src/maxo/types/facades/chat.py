@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import abstractmethod
 from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
@@ -23,10 +22,10 @@ if TYPE_CHECKING:
 class ChatMethodsFacade(AttachmentsFacade):
     __slots__ = ()
 
-    @property
-    @abstractmethod
-    def chat_id(self) -> int:
-        raise NotImplementedError
+    if TYPE_CHECKING:
+        # Type-only, see `BotMethodsFacade`.
+        @property
+        def chat_id(self) -> int: ...
 
     async def send_message(
         self,
