@@ -73,9 +73,6 @@ dev.max.ru, `GET /chats` там объявлен неподдерживаемы�
 - `Chat.chat_message_id: Omittable[str | None]` + `unsafe_chat_message_id`.
 - `ShareAttachment.payload` - `field(default_factory=ShareAttachmentPayload)`
   вместо обязательного поля.
-- `MessageCallback` - `# type: ignore[misc]` на классе. Импорты фасадов (`maxo.types.facades.callback`,
-  `maxo.types.facades.message`) генерирует сам butcher по `FACADE_MODULES` в
-  `overrides.py` - руками их поправлять больше не нужно.
 
 `MessageButton.text` и `PhotoAttachmentRequestPayload.photos` руками уже **не**
 правятся - они генерируются через `MODEL_FIELD_OVERRIDES`.
