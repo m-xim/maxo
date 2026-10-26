@@ -4,17 +4,28 @@ from collections.abc import Sequence
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from unihttp.exceptions import NonRetryableError
 
 from maxo.backoff import BackoffConfig
 from maxo.bot.middlewares import ChunkUploadRetryMiddleware
 from maxo.bot.upload import UploadConfig
-from maxo.errors import MaxBotApiError, MaxBotNetworkError, MaxBotTimeoutError
+from maxo.errors import (
+    MaxBotApiError,
+    MaxBotBadRequestError,
+    MaxBotNetworkError,
+    MaxBotServerError,
+    MaxBotTimeoutError,
+)
 
 _BACKOFF = UploadConfig().chunk_backoff
 
 
 def _response(status_code: int) -> MagicMock:
     return MagicMock(status_code=status_code)
+
+
+def _server_error() -> MaxBotServerError:
+    return MaxBotServerError(code="", error="x", message="x")
 
 
 async def _handle(
@@ -32,28 +43,38 @@ async def _handle(
 async def test_server_error_is_retried_then_succeeds() -> None:
     ok = _response(200)
 
-    result, next_handler, _ = await _handle([_response(500), ok], retries=3)
+    result, next_handler, _ = await _handle([_server_error(), ok], retries=3)
 
     assert result is ok
     assert next_handler.await_count == 2
 
 
-async def test_server_error_is_returned_after_retries() -> None:
-    # The caller turns the last 5xx into `MaxBotApiError`
-    last = _response(500)
-
-    result, next_handler, _ = await _handle([_response(500), last], retries=1)
-
-    assert result is last
-    assert next_handler.await_count == 2
+async def test_server_error_is_reraised_after_retries() -> None:
+    with pytest.raises(MaxBotServerError):
+        await _handle([_server_error(), _server_error()], retries=1)
 
 
-async def test_client_error_is_not_retried() -> None:
-    bad = _response(400)
+def _non_retryable_network_error() -> MaxBotNetworkError:
+    error = MaxBotNetworkError("bad url")
+    error.__cause__ = NonRetryableError("bad url")
+    return error
 
-    result, next_handler, _ = await _handle([bad], retries=3)
 
-    assert result is bad
+@pytest.mark.parametrize(
+    "error",
+    [
+        MaxBotBadRequestError(code="", error="x", message="x"),
+        MaxBotApiError(code="", error="x", message="x"),
+        _non_retryable_network_error(),
+    ],
+)
+async def test_error_is_not_retried(error: Exception) -> None:
+    middleware = ChunkUploadRetryMiddleware(max_retries=3, backoff_config=_BACKOFF)
+    next_handler = AsyncMock(side_effect=error)
+
+    with pytest.raises(type(error)):
+        await middleware.handle(MagicMock(), next_handler)
+
     assert next_handler.await_count == 1
 
 
@@ -76,19 +97,8 @@ async def test_network_error_is_reraised_after_retries() -> None:
         await _handle(errors, retries=2)
 
 
-async def test_api_error_is_not_retried() -> None:
-    middleware = ChunkUploadRetryMiddleware(max_retries=3, backoff_config=_BACKOFF)
-    error = MaxBotApiError(code="", error="x", message="x")
-    next_handler = AsyncMock(side_effect=error)
-
-    with pytest.raises(MaxBotApiError):
-        await middleware.handle(MagicMock(), next_handler)
-
-    assert next_handler.await_count == 1
-
-
 async def test_first_retry_waits_backoff_min_delay() -> None:
-    _, _, sleep = await _handle([_response(500), _response(200)], retries=3)
+    _, _, sleep = await _handle([_server_error(), _response(200)], retries=3)
 
     # The first pause is exactly `min_delay`, not doubled
     assert sleep.await_args_list[0].args[0] == _BACKOFF.min_delay
