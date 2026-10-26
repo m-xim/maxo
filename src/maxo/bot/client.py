@@ -23,6 +23,30 @@ def build_ssl_context() -> ssl.SSLContext:
     return context
 
 
+def default_media_client(
+    *,
+    ssl_context: ssl.SSLContext | None = None,
+    limit: int = _DEFAULT_LIMIT,
+    timeout: "ClientTimeout | None" = None,
+    session: "ClientSession | None" = None,
+) -> "AiohttpAsyncClient":
+    """
+    Client for media hosts: no total timeout, a 2 GiB upload takes minutes.
+
+    `sock_read` still catches a stalled response.
+    """
+    from aiohttp import ClientTimeout  # noqa: PLC0415
+
+    if session is None and timeout is None:
+        timeout = ClientTimeout(total=None, sock_connect=30, sock_read=300)
+    return default_client(
+        ssl_context=ssl_context,
+        limit=limit,
+        timeout=timeout,
+        session=session,
+    )
+
+
 def default_client(
     *,
     base_url: str = BASE_URL,
