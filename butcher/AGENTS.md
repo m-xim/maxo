@@ -265,7 +265,7 @@ Union-алиас собирается из `discriminator.mapping` сам, ре�
 Ещё тип в `_types` в `bot/warming_up.py`. Новому вложению дополнительно нужны
 `factory()` и `to_request()` у него и у пары `*Request`, свойство-хелпер и
 ветка `attachment_type` в `MessageBody`, а заливаемому через `UploadType` -
-запись в `MEDIA_ATTACHMENT_FACTORIES` в `types/facades/attachments.py`.
+запись в `MEDIA_ATTACHMENT_FACTORIES` в `bot/media.py`.
 
 ## Разработка butcher
 
