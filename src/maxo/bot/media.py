@@ -138,13 +138,10 @@ class Media:
         self,
         upload_url: str,
         file: InputFile,
-        size: int | None = None,
+        size: int,
     ) -> UploadMediaResult | None:
         """Загружает видео или аудио по `upload_url` частями."""
         config = self.config
-
-        if size is None:
-            size = await file.size()
 
         encoded_name = quote(file.file_name, safe="")
         disposition = f'attachment; filename="{encoded_name}"'
