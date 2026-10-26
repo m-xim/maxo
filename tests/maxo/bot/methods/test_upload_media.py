@@ -31,5 +31,13 @@ def test_retval_response_raises_retval_returned_error() -> None:
         method().validate_response(response(b"<retval>1</retval>"))
 
 
+def test_error_in_ok_body_is_patched_to_bad_request() -> None:
+    resp = response({"error_code": "upload.error", "message": "nope"})
+
+    method().validate_response(resp)
+
+    assert resp.status_code == 400
+
+
 def test_token_response_passes_validation() -> None:
     method().validate_response(response({"token": "file-token"}))

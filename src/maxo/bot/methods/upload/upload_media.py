@@ -26,5 +26,6 @@ class UploadMedia(MaxoMethod[UploadMediaResult]):
     file: File[UploadFile]
 
     def validate_response(self, response: HTTPResponse[Any]) -> None:
+        super().validate_response(response)
         if response.data == b"<retval>1</retval>":
             raise RetvalReturnedError
