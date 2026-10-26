@@ -1,6 +1,5 @@
 from typing import Any
 
-from unihttp.exceptions import NonRetryableError
 from unihttp.http import HTTPRequest, HTTPResponse
 from unihttp.middlewares import AsyncHandler, AsyncMiddleware
 
@@ -14,7 +13,7 @@ class ChunkUploadRetryMiddleware(AsyncMiddleware):
     Ретраит чанк resumable upload при сетевых сбоях и 5xx.
 
     Работает снаружи `NetworkErrorMiddleware` и видит ошибки maxo.
-    4xx и `NonRetryableError` не ретраятся.
+    4xx и `MaxBotRequestError` не ретраятся.
     """
 
     __slots__ = ("_backoff_config", "_max_retries")
@@ -32,12 +31,8 @@ class ChunkUploadRetryMiddleware(AsyncMiddleware):
         while True:
             try:
                 return await next_handler(request)
-            except (MaxBotNetworkError, MaxBotServerError) as error:
-                # A bad URL or a redirect loop won't heal on retry
-                if (
-                    isinstance(error.__cause__, NonRetryableError)
-                    or backoff.counter >= self._max_retries
-                ):
+            except (MaxBotNetworkError, MaxBotServerError):
+                if backoff.counter >= self._max_retries:
                     raise
 
             backoff.next()

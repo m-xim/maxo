@@ -9,7 +9,12 @@ from unihttp.exceptions import (
 )
 
 from maxo.bot.middlewares import NetworkErrorMiddleware
-from maxo.errors import MaxBotNetworkError, MaxBotTimeoutError, MaxoError
+from maxo.errors import (
+    MaxBotNetworkError,
+    MaxBotRequestError,
+    MaxBotTimeoutError,
+    MaxoError,
+)
 
 
 @pytest.mark.parametrize(
@@ -18,13 +23,13 @@ from maxo.errors import MaxBotNetworkError, MaxBotTimeoutError, MaxoError
         (RequestTimeoutError("slow"), MaxBotTimeoutError),
         (NetworkError("dns"), MaxBotNetworkError),
         (TimeoutError("timed out"), MaxBotTimeoutError),
-        (NonRetryableError("too many redirects"), MaxBotNetworkError),
-        (UniHTTPError("other aiohttp error"), MaxBotNetworkError),
+        (NonRetryableError("too many redirects"), MaxBotRequestError),
+        (UniHTTPError("other aiohttp error"), MaxBotRequestError),
     ],
 )
 async def test_wraps_transport_errors(
     raised: Exception,
-    expected: type[MaxBotNetworkError],
+    expected: type[MaxoError],
 ) -> None:
     middleware = NetworkErrorMiddleware()
     next_handler = AsyncMock(side_effect=raised)
