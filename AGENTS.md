@@ -49,7 +49,7 @@ uv run pytest tests/path/test_file.py::test_name -v
 
 | Путь                     | Что там                                                                     |
 |--------------------------|-----------------------------------------------------------------------------|
-| `src/maxo/bot/`          | `Bot`, `MaxApiClient`, методы Bot API на `unihttp`, `warming_up.py`.         |
+| `src/maxo/bot/`          | `Bot`, `Media`, методы Bot API на `unihttp`, `warming_up.py`.                |
 | `src/maxo/types/`, `enums/` | Типы и enum MAX Bot API, в основном сгенерированы butcher.               |
 | `src/maxo/routing/`      | `Dispatcher`, `Router`, observers, filters, middlewares, signals, flags.     |
 | `src/maxo/fsm/`          | `State`, `StatesGroup`, `FSMContext`, storage, isolation, key builders.      |
@@ -98,8 +98,8 @@ uv run pytest tests/path/test_file.py::test_name -v
 - `serialization.py` ещё дампит query (bool -> `"true"`/`"false"`, списки
   через запятую, `datetime` в миллисекунды), грузит таймстемпы в `datetime` с
   `UTC` и подставляет `BotDefaults` (`text_format`, `disable_link_preview`).
-  Дефолты получают только методы из ручных алиасов `TypesWithFormat` и
-  `TypesWithLinkPreview`: новый метод с `format` или `disable_link_preview`
+  Дефолты получают только методы из `METHODS_WITH_DEFAULTS` в
+  `bot/defaults.py`: новый метод с `format` или `disable_link_preview`
   добавляй туда.
 - `bot/warming_up.py` заранее строит сериализаторы adaptix для всех типов и
   методов; новый тип или метод добавляй и туда.
@@ -152,12 +152,12 @@ Long polling / webhook -> Dispatcher -> Router tree
   методу пометку ставит butcher (`DEPRECATED_METHODS`). Импорты устаревших
   символов внутри maxo и в тестах - с `# type: ignore[deprecated]`: в mypy
   включён код `deprecated`.
-- `MaxApiClient` добавляет российский trusted CA, `Authorization`,
-  `User-Agent`, маппинг ошибок API и превращает HTTP 200 с `"success": false`
+- `default_client()` добавляет российский trusted CA, middleware `Bot` -
+  `Authorization` (только для относительных URL), `User-Agent`, маппинг ошибок API и превращает HTTP 200 с `"success": false`
   или с `error_code` в 400. Исключение - `AddMembers`: он отдаёт частичный результат, и это
   поведение не меняй без отдельного теста и документации.
-- `Bot.download` принимает URL или `AttachmentPayload` и пишет в файл либо
-  возвращает `BinaryIO`.
+- Файловые хосты - через `bot.media` (`Media`): свой клиент, без токена.
+  `download` отдаёт `bytes`, `download_to` пишет в файл, `download_stream` - чанки.
 
 ### FSM и dialogs
 
