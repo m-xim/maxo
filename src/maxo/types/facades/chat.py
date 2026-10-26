@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 from maxo.enums import TextFormat
 from maxo.omit import Omittable, Omitted
-from maxo.types.facades.attachments import AttachmentsFacade, MediaInput
+from maxo.types.facades.subscription import SubscriptionMethodsFacade
 
 if TYPE_CHECKING:
     from maxo.types.attachments import Attachments, AttachmentsRequests
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from maxo.types.simple_query_result import SimpleQueryResult
 
 
-class ChatMethodsFacade(AttachmentsFacade):
+class ChatMethodsFacade(SubscriptionMethodsFacade):
     __slots__ = ()
 
     if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class ChatMethodsFacade(AttachmentsFacade):
         media: Sequence[MediaInput] | None = None,
         attachments: Sequence[AttachmentsRequests] | None = None,
     ) -> Message:
-        prepared_attachments = await self.build_attachments(
+        prepared_attachments = await self.bot.media.build_attachments(
             base=attachments or [],
             keyboard=keyboard,
             files=media,

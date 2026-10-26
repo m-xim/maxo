@@ -1,46 +1,52 @@
-from dataclasses import dataclass
-from typing import Any
+from typing import Any, Never
 
-from unihttp.http import HTTPRequest, HTTPResponse
-from unihttp.method import BaseMethod
-from unihttp.serialize import RequestDumper, ResponseLoader
+from unihttp.http import HTTPResponse
+from unihttp.serialize import ResponseLoader
+
+from maxo.bot.methods.base import MaxoMethod
+from maxo.bot.methods.markers import Header, Path, Raw
+from maxo.errors.api import api_error_type, raise_api_error
 
 # unihttp парсит JSON сам (см. `AiohttpAsyncClient.make_request`), а при
 # нераспарсиваемом теле отдаёт сырые байты как есть.
 UploadResponseBody = dict[str, Any] | list[Any] | bytes
 
 
-@dataclass
-class _ChunkUpload(  # type: ignore[no-untyped-call]
-    BaseMethod[HTTPResponse[UploadResponseBody]],
-):
-    """Сырой POST чанка resumable upload."""
+# Custom method
+class ChunkUpload(MaxoMethod[UploadResponseBody]):
+    """Один кусок resumable-загрузки: промежуточный - 201, финальный - 200."""
 
-    url: str
-    chunk: bytes
-    headers: dict[str, str]
+    __url__ = "{upload_url}"
+    __method__ = "post"
 
-    __method__ = "POST"
+    upload_url: Path[str]
+    content_range: Header[str]
+    content_disposition: Header[str]
+    content_type: Header[str] = "application/octet-stream"
+    # Lets a failed chunk be resent on a new connection
+    x_uploading_mode: Header[str] = "parallel"
+    chunk: Raw[bytes]
 
-    def build_http_request(self, request_dumper: RequestDumper) -> HTTPRequest:
-        return HTTPRequest(
-            url=self.url,
-            method=self.__method__,
-            header=dict(self.headers),
-            path={},
-            query={},
-            body={},
-            file={},
-            form=None,
-            raw=self.chunk,
+    def on_error(self, response: HTTPResponse[Any]) -> Never:
+        body = response.data
+        if isinstance(body, dict):
+            raise_api_error(response.status_code, body)
+        # A non-JSON 5xx must stay retryable
+        raise api_error_type(response.status_code)(
+            code="",
+            error=f"upload failed with status {response.status_code}",
+            message=(
+                body.decode("utf-8", "replace")
+                if isinstance(body, bytes)
+                else str(body or "")
+            ),
+            raw_data=body,
         )
-
-    def on_error(self, response: HTTPResponse[UploadResponseBody]) -> None:
-        pass
 
     def make_response(
         self,
-        response: HTTPResponse[UploadResponseBody],
+        response: HTTPResponse[Any],
         response_loader: ResponseLoader,
-    ) -> HTTPResponse[UploadResponseBody]:
-        return response
+    ) -> UploadResponseBody:
+        # Already parsed JSON or raw bytes
+        return response.data  # type: ignore[no-any-return]

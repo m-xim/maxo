@@ -47,11 +47,6 @@ _INVALID_QUERY_ID_MSG = (
 )
 
 
-# temp
-class _AttachmentsBuilder(FacadeMaxoType, AttachmentsFacade):
-    pass
-
-
 def _combine(sent_message: NewMessage, message_result: Message) -> OldMessage:
     return OldMessage(
         message_id=message_result.body.mid,
@@ -326,7 +321,7 @@ class MessageManager(MessageManagerProtocol):
             for item in media
             if (converted := self._convert_media(item)) is not None
         ]
-        return await _AttachmentsBuilder(_bot=bot).build_attachments(
+        return await bot.media.build_attachments(
             base=[],
             keyboard=keyboard,
             files=converted_media,

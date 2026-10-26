@@ -3,9 +3,7 @@ from collections.abc import AsyncIterator, Iterable, Sequence
 from contextlib import asynccontextmanager
 from types import TracebackType
 from typing import Self
-from urllib.parse import quote
 
-from anyio import open_file
 from unihttp.bind_method import bind_method
 from unihttp.clients.base import BaseAsyncClient
 from unihttp.http.response import HTTPResponse
@@ -15,6 +13,7 @@ from unihttp.middlewares import AsyncMiddleware
 
 from maxo.bot.client import default_client
 from maxo.bot.defaults import BotDefaults, apply_defaults
+from maxo.bot.media import Media
 from maxo.bot.methods import (  # type: ignore[deprecated]
     AddMembers,
     AnswerOnCallback,
@@ -53,30 +52,18 @@ from maxo.bot.methods import (  # type: ignore[deprecated]
     Subscribe,
     UnpinMessage,
     Unsubscribe,
-    UploadMedia,
 )
-from maxo.bot.methods.download import Download
-from maxo.bot.methods.upload.chunk_upload import UploadResponseBody, _ChunkUpload
 from maxo.bot.middlewares import (
     AttachmentNotReadyRetryMiddleware,
     AuthMiddleware,
-    ChunkUploadRetryMiddleware,
     NetworkErrorMiddleware,
 )
-from maxo.bot.middlewares.network_error import translate_network_errors
 from maxo.bot.upload import UploadConfig
 from maxo.bot.warming_up import warm_up
-from maxo.errors import MaxBotApiError, UnsubscribeError
-from maxo.errors.api import raise_api_error
+from maxo.errors import UnsubscribeError
 from maxo.errors.state import StateError
-from maxo.serialization import get_retort
-from maxo.types import AttachmentPayload, BotInfo, ClearSubscriptionsResult
+from maxo.types import BotInfo, ClearSubscriptionsResult
 from maxo.types.binding import bind_bot
-from maxo.types.upload_media_result import UploadMediaResult
-from maxo.utils.upload_media import InputFile
-
-_CLIENT_ERROR_STATUS = 400
-_DEFAULT_CHUNK_SIZE = 65536
 
 
 class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
@@ -88,6 +75,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         upload_config: UploadConfig | None = None,
         warming_up: bool = True,
         client: BaseAsyncClient | None = None,
+        media_client: BaseAsyncClient | None = None,
         middlewares: Sequence[AsyncMiddleware] = (),
     ) -> None:
         self._defaults = defaults or BotDefaults()
@@ -113,12 +101,18 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
 
         self._info: BotInfo | None = None
         self._me_lock = asyncio.Lock()
+        self._media = Media(self, client=media_client)
 
     @property
     def client(self) -> BaseAsyncClient:
         if self._client is None:
             self._client = default_client()
         return self._client
+
+    @property
+    def media(self) -> Media:
+        """Клиент файловых хостов: загрузка, вложения, скачивание."""
+        return self._media
 
     @property
     def info(self) -> BotInfo:
@@ -180,6 +174,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         if self._owns_client and self._client is not None:
             client, self._client = self._client, None
             await client.close()
+        await self._media.close()
 
     async def call_method(  # for unihttp bind_method
         self,
@@ -188,10 +183,10 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         middleware: Sequence[AsyncMiddleware] | None = None,
     ) -> ResponseType:
         method = apply_defaults(method, self._defaults)
+        # Middleware вызова идут первыми: так они получают ошибки maxo,
+        # а не сырые исключения unihttp.
         result = await self.client.call_method(
             method,
-            # Middleware вызова идут первыми: так они получают ошибки maxo,
-            # а не сырые исключения unihttp.
             middleware=[*(middleware or ()), *self.middleware],
         )
         return bind_bot(result, self)
@@ -206,134 +201,6 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
             method,
             middleware=[*(middleware or ()), *self.middleware],
         )
-
-    @asynccontextmanager
-    async def download_stream(
-        self,
-        url: str | AttachmentPayload,
-        chunk_size: int = _DEFAULT_CHUNK_SIZE,
-    ) -> AsyncIterator[AsyncIterator[bytes]]:
-        """
-        Отдаёт вложение чанками.
-
-        Соединение освобождается на выходе из `async with`, в том числе
-        при прерванном цикле.
-        """
-        if isinstance(url, AttachmentPayload):
-            url = url.url
-
-        # The URL may point anywhere, so the token must not leave with it
-        response = await self.client.call_method_stream(
-            Download(url=url, __chunk_size__=chunk_size),
-            middleware=[
-                m for m in self.middleware if not isinstance(m, AuthMiddleware)
-            ],
-        )
-        # Chunks are read after the middleware chain returned
-        async with response.data as stream:
-            with translate_network_errors():
-                yield stream
-
-    async def download(
-        self,
-        url: str | AttachmentPayload,
-        chunk_size: int = _DEFAULT_CHUNK_SIZE,
-    ) -> bytes:
-        """
-        Скачивает вложение целиком в память.
-
-        Для больших файлов: `download_to()` или `download_stream()`.
-        """
-        buffer = bytearray()
-        async with self.download_stream(url, chunk_size=chunk_size) as chunks:
-            async for chunk in chunks:
-                buffer += chunk
-        return bytes(buffer)
-
-    async def download_to(
-        self,
-        url: str | AttachmentPayload,
-        path: pathlib.Path | str,
-        chunk_size: int = _DEFAULT_CHUNK_SIZE,
-    ) -> None:
-        """Скачивает вложение в файл. Каталог должен существовать."""
-        async with (
-            self.download_stream(url, chunk_size=chunk_size) as chunks,
-            await open_file(path, "wb") as file,
-        ):
-            async for chunk in chunks:
-                await file.write(chunk)
-
-    async def upload_media_resumable(
-        self,
-        upload_url: str,
-        file: InputFile,
-        size: int | None = None,
-    ) -> UploadMediaResult | None:
-        """
-        Загружает медиа по `upload_url` частями.
-
-        `size` - заранее известный размер файла, чтобы не делать лишний `stat`.
-        """
-        config = self.upload_config
-
-        if size is None:
-            size = await file.size()
-        if size <= 0:
-            msg = "Нельзя загрузить пустой файл"
-            raise ValueError(msg)
-
-        encoded_name = quote(file.file_name, safe="")
-        disposition = f'attachment; filename="{encoded_name}"'
-
-        offset = 0
-        final_body: UploadResponseBody = b""
-        # aclosing: при ошибке `async for` не закрывает генератор, а у
-        # `FSInputFile.stream` внутри него остаётся открытый файл.
-        async with aclosing(file.stream(config.chunk_size)) as chunks:
-            async for chunk in chunks:
-                end = offset + len(chunk) - 1
-                headers: dict[str, str] = {
-                    "Content-Type": "application/octet-stream",
-                    "Content-Disposition": disposition,
-                    "Content-Range": f"bytes {offset}-{end}/{size}",
-                }
-                response = await self.call_method(
-                    _ChunkUpload(url=upload_url, chunk=chunk, headers=headers),
-                    middleware=[
-                        ChunkUploadRetryMiddleware(
-                            max_retries=config.chunk_retries,
-                            backoff_config=config.chunk_backoff,
-                        ),
-                    ],
-                )
-                body = response.data
-                if response.status_code < _CLIENT_ERROR_STATUS:
-                    final_body = body
-                elif isinstance(body, dict):
-                    raise_api_error(response.status_code, body)
-                else:
-                    raise MaxBotApiError(
-                        code="",
-                        error=f"upload failed with status {response.status_code}",
-                        message=(
-                            body.decode("utf-8", "replace")
-                            if isinstance(body, bytes)
-                            else str(body or "")
-                        ),
-                        raw_data=body,
-                    )
-
-                offset += len(chunk)
-
-        if offset != size:
-            # Файл изменился между замером размера и чтением
-            msg = f"Размер файла изменился во время загрузки: {size} -> {offset} байт"
-            raise ValueError(msg)
-
-        if not isinstance(final_body, dict):
-            return None
-        return get_retort().load(final_body, UploadMediaResult)
 
     # Bots
     edit_bot_info = bind_method(EditBotInfo)
@@ -449,4 +316,3 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
 
     # Uploads
     get_upload_url = bind_method(GetUploadUrl)
-    upload_media = bind_method(UploadMedia)

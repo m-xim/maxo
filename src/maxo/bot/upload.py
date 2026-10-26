@@ -8,6 +8,10 @@ _MIB = 1024 * 1024
 
 _INSTANT_UPLOAD_TYPES = frozenset({UploadType.IMAGE, UploadType.VIDEO})
 
+# Only these hosts keep a chunked upload across connections; the file host
+# loses it but takes one request over 2 GiB
+_RESUMABLE_TYPES = frozenset({UploadType.VIDEO, UploadType.AUDIO})
+
 DEFAULT_NOT_READY_BACKOFF = BackoffConfig(
     min_delay=0.2,
     max_delay=3.0,
@@ -23,7 +27,7 @@ DEFAULT_CHUNK_BACKOFF = BackoffConfig(
 
 
 class UploadMethod(StrEnum):
-    """Способ загрузки медиа на сервер MAX."""
+    """Способ загрузки медиа. Частями грузятся только видео и аудио."""
 
     AUTO = "auto"
     SINGLE = "single"
@@ -63,7 +67,10 @@ class UploadConfig(MaxoType):
         if self.processing_max_delay < 0:
             raise ValueError("`processing_max_delay` should not be negative")
 
-    def should_use_resumable(self, size: int) -> bool:
+    def should_use_resumable(self, upload_type: UploadType, size: int) -> bool:
+        """Грузить ли частями."""
+        if upload_type not in _RESUMABLE_TYPES:
+            return False
         if self.method is UploadMethod.RESUMABLE:
             return True
         if self.method is UploadMethod.SINGLE:
