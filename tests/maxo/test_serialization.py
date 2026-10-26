@@ -15,6 +15,7 @@ from maxo.bot.methods import (
     SendMessage,
 )
 from maxo.bot.methods.base import MaxoMethod
+from maxo.bot.methods.markers import Header, Path, Query
 from maxo.enums import ChatAdminPermission, TextFormat
 from maxo.errors import AttributeIsEmptyError
 from maxo.omit import Omittable, Omitted, is_omitted
@@ -487,3 +488,26 @@ def test_retort_loads_user_without_last_activity_time() -> None:
     assert is_omitted(user.last_activity_time)
     with pytest.raises(AttributeIsEmptyError):
         _ = user.unsafe_last_activity_time
+
+
+class _HeaderMethod(MaxoMethod[bool]):
+    __url__ = "things/{thing_id}"
+    __method__ = "post"
+
+    thing_id: Path[int]
+    x_request_id: Header[str]
+    content_type: Header[str] = "text/plain"
+    page_size: Query[int] = 10
+
+
+def test_header_fields_take_http_names() -> None:
+    """`x_request_id: Header[str]` уходит как `x-request-id`: в Python поле
+    не может содержать дефис, а заголовок с `_` - другой заголовок."""
+    request = _HeaderMethod(thing_id=1, x_request_id="abc").build_http_request(
+        get_retort(),
+    )
+
+    assert request.header == {"x-request-id": "abc", "content-type": "text/plain"}
+    # Other markers keep their names
+    assert request.url == "things/1"
+    assert request.query == {"page_size": 10}
