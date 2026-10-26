@@ -10,6 +10,18 @@ from maxo.__meta__ import __version__
 USER_AGENT = f"Python/{platform.python_version()} maxo/{__version__}"
 
 
+class UserAgentMiddleware(AsyncMiddleware):
+    __slots__ = ()
+
+    async def handle(
+        self,
+        request: HTTPRequest,
+        next_handler: AsyncHandler,
+    ) -> HTTPResponse[Any]:
+        request.header.setdefault("User-Agent", USER_AGENT)
+        return await next_handler(request)
+
+
 class AuthMiddleware(AsyncMiddleware):
     __slots__ = ("_token",)
 

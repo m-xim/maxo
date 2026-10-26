@@ -18,7 +18,11 @@ from maxo.bot.client import default_media_client
 from maxo.bot.methods.download import Download
 from maxo.bot.methods.upload.chunk_upload import ChunkUpload, UploadResponseBody
 from maxo.bot.methods.upload.upload_media import UploadMedia
-from maxo.bot.middlewares import ChunkUploadRetryMiddleware, NetworkErrorMiddleware
+from maxo.bot.middlewares import (
+    ChunkUploadRetryMiddleware,
+    NetworkErrorMiddleware,
+    UserAgentMiddleware,
+)
 from maxo.bot.middlewares.network_error import translate_network_errors
 from maxo.bot.upload import UploadConfig
 from maxo.errors.api import RetvalReturnedError
@@ -32,10 +36,10 @@ DEFAULT_DOWNLOAD_CHUNK_SIZE = 65536
 
 class Media:
     """
-    Client for MAX media hosts, available as `bot.media`.
+    Клиент файловых хостов MAX, доступен как `bot.media`.
 
-    Own HTTP client and middleware, no token and no API calls.
-    A passed `client` is not closed.
+    Свои HTTP-клиент и middleware, без токена и без вызовов API.
+    Переданный `client` не закрывается.
     """
 
     def __init__(
@@ -46,7 +50,10 @@ class Media:
         self.config = config if config is not None else UploadConfig()
         self._client = client
         self._owns_client = client is None
-        self.middleware: list[AsyncMiddleware] = [NetworkErrorMiddleware()]
+        self.middleware: list[AsyncMiddleware] = [
+            UserAgentMiddleware(),
+            NetworkErrorMiddleware(),
+        ]
 
     @property
     def client(self) -> BaseAsyncClient:
