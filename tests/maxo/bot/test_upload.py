@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator, Iterable
 from functools import partial
 from typing import Any, cast
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from urllib.parse import unquote
 
 import pytest
@@ -136,6 +136,8 @@ async def _upload(
     **kwargs: Any,
 ) -> UploadMediaResult | None:
     file = file or BufferedInputFile.video(b"hello", "f.bin")
+    if "size" not in kwargs:
+        kwargs["size"] = await file.size()
     return await make_bot(client, config).media._upload_resumable(_URL, file, **kwargs)
 
 
@@ -187,20 +189,6 @@ async def test_content_disposition_is_latin1_safe() -> None:
     disposition.encode("latin-1")
     encoded = disposition.removeprefix('attachment; filename="').removesuffix('"')
     assert unquote(encoded) == file_name
-
-
-async def test_explicit_total_skips_size_call() -> None:
-    client = _FakeClient([_FakeResponse(200, {"token": "tok"})])
-
-    with patch.object(
-        BufferedInputFile,
-        "size",
-        side_effect=AssertionError("size() не должен вызываться"),
-    ):
-        result = await _upload(client, size=5)
-
-    assert result is not None
-    assert client.calls[0]["headers"]["content-range"] == "bytes 0-4/5"
 
 
 class _TrackingInputFile(InputFile):
@@ -368,7 +356,11 @@ async def test_chunks_go_through_the_given_media_client() -> None:
     client = _FakeClient([_FakeResponse(200, b"0-4/5")])
     bot = make_base_bot(client=api, media=Media(cast("Any", client)))
 
-    await bot.media._upload_resumable(_URL, BufferedInputFile.video(b"hello", "v.mp4"))
+    await bot.media._upload_resumable(
+        _URL,
+        BufferedInputFile.video(b"hello", "v.mp4"),
+        size=5,
+    )
 
     assert len(client.calls) == 1
     assert client.closed is False

@@ -4,7 +4,6 @@ from collections.abc import Sequence
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from unihttp.exceptions import NonRetryableError
 
 from maxo.backoff import BackoffConfig
 from maxo.bot.middlewares import ChunkUploadRetryMiddleware
@@ -13,6 +12,7 @@ from maxo.errors import (
     MaxBotApiError,
     MaxBotBadRequestError,
     MaxBotNetworkError,
+    MaxBotRequestError,
     MaxBotServerError,
     MaxBotTimeoutError,
 )
@@ -54,18 +54,12 @@ async def test_server_error_is_reraised_after_retries() -> None:
         await _handle([_server_error(), _server_error()], retries=1)
 
 
-def _non_retryable_network_error() -> MaxBotNetworkError:
-    error = MaxBotNetworkError("bad url")
-    error.__cause__ = NonRetryableError("bad url")
-    return error
-
-
 @pytest.mark.parametrize(
     "error",
     [
         MaxBotBadRequestError(code="", error="x", message="x"),
         MaxBotApiError(code="", error="x", message="x"),
-        _non_retryable_network_error(),
+        MaxBotRequestError("bad url"),
     ],
 )
 async def test_error_is_not_retried(error: Exception) -> None:
