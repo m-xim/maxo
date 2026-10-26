@@ -1,14 +1,17 @@
+from types import MethodType
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from maxo.bot.bot import Bot
 from maxo.enums import ChatType, MessageLinkType
 from maxo.omit import Omitted
 from maxo.types import (
     CallbackButton,
     Message,
     MessageBody,
+    PhotoAttachmentRequest,
     Recipient,
     SendMessageResult,
     SimpleQueryResult,
@@ -55,6 +58,7 @@ def bot() -> MagicMock:
     bot.send_message = AsyncMock(return_value=SendMessageResult(message=sent))
     bot.edit_message = AsyncMock(return_value=SimpleQueryResult(success=True))
     bot.delete_message = AsyncMock(return_value=SimpleQueryResult(success=True))
+    bot.build_attachments = MethodType(Bot.build_attachments, bot)
     bot.get_message_by_id = AsyncMock(return_value=sent)
     return bot
 
@@ -179,3 +183,19 @@ class TestEditMessage:
 
         assert link.type is MessageLinkType.FORWARD
         assert link.mid == "m1"
+
+
+async def test_send_media_single_media_attachments_request(
+    facade: MockMessageFacade,
+) -> None:
+    request = PhotoAttachmentRequest.factory(token="photo_token")  # noqa: S106
+
+    with patch.object(
+        facade,
+        "send_message",
+        new_callable=AsyncMock,
+    ) as send_message_mock:
+        await facade.send_media(media=request)
+
+        send_message_mock.assert_called_once()
+        assert send_message_mock.call_args[1]["media"] == (request,)

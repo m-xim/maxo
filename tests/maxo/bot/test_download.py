@@ -39,12 +39,16 @@ def _patch_stream(
         data=_stream(chunks, closed if closed is not None else []),
     )
     call = AsyncMock(return_value=response)
-    return patch.object(bot, "_client", SimpleNamespace(call_method_stream=call))
+    return patch.object(
+        bot.media,
+        "_client",
+        SimpleNamespace(call_method_stream=call),
+    )
 
 
 async def test_download_returns_whole_payload(bot: Bot) -> None:
     with _patch_stream(bot, b"pay", b"load"):
-        result = await bot.download("https://example.test/file.bin")
+        result = await bot.media.download("https://example.test/file.bin")
 
     assert result == b"payload"
 
@@ -53,7 +57,7 @@ async def test_download_to_path_writes_file(bot: Bot, tmp_path: Path) -> None:
     path = tmp_path / "payload.bin"
 
     with _patch_stream(bot, b"pay", b"load"):
-        await bot.download_to("https://example.test/file.bin", path)
+        await bot.media.download_to("https://example.test/file.bin", path)
 
     assert path.read_bytes() == b"payload"
 
@@ -62,7 +66,7 @@ async def test_download_stream_yields_chunks_as_they_come(bot: Bot) -> None:
     """Стрим не склеивает чанки: на этом держится и прогресс, и запись
     в чужой буфер без буферизации файла целиком в память."""
     with _patch_stream(bot, b"pay", b"load"):
-        async with bot.download_stream("https://e.test/f.bin") as stream:
+        async with bot.media.download_stream("https://e.test/f.bin") as stream:
             chunks = [chunk async for chunk in stream]
 
     assert chunks == [b"pay", b"load"]
@@ -72,21 +76,21 @@ async def test_download_unwraps_attachment_payload(bot: Bot) -> None:
     payload = AttachmentPayload(url="https://example.test/file.bin")
 
     with _patch_stream(bot, b"payload") as client:
-        await bot.download(payload)
+        await bot.media.download(payload)
 
     call = client.call_method_stream
     assert call.await_args.args[0].url == "https://example.test/file.bin"
 
 
-async def test_download_skips_only_auth_middleware(bot: Bot) -> None:
-    """URL вложения может вести на чужой хост, поэтому токен туда не уходит.
-    Остальные middleware (ретраи, сетевые ошибки) остаются."""
+async def test_download_uses_media_middleware(bot: Bot) -> None:
+    """An attachment URL may lead to another host, so no token goes there:
+    downloads use the `Media` client and its chain without `AuthMiddleware`."""
     with _patch_stream(bot, b"payload") as client:
-        await bot.download("https://example.test/file.bin")
+        await bot.media.download("https://example.test/file.bin")
 
     used = client.call_method_stream.await_args.kwargs["middleware"]
-    expected = [m for m in bot.middleware if not isinstance(m, AuthMiddleware)]
-    assert used == expected
+    assert used == bot.media.middleware
+    assert not any(isinstance(m, AuthMiddleware) for m in used)
 
 
 async def test_download_stream_closes_response_on_break(bot: Bot) -> None:
@@ -95,11 +99,21 @@ async def test_download_stream_closes_response_on_break(bot: Bot) -> None:
     closed: list[bool] = []
 
     with _patch_stream(bot, b"pay", b"load", closed=closed):
-        async with bot.download_stream("https://e.test/f.bin") as chunks:
+        async with bot.media.download_stream("https://e.test/f.bin") as chunks:
             async for _ in chunks:
                 break
 
     assert closed == [True]
+
+
+async def test_download_stream_keeps_caller_errors_as_is(bot: Bot) -> None:
+    """Errors from the caller's `async with` body are not wrapped into maxo ones."""
+    with (
+        _patch_stream(bot, b"payload"),
+        pytest.raises(TimeoutError),
+    ):
+        async with bot.media.download_stream("https://e.test/f.bin"):
+            raise TimeoutError
 
 
 async def test_download_wraps_network_error_raised_mid_body(bot: Bot) -> None:
@@ -116,12 +130,12 @@ async def test_download_wraps_network_error_raised_mid_body(bot: Bot) -> None:
     )
     with (
         patch.object(
-            bot,
+            bot.media,
             "_client",
             SimpleNamespace(call_method_stream=call_method_stream),
         ),
         pytest.raises(MaxBotNetworkError) as exc_info,
     ):
-        await bot.download("https://example.test/file.bin")
+        await bot.media.download("https://example.test/file.bin")
 
     assert isinstance(exc_info.value.__cause__, NetworkError)
