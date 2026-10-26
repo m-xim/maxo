@@ -20,11 +20,14 @@ class ChunkUpload(MaxoMethod[UploadResponseBody]):
     __method__ = "post"
 
     upload_url: Path[str]
+
+    # see https://github.com/max-messenger/max-bot-api-client-ts/blob/adcc479203acd7bf6e664a88c2f2559be3edea60/src/helpers/upload/upload.ts#L211
     content_range: Header[str]
     content_disposition: Header[str]
     content_type: Header[str] = "application/octet-stream"
     # Lets a failed chunk be resent on a new connection
     x_uploading_mode: Header[str] = "parallel"
+
     chunk: Raw[bytes]
 
     def on_error(self, response: HTTPResponse[Any]) -> Never:
