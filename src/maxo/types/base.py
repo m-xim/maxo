@@ -22,10 +22,15 @@ class _MaxoTypeMetaClass(type):
         slots: bool = True,
         **kwargs: Any,
     ) -> Any:
+        # `dataclass(slots=True)` returns a new class; zero-arg `super()` must
+        # point to it, and Python 3.12 rejects a mismatched `__classcell__`.
+        classcell = namespace.pop("__classcell__", None)
         class_: type = super().__new__(cls, name, bases, namespace, **kwargs)
         # `dataclass(slots=True)` re-creates the class through this metaclass
         # with `__slots__` set: don't wrap it twice.
         if "__slots__" in namespace:
+            if classcell is not None:
+                classcell.cell_contents = class_
             return class_
 
         data_class: type = dataclass(
@@ -47,6 +52,8 @@ class _MaxoTypeMetaClass(type):
                     )
                     raise TypeError(msg)
 
+        if classcell is not None:
+            classcell.cell_contents = data_class
         return data_class
 
 
