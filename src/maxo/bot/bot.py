@@ -1,7 +1,7 @@
 import asyncio
-import pathlib
 from collections.abc import AsyncIterator, Iterable, Sequence
-from contextlib import aclosing, asynccontextmanager
+from contextlib import asynccontextmanager
+from types import TracebackType
 from typing import Self
 from urllib.parse import quote
 
@@ -151,6 +151,18 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         finally:
             if auto_close:
                 await self.close()
+
+    async def __aenter__(self) -> Self:
+        await self.me()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        await self.close()
 
     async def me(self) -> BotInfo:
         """Lazy `get_my_info`: hits the API only on the first call."""
