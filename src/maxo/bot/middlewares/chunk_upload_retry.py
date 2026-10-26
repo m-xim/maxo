@@ -1,12 +1,12 @@
 from typing import Any
 
+from unihttp.exceptions import NonRetryableError
 from unihttp.http import HTTPRequest, HTTPResponse
 from unihttp.middlewares import AsyncHandler, AsyncMiddleware
 
 from maxo.backoff import Backoff, BackoffConfig
+from maxo.errors.api import MaxBotServerError
 from maxo.errors.network import MaxBotNetworkError
-
-_SERVER_ERROR_STATUS = 500
 
 
 class ChunkUploadRetryMiddleware(AsyncMiddleware):
@@ -14,8 +14,10 @@ class ChunkUploadRetryMiddleware(AsyncMiddleware):
     Ретраит отправку чанка resumable upload: сетевые сбои и 5xx.
 
     Передаётся в `Bot.call_method(middleware=...)` и работает снаружи
-    `NetworkErrorMiddleware`, поэтому видит уже переведённый
-    `MaxBotNetworkError`/`MaxBotTimeoutError`, а не сырые исключения unihttp.
+    `NetworkErrorMiddleware`, поэтому видит уже переведённые ошибки maxo:
+    `MaxBotNetworkError`/`MaxBotTimeoutError` и `MaxBotServerError` от
+    `ChunkUpload.on_error`. 4xx и сетевые ошибки из `NonRetryableError`
+    (битый URL, петля редиректов) не ретраятся.
     """
 
     __slots__ = ("_backoff_config", "_max_retries")
@@ -32,17 +34,14 @@ class ChunkUploadRetryMiddleware(AsyncMiddleware):
         backoff = Backoff(self._backoff_config)
         while True:
             try:
-                response = await next_handler(request)
-            except MaxBotNetworkError:
-                if backoff.counter >= self._max_retries:
-                    raise
-            else:
-                # 4xx считаем неретраибельными, ретраим только 5xx.
+                return await next_handler(request)
+            except (MaxBotNetworkError, MaxBotServerError) as error:
+                # A bad URL or a redirect loop won't heal on retry
                 if (
-                    response.status_code < _SERVER_ERROR_STATUS
+                    isinstance(error.__cause__, NonRetryableError)
                     or backoff.counter >= self._max_retries
                 ):
-                    return response
+                    raise
 
             backoff.next()
             await backoff.sleep()
