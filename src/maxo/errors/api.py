@@ -85,17 +85,20 @@ _ERRORS_BY_STATUS: dict[int, type[MaxBotApiError]] = {
 }
 
 
+def api_error_type(status_code: int) -> type[MaxBotApiError]:
+    error_type = _ERRORS_BY_STATUS.get(status_code)
+    if error_type is not None:
+        return error_type
+    if status_code in range(400, 500):
+        return MaxBotClientError
+    if status_code in range(500, 600):
+        return MaxBotServerError
+    return MaxBotApiError
+
+
 def raise_api_error(status_code: int, data: object) -> Never:
     code, error, message = _extract_api_error(data)
-    error_type = _ERRORS_BY_STATUS.get(status_code)
-    if error_type is None:
-        if status_code in range(400, 500):
-            error_type = MaxBotClientError
-        elif status_code in range(500, 600):
-            error_type = MaxBotServerError
-        else:
-            error_type = MaxBotApiError
-    raise error_type(code, error, message, data)
+    raise api_error_type(status_code)(code, error, message, data)
 
 
 def _extract_api_error(data: object) -> tuple[str, str, str]:
