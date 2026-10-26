@@ -58,17 +58,9 @@ MEDIA_ATTACHMENT_FACTORIES: dict[UploadType, MediaAttachmentFactory] = {
 
 class Media:
     """
-    Клиент файловых хостов MAX, доступен как `bot.media`.
+    Client for MAX media hosts, available as `bot.media`.
 
-    Устроен как `Bot` для API: свой HTTP-клиент и своя цепочка middleware,
-    только без токена - хостам с файлами он не нужен. От бота берёт только
-    ссылку на загрузку (через API) и `upload_config`.
-
-    Args:
-        bot: Бот, через API которого получаются ссылки на загрузку.
-        client: HTTP-клиент unihttp для файловых хостов. По умолчанию
-            `default_media_client()` - без общего таймаута, загрузка файла в
-            несколько гигабайт идёт минутами. Переданный клиент не закрывается.
+    Own HTTP client and middleware, no token. A passed `client` is not closed.
     """
 
     def __init__(self, bot: "Bot", client: BaseAsyncClient | None = None) -> None:
@@ -329,6 +321,7 @@ class Media:
         ):
             async for chunk in chunks:
                 await file.write(chunk)
+
 
 async def _translate_chunks(stream: AsyncIterator[bytes]) -> AsyncGenerator[bytes]:
     # Only reading: errors from the caller's `async with` body stay as is
