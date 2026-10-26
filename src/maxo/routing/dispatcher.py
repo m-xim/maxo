@@ -170,7 +170,7 @@ class Dispatcher(Router):
         if bot is not None:
             ctx["bot"] = bot
             ctx["bots"] = [bot]
-            # A single meeting point for bot and update (polling, webhook, dialogs, tests)  # noqa: E501
+            # Single place binding bot to update for every transport
             bind_bot(update.update if isinstance(update, MaxoUpdate) else update, bot)
 
         return await self.trigger(ctx)

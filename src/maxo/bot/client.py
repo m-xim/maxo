@@ -31,9 +31,9 @@ def default_media_client(
     session: "ClientSession | None" = None,
 ) -> "AiohttpAsyncClient":
     """
-    Client for media hosts: no total timeout, a 2 GiB upload takes minutes.
+    Клиент файловых хостов: без общего таймаута, загрузка 2 ГиБ идёт минутами.
 
-    `sock_read` still catches a stalled response.
+    Зависший ответ всё равно ловит `sock_read`.
     """
     from aiohttp import ClientTimeout  # noqa: PLC0415
 
