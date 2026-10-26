@@ -39,7 +39,7 @@ class ChatMethodsFacade(SubscriptionMethodsFacade):
         media: Sequence[MediaInput] | None = None,
         attachments: Sequence[AttachmentsRequests] | None = None,
     ) -> Message:
-        prepared_attachments = await self.bot.media.build_attachments(
+        prepared_attachments = await self.bot.build_attachments(
             base=attachments or [],
             keyboard=keyboard,
             files=media,

@@ -321,7 +321,7 @@ class MessageManager(MessageManagerProtocol):
             for item in media
             if (converted := self._convert_media(item)) is not None
         ]
-        return await bot.media.build_attachments(
+        return await bot.build_attachments(
             base=[],
             keyboard=keyboard,
             files=converted_media,

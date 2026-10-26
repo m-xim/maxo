@@ -35,7 +35,7 @@ class UploadMethod(StrEnum):
 
 
 class UploadConfig(MaxoType):
-    """Настройки загрузки медиа для `Bot(upload_config=...)`."""
+    """Как `Media` грузит файлы на файловый хост: `Media(config=...)`."""
 
     method: UploadMethod = UploadMethod.AUTO
     resumable_threshold: int = 50 * _MIB
@@ -44,28 +44,13 @@ class UploadConfig(MaxoType):
     chunk_retries: int = 3
     chunk_backoff: BackoffConfig = DEFAULT_CHUNK_BACKOFF
 
-    not_ready_backoff: BackoffConfig = DEFAULT_NOT_READY_BACKOFF
-    not_ready_max_retries: int = 10
-
-    processing_base_delay: float = 0.5
-    processing_delay_per_mib: float = 0.008
-    processing_max_delay: float = 30.0
-
     def __post_init__(self) -> None:
         if self.chunk_size <= 0:
             raise ValueError("`chunk_size` should be greater than 0")
         if self.chunk_retries < 0:
             raise ValueError("`chunk_retries` should not be negative")
-        if self.not_ready_max_retries < 0:
-            raise ValueError("`not_ready_max_retries` should not be negative")
         if self.resumable_threshold < 0:
             raise ValueError("`resumable_threshold` should not be negative")
-        if self.processing_base_delay < 0:
-            raise ValueError("`processing_base_delay` should not be negative")
-        if self.processing_delay_per_mib < 0:
-            raise ValueError("`processing_delay_per_mib` should not be negative")
-        if self.processing_max_delay < 0:
-            raise ValueError("`processing_max_delay` should not be negative")
 
     def should_use_resumable(self, upload_type: UploadType, size: int) -> bool:
         """Грузить ли частями."""
@@ -77,10 +62,34 @@ class UploadConfig(MaxoType):
             return False
         return size >= self.resumable_threshold
 
-    def estimated_processing_delay(self, upload_type: UploadType, size: int) -> float:
+
+class ProcessingConfig(MaxoType):
+    """
+    Как `Bot` ждёт обработки загруженного файла сервером: `Bot(processing=...)`.
+
+    `build_attachments` выжидает оценку `estimated_delay`, а если сервер всё
+    равно ответил `attachment.not.ready`, запрос повторяется с backoff.
+    """
+
+    not_ready_backoff: BackoffConfig = DEFAULT_NOT_READY_BACKOFF
+    not_ready_max_retries: int = 10
+
+    base_delay: float = 0.5
+    delay_per_mib: float = 0.008
+    max_delay: float = 30.0
+
+    def __post_init__(self) -> None:
+        if self.not_ready_max_retries < 0:
+            raise ValueError("`not_ready_max_retries` should not be negative")
+        if self.base_delay < 0:
+            raise ValueError("`base_delay` should not be negative")
+        if self.delay_per_mib < 0:
+            raise ValueError("`delay_per_mib` should not be negative")
+        if self.max_delay < 0:
+            raise ValueError("`max_delay` should not be negative")
+
+    def estimated_delay(self, upload_type: UploadType, size: int) -> float:
         if upload_type in _INSTANT_UPLOAD_TYPES:
             return 0.0
-        delay = self.processing_base_delay + self.processing_delay_per_mib * (
-            size / _MIB
-        )
-        return min(delay, self.processing_max_delay)
+        delay = self.base_delay + self.delay_per_mib * (size / _MIB)
+        return min(delay, self.max_delay)

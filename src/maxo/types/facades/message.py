@@ -86,7 +86,7 @@ class MessageMethodsFacade(ChatMethodsFacade):
             chat_type=recipient.chat_type,
         )
 
-        attachments = await self.bot.media.build_attachments(
+        attachments = await self.bot.build_attachments(
             base=attachments or [],
             keyboard=keyboard,
             files=media,
@@ -215,7 +215,7 @@ class MessageMethodsFacade(ChatMethodsFacade):
             # Для случая, когда не надо редачить аттачменты
             prepared_attachments = None
         else:
-            prepared_attachments = await self.bot.media.build_attachments(
+            prepared_attachments = await self.bot.build_attachments(
                 base=attachments or [],
                 keyboard=keyboard,
                 files=media,

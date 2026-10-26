@@ -1,14 +1,12 @@
 import asyncio
-from collections.abc import AsyncIterator, Iterable, Sequence
+from collections.abc import AsyncIterator, Callable, Iterable, Sequence
 from contextlib import asynccontextmanager
 from types import TracebackType
-from typing import Self
+from typing import Self, TypeAlias
 
 from unihttp.bind_method import bind_method
 from unihttp.clients.base import BaseAsyncClient
-from unihttp.http.response import HTTPResponse
-from unihttp.http.stream import AsyncChunkStream
-from unihttp.method import BaseMethod, ResponseType, StreamMethod
+from unihttp.method import BaseMethod, ResponseType
 from unihttp.middlewares import AsyncMiddleware
 
 from maxo.bot.client import default_client
@@ -58,12 +56,37 @@ from maxo.bot.middlewares import (
     AuthMiddleware,
     NetworkErrorMiddleware,
 )
-from maxo.bot.upload import UploadConfig
+from maxo.bot.upload import ProcessingConfig
 from maxo.bot.warming_up import warm_up
+from maxo.enums import UploadType
 from maxo.errors import UnsubscribeError
 from maxo.errors.state import StateError
+from maxo.omit import is_defined
 from maxo.types import BotInfo, ClearSubscriptionsResult
+from maxo.types.attachments import AttachmentsRequests, MediaAttachmentsRequests
+from maxo.types.audio_attachment_request import AudioAttachmentRequest
 from maxo.types.binding import bind_bot
+from maxo.types.buttons import InlineButtons
+from maxo.types.file_attachment_request import FileAttachmentRequest
+from maxo.types.inline_keyboard_attachment_request import (
+    InlineKeyboardAttachmentRequest,
+)
+from maxo.types.inline_keyboard_attachment_request_payload import (
+    InlineKeyboardAttachmentRequestPayload,
+)
+from maxo.types.media_input import MediaInput
+from maxo.types.photo_attachment_request import PhotoAttachmentRequest
+from maxo.types.video_attachment_request import VideoAttachmentRequest
+from maxo.utils.upload_media import InputFile
+
+MediaAttachmentFactory: TypeAlias = Callable[[str], MediaAttachmentsRequests]
+
+MEDIA_ATTACHMENT_FACTORIES: dict[UploadType, MediaAttachmentFactory] = {
+    UploadType.FILE: FileAttachmentRequest.factory,
+    UploadType.AUDIO: AudioAttachmentRequest.factory,
+    UploadType.VIDEO: VideoAttachmentRequest.factory,
+    UploadType.IMAGE: lambda token: PhotoAttachmentRequest.factory(token=token),
+}
 
 
 class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
@@ -72,24 +95,22 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         token: str,
         *,
         defaults: BotDefaults | None = None,
-        upload_config: UploadConfig | None = None,
         warming_up: bool = True,
         client: BaseAsyncClient | None = None,
-        media_client: BaseAsyncClient | None = None,
+        media: Media | None = None,
+        processing: ProcessingConfig | None = None,
         middlewares: Sequence[AsyncMiddleware] = (),
     ) -> None:
         self._defaults = defaults or BotDefaults()
         self._token = token
-        self._upload_config = (
-            upload_config if upload_config is not None else UploadConfig()
-        )
+        self._processing = processing if processing is not None else ProcessingConfig()
 
         self.middleware: list[AsyncMiddleware] = [
             *middlewares,
             AuthMiddleware(self._token),
             AttachmentNotReadyRetryMiddleware(
-                max_retries=self._upload_config.not_ready_max_retries,
-                backoff_config=self._upload_config.not_ready_backoff,
+                max_retries=self._processing.not_ready_max_retries,
+                backoff_config=self._processing.not_ready_backoff,
             ),
             NetworkErrorMiddleware(),
         ]
@@ -101,7 +122,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
 
         self._info: BotInfo | None = None
         self._me_lock = asyncio.Lock()
-        self._media = Media(self, client=media_client)
+        self._media = media if media is not None else Media()
 
     @property
     def client(self) -> BaseAsyncClient:
@@ -123,10 +144,6 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
     @property
     def defaults(self) -> BotDefaults:
         return self._defaults
-
-    @property
-    def upload_config(self) -> UploadConfig:
-        return self._upload_config
 
     @property
     def token(self) -> str:
@@ -190,17 +207,6 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
             middleware=[*(middleware or ()), *self.middleware],
         )
         return bind_bot(result, self)
-
-    async def call_method_stream(  # for unihttp bind_method
-        self,
-        method: StreamMethod,
-        *,
-        middleware: Sequence[AsyncMiddleware] | None = None,
-    ) -> HTTPResponse[AsyncChunkStream]:
-        return await self.client.call_method_stream(
-            method,
-            middleware=[*(middleware or ()), *self.middleware],
-        )
 
     # Bots
     edit_bot_info = bind_method(EditBotInfo)
@@ -316,3 +322,81 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
 
     # Uploads
     get_upload_url = bind_method(GetUploadUrl)
+
+    async def upload(
+        self,
+        file: InputFile,
+        size: int | None = None,
+    ) -> MediaAttachmentsRequests:
+        """Загружает файл и возвращает вложение с его токеном."""
+        endpoint = await self.get_upload_url(type=file.type)
+        upload_result = await self._media.upload(endpoint.url, file, size)
+
+        token: str
+        if is_defined(endpoint.token):
+            token = endpoint.token
+        elif upload_result is not None:
+            token = upload_result.last_token
+        else:
+            raise RuntimeError("Could not get upload token")
+
+        return MEDIA_ATTACHMENT_FACTORIES[file.type](token)
+
+    async def build_attachments(
+        self,
+        base: Sequence[AttachmentsRequests],
+        keyboard: Sequence[Sequence[InlineButtons]] | None = None,
+        files: Sequence[MediaInput] | None = None,
+    ) -> Sequence[AttachmentsRequests]:
+        """
+        Собирает вложения сообщения: `base`, клавиатуру и медиа.
+
+        Файлы из `files` загружаются, готовые вложения передаются как есть,
+        порядок сохраняется.
+        """
+        attachments = list(base)
+
+        if keyboard is not None:
+            attachments.append(
+                InlineKeyboardAttachmentRequest(
+                    payload=InlineKeyboardAttachmentRequestPayload(
+                        buttons=[list(row) for row in keyboard],
+                    ),
+                ),
+            )
+
+        if files:
+            attachments.extend(await self._build_media(files))
+
+        return attachments
+
+    async def _build_media(
+        self,
+        files: Sequence[MediaInput],
+    ) -> list[MediaAttachmentsRequests]:
+        """Загружает файлы, готовые вложения оставляет на местах."""
+        to_upload = [file for file in files if isinstance(file, InputFile)]
+
+        # Размер каждого файла считаем один раз и прокидываем дальше
+        sizes = await asyncio.gather(*(file.size() for file in to_upload))
+        uploaded = iter(
+            await asyncio.gather(
+                *(
+                    self.upload(f, size)
+                    for f, size in zip(to_upload, sizes, strict=True)
+                ),
+            ),
+        )
+
+        # Let the server process files before sending
+        delay = max(
+            (
+                self._processing.estimated_delay(f.type, size)
+                for f, size in zip(to_upload, sizes, strict=True)
+            ),
+            default=0.0,
+        )
+        if delay > 0:
+            await asyncio.sleep(delay)
+
+        return [next(uploaded) if isinstance(f, InputFile) else f for f in files]
