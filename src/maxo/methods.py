@@ -3,6 +3,7 @@
 from maxo.bot.methods import (  # type: ignore[deprecated]
     AddMembers,
     AnswerOnCallback,
+    ChunkUpload,
     DeleteAdmin,
     DeleteAdmins,
     DeleteChat,
@@ -46,6 +47,7 @@ from maxo.bot.methods import (  # type: ignore[deprecated]
 __all__ = (
     "AddMembers",
     "AnswerOnCallback",
+    "ChunkUpload",
     "DeleteAdmin",
     "DeleteAdmins",
     "DeleteChat",
