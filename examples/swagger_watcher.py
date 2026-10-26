@@ -256,7 +256,7 @@ async def fetch_openapi(session: ClientSession) -> JsonObject:
 
 async def publish_max(token: str, chat_id: int, diff: str, message: str) -> None:
     async with MaxBot(token).context() as bot:
-        attachments = await bot.media.build_attachments(
+        attachments = await bot.build_attachments(
             base=[],
             keyboard=[[LinkButton(text="Документация", url=DOCS_URL)]],
             files=[MaxBufferedInputFile.file(diff.encode(), DIFF_FILE_NAME)],
