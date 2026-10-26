@@ -71,6 +71,7 @@ from .location_attachment_request import LocationAttachmentRequest
 from .markup_element import MarkupElement
 from .markup_elements import MarkupElements
 from .media_attachment_payload import MediaAttachmentPayload
+from .media_input import MediaInput
 from .message import Message
 from .message_body import MessageBody
 from .message_button import MessageButton
@@ -197,6 +198,7 @@ __all__ = (
     "MediaAttachmentPayload",
     "MediaAttachments",
     "MediaAttachmentsRequests",
+    "MediaInput",
     "Message",
     "MessageBody",
     "MessageButton",

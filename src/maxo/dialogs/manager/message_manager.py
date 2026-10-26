@@ -30,8 +30,7 @@ from maxo.types import (
     PhotoAttachmentRequest,
     VideoAttachmentRequest,
 )
-from maxo.types.base import FacadeMaxoType
-from maxo.types.facades.attachments import AttachmentsFacade, MediaInput
+from maxo.types.media_input import MediaInput
 from maxo.utils.upload_media import FSInputFile
 
 SEND_METHODS = {

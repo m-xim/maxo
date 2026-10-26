@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from maxo.types.buttons import InlineButtons
     from maxo.types.chat import Chat
     from maxo.types.chat_members_list import ChatMembersList
+    from maxo.types.media_input import MediaInput
     from maxo.types.message import Message
     from maxo.types.message_list import MessageList
     from maxo.types.new_message_link import NewMessageLink
