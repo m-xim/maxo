@@ -1,6 +1,6 @@
 import asyncio
 from collections.abc import AsyncIterator, Callable, Iterable, Sequence
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from types import TracebackType
 from typing import Self, TypeAlias
 
@@ -164,7 +164,11 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
                 await self.close()
 
     async def __aenter__(self) -> Self:
-        await self.me()
+        async with AsyncExitStack() as stack:
+            # Close the session if `me()` fails: `__aexit__` won't run then
+            stack.push_async_callback(self.close)
+            await self.me()
+            stack.pop_all()
         return self
 
     async def __aexit__(
@@ -176,7 +180,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         await self.close()
 
     async def me(self) -> BotInfo:
-        """Lazy `get_my_info`: hits the API only on the first call."""
+        """Ленивый `get_my_info`: запрос к API только при первом вызове."""
         if self._info is None:
             async with self._me_lock:
                 if self._info is None:
@@ -329,6 +333,12 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         size: int | None = None,
     ) -> MediaAttachmentsRequests:
         """Загружает файл и возвращает вложение с его токеном."""
+        if size is None:
+            size = await file.size()
+        if size <= 0:
+            # До `get_upload_url`: не тратить запрос на пустой файл
+            msg = "Нельзя загрузить пустой файл"
+            raise ValueError(msg)
         endpoint = await self.get_upload_url(type=file.type)
         upload_result = await self._media.upload(endpoint.url, file, size)
 
@@ -379,14 +389,18 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
 
         # Размер каждого файла считаем один раз и прокидываем дальше
         sizes = await asyncio.gather(*(file.size() for file in to_upload))
-        uploaded = iter(
-            await asyncio.gather(
-                *(
-                    self.upload(f, size)
+        # TaskGroup cancels the remaining uploads if one fails
+        try:
+            async with asyncio.TaskGroup() as group:
+                tasks = [
+                    group.create_task(self.upload(f, size))
                     for f, size in zip(to_upload, sizes, strict=True)
-                ),
-            ),
-        )
+                ]
+        except* Exception as error_group:
+            # Callers catch MaxoError, not a group: re-raise the first failure,
+            # the rest stay visible through the chained group
+            raise error_group.exceptions[0] from error_group
+        uploaded = iter([task.result() for task in tasks])
 
         # Let the server process files before sending
         delay = max(
