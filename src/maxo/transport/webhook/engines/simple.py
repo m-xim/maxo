@@ -73,6 +73,7 @@ class SimpleEngine(WebhookEngine):
         self.dispatcher.workflow_data.update(workflow_data)
 
         await self.dispatcher.feed_signal(BeforeStartup(), self.bot)
+        await self.bot.me()
         await self.dispatcher.feed_signal(AfterStartup(), self.bot)
 
     async def on_shutdown(self, app: Any, *args: Any, **kwargs: Any) -> None:

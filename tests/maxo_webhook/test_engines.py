@@ -78,10 +78,22 @@ class TestSimpleEngine:
         self,
         engine: SimpleEngine,
         dispatcher: Dispatcher,
+        bot: MagicMock,
     ) -> None:
-        feed_signal_mock = AsyncMock()
+        calls: list[str] = []
+
+        async def feed_signal(signal: object, *_: object) -> None:
+            calls.append(type(signal).__name__)
+
+        async def me() -> None:
+            calls.append("me")
+
+        feed_signal_mock = AsyncMock(side_effect=feed_signal)
         dispatcher.feed_signal = feed_signal_mock  # type: ignore[method-assign]
+        bot.me = AsyncMock(side_effect=me)
         await engine.on_startup(app=MagicMock())
+        # As in polling and signals.rst: the bot connects between the signals
+        assert calls == ["BeforeStartup", "me", "AfterStartup"]
         assert dispatcher.feed_signal.await_count == 2
         assert isinstance(
             dispatcher.feed_signal.await_args_list[0].args[0],
