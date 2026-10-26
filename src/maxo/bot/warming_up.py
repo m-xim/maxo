@@ -6,6 +6,7 @@ from unihttp.method import BaseMethod
 from maxo.bot.methods import (  # type: ignore[deprecated]
     AddMembers,
     AnswerOnCallback,
+    ChunkUpload,
     DeleteAdmins,
     DeleteChat,
     DeleteComment,
@@ -49,6 +50,7 @@ from maxo.types import Attachments, Updates
 _METHOD_ROOTS: tuple[type[BaseMethod[Any]], ...] = (
     AddMembers,
     AnswerOnCallback,
+    ChunkUpload,
     DeleteAdmins,
     DeleteChat,
     DeleteComment,
