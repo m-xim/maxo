@@ -11,13 +11,10 @@ from maxo.errors.network import MaxBotNetworkError
 
 class ChunkUploadRetryMiddleware(AsyncMiddleware):
     """
-    Ретраит отправку чанка resumable upload: сетевые сбои и 5xx.
+    Ретраит чанк resumable upload при сетевых сбоях и 5xx.
 
-    Передаётся в `Bot.call_method(middleware=...)` и работает снаружи
-    `NetworkErrorMiddleware`, поэтому видит уже переведённые ошибки maxo:
-    `MaxBotNetworkError`/`MaxBotTimeoutError` и `MaxBotServerError` от
-    `ChunkUpload.on_error`. 4xx и сетевые ошибки из `NonRetryableError`
-    (битый URL, петля редиректов) не ретраятся.
+    Работает снаружи `NetworkErrorMiddleware` и видит ошибки maxo.
+    4xx и `NonRetryableError` не ретраятся.
     """
 
     __slots__ = ("_backoff_config", "_max_retries")

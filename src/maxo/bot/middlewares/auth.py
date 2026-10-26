@@ -1,5 +1,6 @@
 import platform
 from typing import Any
+from urllib.parse import urlsplit
 
 from unihttp.http import HTTPRequest, HTTPResponse
 from unihttp.middlewares import AsyncHandler, AsyncMiddleware
@@ -20,6 +21,8 @@ class AuthMiddleware(AsyncMiddleware):
         request: HTTPRequest,
         next_handler: AsyncHandler,
     ) -> HTTPResponse[Any]:
-        request.header.setdefault("Authorization", self._token)
+        # `netloc` also catches "//host/path", which urljoin resolves elsewhere
+        if not urlsplit(request.url).netloc:
+            request.header.setdefault("Authorization", self._token)
         request.header.setdefault("User-Agent", USER_AGENT)
         return await next_handler(request)
