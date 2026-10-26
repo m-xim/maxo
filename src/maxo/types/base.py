@@ -33,6 +33,10 @@ class _MaxoTypeMetaClass(type):
                 classcell.cell_contents = class_
             return class_
 
+        # Python 3.14.0-3.14.4 `dataclass` reads the cell: it must not be empty.
+        if classcell is not None:
+            classcell.cell_contents = class_
+
         data_class: type = dataclass(
             slots=slots,
             frozen=False,
