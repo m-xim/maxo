@@ -2,7 +2,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any
 
-from unihttp.exceptions import NetworkError, RequestTimeoutError
+from unihttp.exceptions import RequestTimeoutError, UniHTTPError
 from unihttp.http import HTTPRequest, HTTPResponse
 from unihttp.middlewares import AsyncHandler, AsyncMiddleware
 
@@ -15,7 +15,7 @@ def translate_network_errors() -> Iterator[None]:
         yield
     except RequestTimeoutError as error:
         raise MaxBotTimeoutError(str(error) or type(error).__name__) from error
-    except (NetworkError, TimeoutError) as error:
+    except (UniHTTPError, TimeoutError) as error:
         raise to_network_error(error) from error
 
 

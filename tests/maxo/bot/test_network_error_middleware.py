@@ -1,7 +1,12 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from unihttp.exceptions import NetworkError, RequestTimeoutError
+from unihttp.exceptions import (
+    NetworkError,
+    NonRetryableError,
+    RequestTimeoutError,
+    UniHTTPError,
+)
 
 from maxo.bot.middlewares import NetworkErrorMiddleware
 from maxo.errors import MaxBotNetworkError, MaxBotTimeoutError, MaxoError
@@ -13,6 +18,8 @@ from maxo.errors import MaxBotNetworkError, MaxBotTimeoutError, MaxoError
         (RequestTimeoutError("slow"), MaxBotTimeoutError),
         (NetworkError("dns"), MaxBotNetworkError),
         (TimeoutError("timed out"), MaxBotTimeoutError),
+        (NonRetryableError("too many redirects"), MaxBotNetworkError),
+        (UniHTTPError("other aiohttp error"), MaxBotNetworkError),
     ],
 )
 async def test_wraps_transport_errors(
