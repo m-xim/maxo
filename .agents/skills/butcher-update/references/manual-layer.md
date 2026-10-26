@@ -40,7 +40,7 @@ dev.max.ru, `GET /chats` там объявлен неподдерживаемы�
 `InlineKeyboardAttachmentRequest`, `PhotoAttachmentRequest`,
 `ShareAttachmentRequest`, `StickerAttachmentRequest`, `VideoAttachmentRequest`.
 
-На них завязаны `maxo/bot/media.py`,
+На них завязаны `maxo/bot/bot.py`,
 `maxo/utils/builders/attachment_request.py`, `maxo/utils/hide_link.py` - без
 `factory` падает уже `import maxo`.
 
@@ -133,19 +133,19 @@ API отвечает 400 `Field 'webApp' cannot be null`. Тип оставле�
 ## Реестры и compat-слои, о которых легко не узнать
 
 Генерация их не трогает, но по ним расходится ручная регистрация новых
-апдейтов и фасадов. Полный порядок действий - в `butcher/AGENTS.md`.
+апдейтов и фасадов. Полный порядок действий - в `../SKILL.md`.
 
-- `src/maxo/serialization.py` - `TAG_PROVIDERS`, регистрация полиморфных типов
-  в retort. Union-алиасы генерируются, а эта таблица - нет.
-- `src/maxo/bot/warming_up.py` - кортежи `_types` и `_methods`.
-- `src/maxo/serialization.py` - `TypesWithFormat` и `TypesWithLinkPreview`,
-  методы, которым подставляются `BotDefaults`.
-- `src/maxo/bot/media.py` - `MEDIA_ATTACHMENT_FACTORIES`,
+- `src/maxo/serialization.py` - словари `_*_TAGS`, из которых собирается
+  `TAG_PROVIDERS`. Union-алиасы генерируются, а эти словари - нет.
+- `src/maxo/bot/warming_up.py` - кортеж `_METHOD_ROOTS`.
+- `src/maxo/bot/defaults.py` - `METHODS_WITH_DEFAULTS`, методы, которым
+  подставляются `BotDefaults`.
+- `src/maxo/bot/bot.py` - `MEDIA_ATTACHMENT_FACTORIES`,
   карта `UploadType` -> `factory` для заливаемых медиа.
 - `src/maxo/routing/middlewares/update_context.py` - ветки `isinstance`,
   которые заполняют `chat_id`/`user`/`user_id` в `UpdateContext`.
-- `tests/maxo/types/facades/test_<name>.py` - по файлу на фасад, каждый со
-  своими `parametrize`.
+- `tests/maxo/types/facades/test_<name>.py` - по файлу на фасад с методами
+  (`chat`, `comment`, `message`, `subscription`), каждый со своими `parametrize`.
 - `tests/maxo/types/test_accessors.py` - ручные списки полей для `unsafe_*`.
 
 ## Известный дрейф: генератор впереди дерева
