@@ -157,7 +157,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
     ) -> AsyncIterator[Self]:
         try:
             if get_my_info:
-                await self.get_my_info()
+                await self.me()
             yield self
         finally:
             if auto_close:
