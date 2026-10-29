@@ -60,7 +60,7 @@ from maxo.bot.middlewares import (
 from maxo.bot.upload import ProcessingConfig
 from maxo.bot.warming_up import warm_up
 from maxo.enums import UploadType
-from maxo.errors import UnsubscribeError
+from maxo.errors import MaxBotApiError, UnsubscribeError
 from maxo.errors.state import StateError
 from maxo.omit import is_defined
 from maxo.types import BotInfo, ClearSubscriptionsResult
@@ -350,7 +350,11 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         elif upload_result is not None:
             token = upload_result.last_token
         else:
-            raise RuntimeError("Could not get upload token")
+            raise MaxBotApiError(
+                code="",
+                error="",
+                message="Сервер не вернул токен загруженного файла",
+            )
 
         return MEDIA_ATTACHMENT_FACTORIES[file.type](token)
 
