@@ -20,7 +20,7 @@ from maxo.routing.sentinels import UNHANDLED, SkipHandler
 from maxo.routing.signals.base import BaseSignal
 from maxo.routing.utils._resolving_inner_middlewares import resolve_middlewares
 from maxo.routing.utils.validate_router_graph import validate_router_graph
-from maxo.types.base import BaseUpdate
+from maxo.types.base import BaseUpdate, FacadeMaxoType
 from maxo.types.binding import bind_bot
 
 
@@ -170,8 +170,12 @@ class Dispatcher(Router):
         if bot is not None:
             ctx["bot"] = bot
             ctx["bots"] = [bot]
-            # Single place binding bot to update for every transport
-            bind_bot(update.update if isinstance(update, MaxoUpdate) else update, bot)
+
+            event = update.update if isinstance(update, MaxoUpdate) else update
+            if not ( # Single place binding bot to update for every transport
+                isinstance(event, FacadeMaxoType) and event._bot is bot  # noqa: SLF001
+            ):
+                bind_bot(event, bot)
 
         return await self.trigger(ctx)
 
