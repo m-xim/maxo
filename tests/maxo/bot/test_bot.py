@@ -13,7 +13,6 @@ from maxo.bot.methods.upload.upload_media import UploadMedia
 from maxo.bot.middlewares import AuthMiddleware
 from maxo.bot.upload import ProcessingConfig, UploadConfig, UploadMethod
 from maxo.errors import MaxBotApiError, UnsubscribeError
-from maxo.errors.state import StateError
 from maxo.types import (
     BotInfo,
     GetSubscriptionsResult,
@@ -48,8 +47,7 @@ def bot_info() -> BotInfo:
 
 async def test_bot_init(bot: Bot) -> None:
     assert bot.token == TOKEN
-    with pytest.raises(StateError, match="Bot info is not resolved yet"):
-        _ = bot.info
+    assert not hasattr(bot, "info")
 
 
 def test_default_upload_config_is_not_shared() -> None:
@@ -101,15 +99,18 @@ async def test_async_with_resolves_info_and_closes(
 
     async with mock_bot as bot:
         assert bot is mock_bot
-        assert bot.info.user_id == BOT_ID
+        assert (await bot.me()).user_id == BOT_ID
 
     mock_client.call_method.assert_awaited_once()
     mock_client.close.assert_awaited_once()
 
 
 async def test_bot_context(bot: Bot) -> None:
-    with patch("maxo.bot.bot.Bot.close", new_callable=AsyncMock) as mock_close:
-        async with bot.context(get_my_info=False):
+    with (
+        patch("maxo.bot.bot.Bot.me", new_callable=AsyncMock),
+        patch("maxo.bot.bot.Bot.close", new_callable=AsyncMock) as mock_close,
+    ):
+        async with bot.context():
             pass
         mock_close.assert_awaited_once()
 
@@ -122,21 +123,20 @@ async def test_bot_context_fetches_info_by_default(
     mock_client.call_method.return_value = bot_info
 
     async with mock_bot.context():
-        assert mock_bot.info.user_id == BOT_ID
+        assert (await mock_bot.me()).user_id == BOT_ID
 
     mock_client.call_method.assert_awaited_once()
 
 
 async def test_bot_call_method(mock_bot: Bot, mock_client: AsyncMock) -> None:
-    """`call_method` no longer resolves `.info` as a side effect."""
+    """`call_method` doesn't resolve bot info as a side effect."""
     mock_client.call_method.return_value = "test_result"
 
     result: object = await mock_bot.call_method(MagicMock())
 
     assert result == "test_result"
     mock_client.call_method.assert_awaited_once()
-    with pytest.raises(StateError, match="Bot info is not resolved yet"):
-        _ = mock_bot.info
+    assert mock_bot._info is None
 
 
 async def test_close_before_first_request_is_noop(bot: Bot) -> None:
@@ -155,8 +155,11 @@ async def test_close_twice_is_noop(mock_bot: Bot, mock_client: AsyncMock) -> Non
 
 
 async def test_context_without_auto_close(bot: Bot) -> None:
-    with patch("maxo.bot.bot.Bot.close", new_callable=AsyncMock) as mock_close:
-        async with bot.context(auto_close=False, get_my_info=False):
+    with (
+        patch("maxo.bot.bot.Bot.me", new_callable=AsyncMock),
+        patch("maxo.bot.bot.Bot.close", new_callable=AsyncMock) as mock_close,
+    ):
+        async with bot.context(auto_close=False):
             pass
 
     mock_close.assert_not_awaited()
@@ -183,14 +186,14 @@ async def test_get_my_info_retries_after_previous_failure(
     with pytest.raises(MaxBotApiError):
         await mock_bot.get_my_info()
 
-    with pytest.raises(StateError, match="Bot info is not resolved yet"):
-        _ = mock_bot.info
+    assert mock_bot._info is None
 
     mock_client.call_method.side_effect = None
     mock_client.call_method.return_value = bot_info
 
     await mock_bot.get_my_info()
-    assert mock_bot.info.user_id == BOT_ID
+    assert (await mock_bot.me()).user_id == BOT_ID
+    mock_client.call_method.assert_awaited()
 
 
 async def test_me_fetches_info_once_and_caches_it(

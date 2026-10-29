@@ -60,7 +60,7 @@ from maxo.bot.middlewares import (
 from maxo.bot.upload import ProcessingConfig
 from maxo.bot.warming_up import warm_up
 from maxo.enums import UploadType
-from maxo.errors import MaxBotApiError, UnsubscribeError
+from maxo.errors import MaxBotResponseError, UnsubscribeError
 from maxo.omit import is_defined
 from maxo.types import BotInfo, ClearSubscriptionsResult
 from maxo.types.attachments import AttachmentsRequests, MediaAttachmentsRequests
