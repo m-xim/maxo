@@ -532,7 +532,7 @@ async def test_start_warns_about_subscriptions_when_not_cleared(
         "У бота @%s есть активные WebHook-подписки (%d). "
         "Они не были очищены перед запуском Long Polling. "
         "Передайте clear_subscriptions=True, чтобы удалить их.",
-        mock_bot.info.username,
+        (await mock_bot.me()).username,
         1,
     )
 

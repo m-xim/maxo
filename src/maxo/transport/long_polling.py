@@ -86,13 +86,13 @@ class LongPolling:
             dispatcher.workflow_data.update(bot=bot, **workflow_data)
 
             async with bot.context(auto_close=auto_close_bot):
-                # After `get_my_info`: handlers can read `bot.info`
+                info = await bot.me()
                 await dispatcher.feed_signal(BeforeStartup(), bot)
 
                 loggers.dispatcher.info(
                     "Polling started for @%s id=%s",
-                    bot.info.username,
-                    bot.info.user_id,
+                    info.username,
+                    info.user_id,
                 )
 
                 if clear_subscriptions:
@@ -118,7 +118,7 @@ class LongPolling:
                                 "У бота @%s есть активные WebHook-подписки (%d). "
                                 "Они не были очищены перед запуском Long Polling. "
                                 "Передайте clear_subscriptions=True, чтобы удалить их.",
-                                bot.info.username,
+                                info.username,
                                 len(subscriptions.subscriptions),
                             )
 
@@ -144,8 +144,8 @@ class LongPolling:
 
                 loggers.dispatcher.info(
                     "Polling stop for @%s bot id=%s",
-                    bot.info.username,
-                    bot.info.user_id,
+                    info.username,
+                    info.user_id,
                 )
 
         await dispatcher.feed_signal(AfterShutdown())
@@ -161,8 +161,9 @@ class LongPolling:
     ) -> AsyncIterator[MaxoUpdate[Any]]:
         start_time = time.time()
         backoff = Backoff(self._backoff_config)
-        bot_id = bot.info.user_id
-        bot_username = bot.info.username
+        info = await bot.me()
+        bot_id = info.user_id
+        bot_username = info.username
 
         failed = False
         while True:

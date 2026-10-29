@@ -61,7 +61,6 @@ from maxo.bot.upload import ProcessingConfig
 from maxo.bot.warming_up import warm_up
 from maxo.enums import UploadType
 from maxo.errors import MaxBotApiError, UnsubscribeError
-from maxo.errors.state import StateError
 from maxo.omit import is_defined
 from maxo.types import BotInfo, ClearSubscriptionsResult
 from maxo.types.attachments import AttachmentsRequests, MediaAttachmentsRequests
@@ -138,12 +137,6 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         return self._media
 
     @property
-    def info(self) -> BotInfo:
-        if self._info is None:
-            raise StateError("Bot info is not resolved yet")
-        return self._info
-
-    @property
     def defaults(self) -> BotDefaults:
         return self._defaults
 
@@ -185,7 +178,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
             async with self._me_lock:
                 if self._info is None:
                     return await self.get_my_info()
-        return self.info
+        return self._info
 
     async def get_my_info(self) -> BotInfo:
         self._info = await self.call_method(GetMyInfo())

@@ -101,13 +101,14 @@ class BotClient:
         self,
         text: str,
         reply_to: Message | None,
+        bot_id: int,
     ) -> Message:
         message_seq = self._new_message_id()
         return Message(
             sender=self.user,
             recipient=Recipient(
                 chat_type=self.chat.type,
-                user_id=self.bot.info.user_id,
+                user_id=bot_id,
                 chat_id=self.chat.chat_id,
             ),
             timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
@@ -142,7 +143,11 @@ class BotClient:
         return await self.dp.feed_update(
             MaxoUpdate(
                 update=MessageCreated(
-                    message=self._new_message(text, reply_to),
+                    message=self._new_message(
+                        text,
+                        reply_to,
+                        (await self.bot.me()).user_id,
+                    ),
                     timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
                     user_locale="ru",
                 ),
@@ -156,7 +161,7 @@ class BotClient:
         msg = Message(
             recipient=Recipient(
                 chat_type=ChatType.CHANNEL,
-                user_id=self.bot.info.user_id,
+                user_id=(await self.bot.me()).user_id,
                 chat_id=self.chat.chat_id,
             ),
             timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
@@ -185,7 +190,7 @@ class BotClient:
         msg = Message(
             recipient=Recipient(
                 chat_type=ChatType.CHANNEL,
-                user_id=self.bot.info.user_id,
+                user_id=(await self.bot.me()).user_id,
                 chat_id=self.chat.chat_id,
             ),
             timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
@@ -210,7 +215,7 @@ class BotClient:
                 update=MessageRemoved(
                     message_id=mid,
                     chat_id=self.chat.chat_id,
-                    user_id=self.bot.info.user_id,
+                    user_id=(await self.bot.me()).user_id,
                     timestamp=datetime.fromtimestamp(1234567890, tz=UTC),
                 ),
             ),
@@ -291,7 +296,7 @@ class BotClient:
                 update=BotAdminPermissionsChanged(
                     chat_id=self.chat.chat_id,
                     user_id=self.user.user_id,
-                    bot_id=self.bot.info.user_id,
+                    bot_id=(await self.bot.me()).user_id,
                     is_channel=self.chat.type == ChatType.CHANNEL,
                     is_admin=is_admin,
                     permissions=permissions,
