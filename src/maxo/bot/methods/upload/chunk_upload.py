@@ -1,11 +1,10 @@
-from typing import Any, Never
+from typing import Any
 
 from unihttp.http import HTTPResponse
 from unihttp.serialize import ResponseLoader
 
 from maxo.bot.methods.base import MaxoMethod
 from maxo.bot.methods.markers import Header, Path, Raw
-from maxo.errors.api import api_error_type, raise_api_error
 
 # unihttp парсит JSON сам (см. `AiohttpAsyncClient.make_request`), а при
 # нераспарсиваемом теле отдаёт сырые байты как есть.
@@ -29,22 +28,6 @@ class ChunkUpload(MaxoMethod[UploadResponseBody]):
     x_uploading_mode: Header[str] = "parallel"
 
     chunk: Raw[bytes]
-
-    def on_error(self, response: HTTPResponse[Any]) -> Never:
-        body = response.data
-        if isinstance(body, dict):
-            raise_api_error(response.status_code, body)
-        # A non-JSON 5xx must stay retryable
-        raise api_error_type(response.status_code)(
-            code="",
-            error=f"upload failed with status {response.status_code}",
-            message=(
-                body.decode("utf-8", "replace")
-                if isinstance(body, bytes)
-                else str(body or "")
-            ),
-            raw_data=body,
-        )
 
     def make_response(
         self,

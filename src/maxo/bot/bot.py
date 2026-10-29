@@ -341,10 +341,9 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         elif upload_result is not None:
             token = upload_result.last_token
         else:
-            raise MaxBotApiError(
-                code="",
-                error="",
-                message="Сервер не вернул токен загруженного файла",
+            raise MaxBotResponseError(
+                method="UploadMedia",
+                detail="нет токена файла ни в ответе загрузки, ни в get_upload_url",
             )
 
         return MEDIA_ATTACHMENT_FACTORIES[file.type](token)
