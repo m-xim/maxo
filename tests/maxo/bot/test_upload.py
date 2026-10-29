@@ -23,7 +23,6 @@ from maxo.errors import (
     MaxBotUnsupportedMediaTypeError,
     MaxoError,
 )
-from maxo.errors.network import to_network_error
 from maxo.serialization import get_retort
 from maxo.types.upload_media_result import UploadMediaResult
 from maxo.utils.upload_media import BufferedInputFile, InputFile
@@ -32,13 +31,6 @@ from tests.factories import make_bot as make_base_bot
 _MIB = 1024 * 1024
 _URL = "https://upload.example/upload.do"
 _FAST_BACKOFF = BackoffConfig(min_delay=0.0, max_delay=0.001, factor=2.0, jitter=0.0)
-
-
-def _network_error(cause: Exception) -> MaxBotNetworkError:
-    """Имитирует `raise to_network_error(error) from error` из `make_request`."""
-    error = to_network_error(cause)
-    error.__cause__ = cause
-    return error
 
 
 class _FakeResponse:
@@ -266,7 +258,8 @@ async def test_non_dict_error_status_raises_base_error(
         await _upload(_FakeClient([_FakeResponse(406, body)]))
 
     error = exc_info.value
-    assert error.error == "upload failed with status 406"
+    assert error.status_code == 406
+    assert error.error == ""
     assert error.message == message
     assert error.raw_data == body
 
@@ -309,18 +302,17 @@ async def test_server_error_status_raises_immediately() -> None:
     with pytest.raises(MaxBotServerError) as exc_info:
         await _upload(client)
 
-    assert exc_info.value.error == "upload failed with status 502"
+    assert exc_info.value.status_code == 502
     assert len(client.calls) == 1
 
 
 async def test_network_error_propagates_without_retry() -> None:
-    client = _FakeClient([_network_error(ConnectionError("boom"))])
+    client = _FakeClient([MaxBotNetworkError("boom")])
 
-    with pytest.raises(MaxBotNetworkError, match="boom") as exc_info:
+    with pytest.raises(MaxBotNetworkError, match="boom"):
         await _upload(client)
 
     assert len(client.calls) == 1
-    assert isinstance(exc_info.value.__cause__, ConnectionError)
 
 
 async def test_non_json_server_error_is_retried() -> None:

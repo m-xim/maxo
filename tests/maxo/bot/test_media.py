@@ -10,7 +10,7 @@ from maxo.bot.media import Media
 from maxo.bot.methods.upload.upload_media import UploadMedia
 from maxo.bot.upload import ProcessingConfig, UploadConfig, UploadMethod
 from maxo.enums import UploadType
-from maxo.errors.api import MaxBotApiError, RetvalReturnedError
+from maxo.errors.api import MaxBotResponseError
 from maxo.types import (
     AudioAttachmentRequest,
     CallbackButton,
@@ -304,7 +304,7 @@ async def test_upload_media_single_retval_falls_back_to_endpoint_token(
     file = BufferedInputFile.video(b"video", "video.mp4")
     bot.media.config = UploadConfig(method=UploadMethod.SINGLE)
     _set_endpoint(bot, "endpoint-token")
-    media_call.side_effect = RetvalReturnedError()
+    media_call.return_value = None
 
     assert await bot.upload(file) == VideoAttachmentRequest.factory("endpoint-token")
 
@@ -352,7 +352,7 @@ async def test_upload_media_raises_without_any_token(
     _set_endpoint(bot)
     resumable.return_value = None
 
-    with pytest.raises(MaxBotApiError, match="токен"):
+    with pytest.raises(MaxBotResponseError, match="токен"):
         await bot.upload(file)
 
 

@@ -104,8 +104,12 @@ def test_validate_response_error() -> None:
         raw_response=AsyncMock(),
     )
     method: MaxoMethod[object] = MaxoMethod()
-    method.validate_response(response)
-    assert response.status_code == 400
+
+    with pytest.raises(MaxBotBadRequestError) as exc_info:
+        method.validate_response(response)
+
+    assert exc_info.value.code == "some_error"
+    assert response.status_code == 200
 
 
 def test_validate_response_preserves_add_members_result() -> None:
