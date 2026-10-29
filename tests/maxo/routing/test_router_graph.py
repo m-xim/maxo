@@ -2,7 +2,6 @@ import pytest
 
 from maxo import Router
 from maxo.errors import CycleRoutersError, RouterAlreadyIncludedError
-from maxo.errors.state import StateError
 from maxo.routing.dispatcher import Dispatcher
 from maxo.routing.signals import BeforeStartup
 from maxo.routing.utils.validate_router_graph import validate_router_graph
@@ -97,7 +96,7 @@ async def test_router_cannot_include_children_after_startup() -> None:
 
     await dp.feed_signal(BeforeStartup())
 
-    with pytest.raises(StateError, match="Routers cannot be include after startup"):
+    with pytest.raises(RuntimeError, match="Routers can't be included after startup"):
         dp.include(Router("late"))
 
 
@@ -109,7 +108,7 @@ async def test_observer_cannot_be_modified_after_startup() -> None:
     async def handler(_: MessageCreated) -> None:
         return None
 
-    with pytest.raises(StateError, match="Can't add handler after startup"):
+    with pytest.raises(RuntimeError, match="Can't add handler after startup"):
         dp.message_created.handler(handler)
 
 
