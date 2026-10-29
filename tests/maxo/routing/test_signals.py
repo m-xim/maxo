@@ -334,6 +334,26 @@ async def test_feed_update_binds_bot_to_inner_update(
     assert update.bot is bot
 
 
+async def test_feed_update_skips_already_bound_update(
+    update: MessageCreated,
+    bot: Bot,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Polling updates are bound in `Bot.call_method`: no second walk."""
+    dp = Dispatcher()
+    await dp.feed_signal(BeforeStartup())
+    update.as_(bot)
+
+    calls: list[object] = []
+    monkeypatch.setattr(
+        "maxo.routing.dispatcher.bind_bot",
+        lambda obj, _bot: calls.append(obj),
+    )
+    await dp.feed_update(MaxoUpdate(update=update), bot)
+
+    assert calls == []
+
+
 async def test_signal_skip_handler_runs_next_handlers() -> None:
     dp = Dispatcher()
     router = Router()
