@@ -191,8 +191,8 @@ class Dispatcher(Router):
 
         return result
 
-    async def _emit_before_startup_handler(self) -> None:
+    async def _on_before_startup(self) -> None:
         validate_router_graph(self)
         resolve_middlewares(self)
 
-        await super()._emit_before_startup_handler()
+        await super()._on_before_startup()
