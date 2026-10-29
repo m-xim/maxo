@@ -52,3 +52,18 @@ def test_api_error_str_uses_fields_and_raw_data() -> None:
         "MaxBotApiError(code='code', error='error', message='message')"
     )
     assert str(raw_error) == "MaxBotApiError(raw_data={'raw': 'data'})"
+
+
+@pytest.mark.parametrize(
+    ("data", "message"),
+    [(b"<html>Bad Gateway</html>", "<html>Bad Gateway</html>"), (None, "")],
+)
+def test_raise_api_error_without_json_body_keeps_status_and_text(
+    data: object,
+    message: str,
+) -> None:
+    with pytest.raises(MaxBotBadGatewayError) as exc_info:
+        raise_api_error(502, data)
+
+    assert exc_info.value.error == "HTTP 502"
+    assert exc_info.value.message == message
