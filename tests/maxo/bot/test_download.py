@@ -62,6 +62,33 @@ async def test_download_to_path_writes_file(bot: Bot, tmp_path: Path) -> None:
     assert path.read_bytes() == b"payload"
 
 
+async def test_download_to_keeps_old_file_on_broken_stream(
+    bot: Bot,
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "payload.bin"
+    path.write_bytes(b"old")
+
+    @asynccontextmanager
+    async def broken() -> AsyncIterator[AsyncIterator[bytes]]:
+        async def iterator() -> AsyncIterator[bytes]:
+            yield b"pay"
+            raise NetworkError("connection reset")
+
+        yield iterator()
+
+    response = SimpleNamespace(data=broken())
+    client = SimpleNamespace(call_method_stream=AsyncMock(return_value=response))
+    with (
+        patch.object(bot.media, "_client", client),
+        pytest.raises(MaxBotNetworkError),
+    ):
+        await bot.media.download_to("https://example.test/file.bin", path)
+
+    assert path.read_bytes() == b"old"
+    assert list(tmp_path.iterdir()) == [path]
+
+
 async def test_download_stream_yields_chunks_as_they_come(bot: Bot) -> None:
     """Стрим не склеивает чанки: на этом держится и прогресс, и запись
     в чужой буфер без буферизации файла целиком в память."""
