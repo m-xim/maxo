@@ -10,7 +10,7 @@ from maxo.bot.media import Media
 from maxo.bot.methods.upload.upload_media import UploadMedia
 from maxo.bot.upload import ProcessingConfig, UploadConfig, UploadMethod
 from maxo.enums import UploadType
-from maxo.errors.api import RetvalReturnedError
+from maxo.errors.api import MaxBotApiError, RetvalReturnedError
 from maxo.types import (
     AudioAttachmentRequest,
     CallbackButton,
@@ -352,7 +352,7 @@ async def test_upload_media_raises_without_any_token(
     _set_endpoint(bot)
     resumable.return_value = None
 
-    with pytest.raises(RuntimeError, match="Could not get upload token"):
+    with pytest.raises(MaxBotApiError, match="токен"):
         await bot.upload(file)
 
 
