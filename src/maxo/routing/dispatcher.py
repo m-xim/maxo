@@ -172,7 +172,7 @@ class Dispatcher(Router):
             ctx["bots"] = [bot]
 
             event = update.update if isinstance(update, MaxoUpdate) else update
-            if not ( # Single place binding bot to update for every transport
+            if not (  # Single place binding bot to update for every transport
                 isinstance(event, FacadeMaxoType) and event._bot is bot  # noqa: SLF001
             ):
                 bind_bot(event, bot)
