@@ -55,6 +55,7 @@ from maxo.bot.middlewares import (
     AttachmentNotReadyRetryMiddleware,
     AuthMiddleware,
     NetworkErrorMiddleware,
+    UserAgentMiddleware,
 )
 from maxo.bot.upload import ProcessingConfig
 from maxo.bot.warming_up import warm_up
@@ -108,6 +109,7 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
         self.middleware: list[AsyncMiddleware] = [
             *middlewares,
             AuthMiddleware(self._token),
+            UserAgentMiddleware(),
             AttachmentNotReadyRetryMiddleware(
                 max_retries=self._processing.not_ready_max_retries,
                 backoff_config=self._processing.not_ready_backoff,

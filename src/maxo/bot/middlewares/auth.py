@@ -36,5 +36,4 @@ class AuthMiddleware(AsyncMiddleware):
         # `netloc` also catches "//host/path", which urljoin resolves elsewhere
         if not urlsplit(request.url).netloc:
             request.header.setdefault("Authorization", self._token)
-        request.header.setdefault("User-Agent", USER_AGENT)
         return await next_handler(request)

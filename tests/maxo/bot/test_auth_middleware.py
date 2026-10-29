@@ -3,7 +3,8 @@ from unittest.mock import AsyncMock
 import pytest
 from unihttp.http import HTTPRequest
 
-from maxo.bot.middlewares import AuthMiddleware
+from maxo.bot import Bot
+from maxo.bot.middlewares import AuthMiddleware, UserAgentMiddleware
 from maxo.bot.middlewares.auth import USER_AGENT
 from tests.constants import TOKEN
 
@@ -32,7 +33,6 @@ async def test_token_goes_to_api_paths(url: str) -> None:
     request = await _handle(url)
 
     assert request.header["Authorization"] == TOKEN
-    assert request.header["User-Agent"] == USER_AGENT
 
 
 @pytest.mark.parametrize(
@@ -49,7 +49,6 @@ async def test_token_never_goes_to_other_hosts(url: str) -> None:
     request = await _handle(url)
 
     assert "Authorization" not in request.header
-    assert request.header["User-Agent"] == USER_AGENT
 
 
 async def test_explicit_header_is_kept() -> None:
@@ -59,3 +58,20 @@ async def test_explicit_header_is_kept() -> None:
     await AuthMiddleware(TOKEN).handle(request, AsyncMock())
 
     assert request.header["Authorization"] == "other"
+
+
+async def test_user_agent_is_set_and_explicit_one_kept() -> None:
+    request = _request("messages")
+    await UserAgentMiddleware().handle(request, AsyncMock())
+    assert request.header["User-Agent"] == USER_AGENT
+
+    request = _request("messages")
+    request.header["User-Agent"] = "custom"
+    await UserAgentMiddleware().handle(request, AsyncMock())
+    assert request.header["User-Agent"] == "custom"
+
+
+def test_bot_chain_has_auth_and_user_agent() -> None:
+    kinds = [type(m) for m in Bot(TOKEN, warming_up=False).middleware]
+    assert AuthMiddleware in kinds
+    assert UserAgentMiddleware in kinds
