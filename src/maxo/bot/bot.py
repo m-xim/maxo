@@ -155,11 +155,9 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
     async def context(
         self,
         auto_close: bool = True,
-        get_my_info: bool = True,
     ) -> AsyncIterator[Self]:
         try:
-            if get_my_info:
-                await self.me()
+            await self.me()
             yield self
         finally:
             if auto_close:
