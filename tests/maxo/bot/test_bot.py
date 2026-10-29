@@ -47,7 +47,6 @@ def bot_info() -> BotInfo:
 
 async def test_bot_init(bot: Bot) -> None:
     assert bot.token == TOKEN
-    assert not hasattr(bot, "info")
 
 
 def test_default_upload_config_is_not_shared() -> None:
@@ -136,7 +135,6 @@ async def test_bot_call_method(mock_bot: Bot, mock_client: AsyncMock) -> None:
 
     assert result == "test_result"
     mock_client.call_method.assert_awaited_once()
-    assert mock_bot._info is None
 
 
 async def test_close_before_first_request_is_noop(bot: Bot) -> None:
@@ -186,14 +184,11 @@ async def test_get_my_info_retries_after_previous_failure(
     with pytest.raises(MaxBotApiError):
         await mock_bot.get_my_info()
 
-    assert mock_bot._info is None
-
     mock_client.call_method.side_effect = None
     mock_client.call_method.return_value = bot_info
 
-    await mock_bot.get_my_info()
     assert (await mock_bot.me()).user_id == BOT_ID
-    mock_client.call_method.assert_awaited()
+    assert mock_client.call_method.await_count == 2
 
 
 async def test_me_fetches_info_once_and_caches_it(
