@@ -102,9 +102,10 @@ uv run pytest tests/path/test_file.py::test_name -v
   dialog-исключения - `maxo.dialogs.api.exceptions`; управляющие исключения
   routing - `maxo.routing.sentinels`.
 - `maxo.exceptions` и `maxo.filters` - постоянные aiogram-алиасы `maxo.errors`
-  и `maxo.routing.filters`. Новый символ - в `__all__` обоих модулей пары
-  (сверяет `tests/maxo/test_public_api.py`). Переезд внутри пакета - со старым
-  путём, кидающим `DeprecationWarning`.
+  и `maxo.routing.filters`, как и `maxo.methods` для `maxo.bot.methods`: одна
+  строка `from <оригинал> import *` без своего `__all__` (реэкспорт по
+  спецификации типизации), новый символ - только в оригинал. Переезд внутри
+  пакета - со старым путём, кидающим `DeprecationWarning`.
 - Docs и examples не импортируют из `maxo._internal`.
 
 ## Правила кода
