@@ -1,7 +1,12 @@
 import asyncio
 import io
 from collections.abc import AsyncGenerator, AsyncIterator, Sequence
-from contextlib import aclosing, asynccontextmanager
+from contextlib import (
+    AbstractContextManager,
+    aclosing,
+    asynccontextmanager,
+    nullcontext,
+)
 from pathlib import Path
 from typing import BinaryIO
 from urllib.parse import quote
@@ -25,7 +30,6 @@ from maxo.bot.middlewares import (
 )
 from maxo.bot.middlewares.network_error import translate_network_errors
 from maxo.bot.upload import UploadConfig
-from maxo.errors.api import RetvalReturnedError
 from maxo.serialization import get_retort
 from maxo.types import AttachmentPayload
 from maxo.types.upload_media_result import UploadMediaResult
@@ -111,28 +115,19 @@ class Media:
         if self.config.should_use_resumable(file.type, size):
             return await self._upload_resumable(url, file, size)
 
+        source: AbstractContextManager[bytes | BinaryIO]
         if isinstance(file, FSInputFile):
             # Streamed, not read into memory
-            content = await asyncio.to_thread(Path(file.path).open, "rb")
-            with content:
-                return await self._upload_single(url, file.file_name, content)
-        return await self._upload_single(url, file.file_name, await file.read())
-
-    async def _upload_single(
-        self,
-        url: str,
-        file_name: str,
-        content: bytes | BinaryIO,
-    ) -> UploadMediaResult | None:
-        try:
+            source = await asyncio.to_thread(Path(file.path).open, "rb")
+        else:
+            source = nullcontext(await file.read())
+        with source as content:
             return await self.call_method(
                 UploadMedia(
                     upload_url=url,
-                    file=UploadFile(file=content, filename=file_name),
+                    file=UploadFile(file=content, filename=file.file_name),
                 ),
             )
-        except RetvalReturnedError:
-            return None
 
     async def _upload_resumable(
         self,
