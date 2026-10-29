@@ -1,6 +1,6 @@
 import asyncio
 from collections.abc import AsyncIterator, Callable, Iterable, Sequence
-from contextlib import AsyncExitStack, asynccontextmanager
+from contextlib import asynccontextmanager
 from types import TracebackType
 from typing import Self, TypeAlias
 
@@ -166,11 +166,11 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
                 await self.close()
 
     async def __aenter__(self) -> Self:
-        async with AsyncExitStack() as stack:
-            # Close the session if `me()` fails: `__aexit__` won't run then
-            stack.push_async_callback(self.close)
+        try:
             await self.me()
-            stack.pop_all()
+        except BaseException:
+            await self.close()
+            raise
         return self
 
     async def __aexit__(
