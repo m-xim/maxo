@@ -93,7 +93,7 @@ class TestSimpleEngine:
         bot.me = AsyncMock(side_effect=me)
         await engine.on_startup(app=MagicMock())
         # As in polling and signals.rst: the bot connects between the signals
-        assert calls == ["BeforeStartup", "me", "AfterStartup"]
+        assert calls == ["me", "BeforeStartup", "AfterStartup"]
         assert dispatcher.feed_signal.await_count == 2
         assert isinstance(
             dispatcher.feed_signal.await_args_list[0].args[0],
