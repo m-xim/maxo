@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import BinaryIO
 from urllib.parse import quote
 
-from anyio import open_file
+from anyio import Path as AsyncPath, open_file
 from unihttp.clients.base import BaseAsyncClient
 from unihttp.http import UploadFile
 from unihttp.http.response import HTTPResponse
@@ -223,13 +223,25 @@ class Media:
         path: Path | str,
         chunk_size: int = DEFAULT_DOWNLOAD_CHUNK_SIZE,
     ) -> None:
-        """Скачивает вложение в файл. Каталог должен существовать."""
-        async with (
-            self.download_stream(url, chunk_size=chunk_size) as chunks,
-            await open_file(path, "wb") as file,
-        ):
-            async for chunk in chunks:
-                await file.write(chunk)
+        """
+        Скачивает вложение в файл. Каталог должен существовать.
+
+        Пишет во временный `<path>.part` и переименовывает его в конце:
+        при ошибке `path` не тронут, а `.part` удаляется.
+        """
+        target = AsyncPath(path)
+        part = target.with_name(target.name + ".part")
+        try:
+            async with (
+                self.download_stream(url, chunk_size=chunk_size) as chunks,
+                await open_file(part, "wb") as file,
+            ):
+                async for chunk in chunks:
+                    await file.write(chunk)
+        except BaseException:
+            await part.unlink(missing_ok=True)
+            raise
+        await part.replace(target)
 
 
 async def _translate_chunks(stream: AsyncIterator[bytes]) -> AsyncGenerator[bytes]:
