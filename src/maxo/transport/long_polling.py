@@ -85,7 +85,7 @@ class LongPolling:
         async with self._lock:
             dispatcher.workflow_data.update(bot=bot, **workflow_data)
 
-            async with bot.context(auto_close=auto_close_bot):
+            try:
                 info = await bot.me()
                 await dispatcher.feed_signal(BeforeStartup(), bot)
 
@@ -147,6 +147,9 @@ class LongPolling:
                     info.username,
                     info.user_id,
                 )
+            finally:
+                if auto_close_bot:
+                    await bot.close()
 
         await dispatcher.feed_signal(AfterShutdown())
 

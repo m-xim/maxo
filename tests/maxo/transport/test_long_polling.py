@@ -36,7 +36,7 @@ class MockUpdate(MaxoType):
 @pytest.fixture
 def mock_client() -> AsyncMock:
     client = AsyncMock()
-    # `bot.context()` re-fetches the info: answer it with a real `BotInfo`
+    # `bot.me()` may fetch the info: answer it with a real `BotInfo`
     client.call_method.side_effect = lambda method, **_: (
         make_bot_info() if isinstance(method, GetMyInfo) else DEFAULT
     )
@@ -270,6 +270,35 @@ async def test_start_feeds_updates_to_dispatcher(
         await long_polling.start(mock_bot, auto_close_bot=False)
 
     mock_feed_max_update.assert_awaited_once_with(update, mock_bot)
+
+
+@pytest.mark.parametrize("auto_close_bot", [True, False])
+async def test_start_closes_bot_only_with_auto_close(
+    long_polling: LongPolling,
+    mock_bot: Bot,
+    auto_close_bot: bool,
+) -> None:
+    with (
+        patch.object(long_polling, "_get_updates", side_effect=empty_updates),
+        patch.object(Bot, "close", new=AsyncMock()) as close,
+    ):
+        await long_polling.start(mock_bot, auto_close_bot=auto_close_bot)
+
+    assert close.await_count == int(auto_close_bot)
+
+
+async def test_start_closes_bot_when_startup_fails(
+    long_polling: LongPolling,
+    mock_bot: Bot,
+) -> None:
+    with (
+        patch.object(Bot, "me", new=AsyncMock(side_effect=RuntimeError)),
+        patch.object(Bot, "close", new=AsyncMock()) as close,
+        pytest.raises(RuntimeError),
+    ):
+        await long_polling.start(mock_bot)
+
+    close.assert_awaited_once()
 
 
 async def test_start_polling_delegates_to_long_polling(mock_bot: Bot) -> None:

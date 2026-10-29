@@ -102,7 +102,7 @@ async def main() -> None:
     )
 
     try:
-        async with bot.context():
+        async with bot:
             await bot.send_message(chat_id=-1)
     finally:
         # Клиент создали здесь - здесь и закрываем: `bot.close()`

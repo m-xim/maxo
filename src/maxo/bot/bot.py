@@ -1,6 +1,5 @@
 import asyncio
-from collections.abc import AsyncIterator, Callable, Iterable, Sequence
-from contextlib import asynccontextmanager
+from collections.abc import Callable, Iterable, Sequence
 from types import TracebackType
 from typing import Self, TypeAlias
 
@@ -143,18 +142,6 @@ class Bot(BaseAsyncClient):  # BaseAsyncClient for mypy
     @property
     def token(self) -> str:
         return self._token
-
-    @asynccontextmanager
-    async def context(
-        self,
-        auto_close: bool = True,
-    ) -> AsyncIterator[Self]:
-        try:
-            await self.me()
-            yield self
-        finally:
-            if auto_close:
-                await self.close()
 
     async def __aenter__(self) -> Self:
         try:

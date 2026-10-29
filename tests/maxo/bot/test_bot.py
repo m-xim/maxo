@@ -104,29 +104,6 @@ async def test_async_with_resolves_info_and_closes(
     mock_client.close.assert_awaited_once()
 
 
-async def test_bot_context(bot: Bot) -> None:
-    with (
-        patch("maxo.bot.bot.Bot.me", new_callable=AsyncMock),
-        patch("maxo.bot.bot.Bot.close", new_callable=AsyncMock) as mock_close,
-    ):
-        async with bot.context():
-            pass
-        mock_close.assert_awaited_once()
-
-
-async def test_bot_context_fetches_info_by_default(
-    mock_bot: Bot,
-    mock_client: AsyncMock,
-    bot_info: BotInfo,
-) -> None:
-    mock_client.call_method.return_value = bot_info
-
-    async with mock_bot.context():
-        assert (await mock_bot.me()).user_id == BOT_ID
-
-    mock_client.call_method.assert_awaited_once()
-
-
 async def test_bot_call_method(mock_bot: Bot, mock_client: AsyncMock) -> None:
     """`call_method` doesn't resolve bot info as a side effect."""
     mock_client.call_method.return_value = "test_result"
@@ -150,17 +127,6 @@ async def test_close_twice_is_noop(mock_bot: Bot, mock_client: AsyncMock) -> Non
     await mock_bot.close()
 
     mock_client.close.assert_awaited_once()
-
-
-async def test_context_without_auto_close(bot: Bot) -> None:
-    with (
-        patch("maxo.bot.bot.Bot.me", new_callable=AsyncMock),
-        patch("maxo.bot.bot.Bot.close", new_callable=AsyncMock) as mock_close,
-    ):
-        async with bot.context(auto_close=False):
-            pass
-
-    mock_close.assert_not_awaited()
 
 
 async def test_client_access_never_hits_network(
@@ -196,7 +162,7 @@ async def test_me_fetches_info_once_and_caches_it(
     mock_client: AsyncMock,
     bot_info: BotInfo,
 ) -> None:
-    """Без `context()` (вебхук, тесты) `me()` сам запрашивает информацию о боте."""
+    """Без `async with bot` (вебхук, тесты) `me()` сам запрашивает информацию о боте."""
     mock_client.call_method.return_value = bot_info
 
     first = await mock_bot.me()

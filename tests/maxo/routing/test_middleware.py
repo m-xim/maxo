@@ -436,7 +436,7 @@ async def test_shared_observer_inherits_parent_inner_middleware_once(ctx: Ctx) -
 
 
 async def test_fsm_key_uses_bot_id_without_bot_context() -> None:
-    """Вебхук не входит в `bot.context()`: FSM сам запрашивает id бота."""
+    """Вебхук не входит в `async with bot`: FSM сам запрашивает id бота."""
     client = AsyncMock()
     client.call_method.return_value = make_bot_info()
     bot = make_bot(client=client)  # info ещё не запрошена
