@@ -22,26 +22,16 @@ class _MaxoTypeMetaClass(type):
         slots: bool = True,
         **kwargs: Any,
     ) -> Any:
-        # `dataclass(slots=True)` returns a new class; zero-arg `super()` must
-        # point to it, and Python 3.12 rejects a mismatched `__classcell__`.
-        classcell = namespace.pop("__classcell__", None)
+        # `get`, not `pop`: `type.__new__` must fill the cell before
+        # `dataclass` runs, Python 3.14.0-3.14.4 crashes on an empty one.
+        classcell = namespace.get("__classcell__")
         class_: type = super().__new__(cls, name, bases, namespace, **kwargs)
         # `dataclass(slots=True)` re-creates the class through this metaclass
         # with `__slots__` set: don't wrap it twice.
         if "__slots__" in namespace:
-            if classcell is not None:
-                classcell.cell_contents = class_
             return class_
 
-        # Python 3.14.0-3.14.4 `dataclass` reads the cell: it must not be empty.
-        if classcell is not None:
-            classcell.cell_contents = class_
-
-        data_class: type = dataclass(
-            slots=slots,
-            frozen=False,
-            kw_only=True,
-        )(class_)
+        data_class: type = dataclass(slots=slots, kw_only=True)(class_)
 
         # `dataclass` takes field defaults via `getattr`,
         # so an attribute of a plain base would silently become one
@@ -56,8 +46,10 @@ class _MaxoTypeMetaClass(type):
                     )
                     raise TypeError(msg)
 
+        # `slots=True` returns a new class, but `super()` in its methods still
+        # points to the old one. Python < 3.13.14 doesn't fix it itself.
         if classcell is not None:
-            classcell.cell_contents = data_class
+            pass
         return data_class
 
 
