@@ -49,7 +49,7 @@ class _MaxoTypeMetaClass(type):
         # `slots=True` returns a new class, but `super()` in its methods still
         # points to the old one. Python < 3.13.14 doesn't fix it itself.
         if classcell is not None:
-            pass
+            classcell.cell_contents = data_class
         return data_class
 
 
