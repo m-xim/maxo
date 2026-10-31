@@ -89,6 +89,21 @@ async def test_download_to_keeps_old_file_on_broken_stream(
     assert list(tmp_path.iterdir()) == [path]
 
 
+async def test_download_to_does_not_touch_foreign_part_file(
+    bot: Bot,
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "payload.bin"
+    foreign = tmp_path / "payload.bin.part"
+    foreign.write_bytes(b"foreign")
+
+    with _patch_stream(bot, b"pay", b"load"):
+        await bot.media.download_to("https://example.test/file.bin", path)
+
+    assert path.read_bytes() == b"payload"
+    assert foreign.read_bytes() == b"foreign"
+
+
 async def test_download_stream_yields_chunks_as_they_come(bot: Bot) -> None:
     """Стрим не склеивает чанки: на этом держится и прогресс, и запись
     в чужой буфер без буферизации файла целиком в память."""

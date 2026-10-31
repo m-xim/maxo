@@ -1,5 +1,6 @@
 import asyncio
 import io
+import secrets
 from collections.abc import AsyncGenerator, AsyncIterator, Sequence
 from contextlib import (
     AbstractContextManager,
@@ -221,11 +222,12 @@ class Media:
         """
         Скачивает вложение в файл. Каталог должен существовать.
 
-        Пишет во временный `<path>.part` и переименовывает его в конце:
+        Пишет во временный `<path>.<random>.part` и переименовывает его в конце:
         при ошибке `path` не тронут, а `.part` удаляется.
         """
         target = AsyncPath(path)
-        part = target.with_name(target.name + ".part")
+        # Unique name: parallel downloads to one path don't share a `.part`
+        part = target.with_name(f"{target.name}.{secrets.token_hex(4)}.part")
         try:
             async with (
                 self.download_stream(url, chunk_size=chunk_size) as chunks,
