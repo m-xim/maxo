@@ -147,11 +147,10 @@ class LongPolling:
                     info.username,
                     info.user_id,
                 )
+                await dispatcher.feed_signal(AfterShutdown(), bot)
             finally:
                 if auto_close_bot:
                     await bot.close()
-
-        await dispatcher.feed_signal(AfterShutdown())
 
     async def _get_updates(
         self,
