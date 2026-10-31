@@ -110,12 +110,18 @@ class TestSimpleEngine:
         dispatcher: Dispatcher,
         bot: MagicMock,
     ) -> None:
-        feed_signal_mock = AsyncMock()
-        dispatcher.feed_signal = feed_signal_mock  # type: ignore[method-assign]
+        order = MagicMock()
+        dispatcher.feed_signal = AsyncMock()  # type: ignore[method-assign]
         bot.close = AsyncMock()
+        order.attach_mock(dispatcher.feed_signal, "feed_signal")
+        order.attach_mock(bot.close, "close")
         await engine.on_shutdown(app=MagicMock())
-        assert dispatcher.feed_signal.await_count == 2
-        bot.close.assert_awaited_once()
+        # Signal handlers may still call the API, so close goes last
+        assert [name for name, *_ in order.mock_calls] == [
+            "feed_signal",
+            "feed_signal",
+            "close",
+        ]
         assert isinstance(
             dispatcher.feed_signal.await_args_list[0].args[0],
             BeforeShutdown,

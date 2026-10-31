@@ -59,10 +59,10 @@ def default_client(
     session: "ClientSession | None" = None,
 ) -> "AiohttpAsyncClient":
     """
-    Aiohttp client trusting the Russian Ministry of Digital Development CA.
+    Aiohttp-клиент, доверяющий корневому сертификату Минцифры.
 
-    `ssl_context`, `limit` and `timeout` configure the session built here,
-    so passing them together with your own `session` raises `TypeError`.
+    `ssl_context`, `limit` и `timeout` настраивают создаваемую здесь сессию,
+    поэтому вместе со своей `session` они дают `TypeError`.
     """
     # Lazy: importing aiohttp costs ~0.4s, keep it out of `import maxo`
     from aiohttp import ClientSession, TCPConnector  # noqa: PLC0415

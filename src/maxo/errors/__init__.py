@@ -21,7 +21,11 @@ from maxo.errors.network import (
     MaxBotTimeoutError,
 )
 from maxo.errors.payload import InvalidPayloadError
-from maxo.errors.routing import CycleRoutersError, RouterAlreadyIncludedError
+from maxo.errors.routing import (
+    CycleRoutersError,
+    RouterAlreadyIncludedError,
+    RoutingFrozenError,
+)
 from maxo.errors.subscriptions import UnsubscribeError
 from maxo.errors.types import AttributeIsEmptyError
 from maxo.errors.webapp import InvalidWebAppInitDataError
@@ -50,5 +54,6 @@ __all__ = (
     "MaxBotUnsupportedMediaTypeError",
     "MaxoError",
     "RouterAlreadyIncludedError",
+    "RoutingFrozenError",
     "UnsubscribeError",
 )

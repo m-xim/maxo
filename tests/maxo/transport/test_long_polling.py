@@ -287,6 +287,30 @@ async def test_start_closes_bot_only_with_auto_close(
     assert close.await_count == int(auto_close_bot)
 
 
+async def test_start_closes_bot_after_after_shutdown(
+    long_polling: LongPolling,
+    mock_dispatcher: Dispatcher,
+    mock_bot: Bot,
+) -> None:
+    events: list[object] = []
+
+    @mock_dispatcher.after_shutdown()
+    async def _after_shutdown(bot: Bot) -> None:
+        events.append(bot)
+
+    with (
+        patch.object(long_polling, "_get_updates", side_effect=empty_updates),
+        patch.object(
+            Bot,
+            "close",
+            new=AsyncMock(side_effect=lambda: events.append("close")),
+        ),
+    ):
+        await long_polling.start(mock_bot)
+
+    assert events == [mock_bot, "close"]
+
+
 async def test_start_closes_bot_when_startup_fails(
     long_polling: LongPolling,
     mock_bot: Bot,

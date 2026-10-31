@@ -72,5 +72,6 @@ class GetUpdates(MaxoMethod[UpdateList], slots=False):
                     raw_update,
                     exc_info=True,
                 )
+        # `int | None` is a union too, same mypy limitation
         marker = response_loader.load(raw.get("marker"), int | None)  # type: ignore[arg-type]
         return UpdateList(updates=updates, marker=marker)

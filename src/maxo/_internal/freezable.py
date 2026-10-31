@@ -1,3 +1,6 @@
+from maxo.errors.routing import RoutingFrozenError
+
+
 class Freezable:
     __slots__ = ("_frozen",)
 
@@ -12,4 +15,4 @@ class Freezable:
 
     def _ensure_not_frozen(self, message: str) -> None:
         if self._frozen:
-            raise RuntimeError(message)
+            raise RoutingFrozenError(message)
